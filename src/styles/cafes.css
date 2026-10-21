@@ -1,0 +1,583 @@
+/* ---------- página de cafeterías ---------- */
+
+.cafes-credit {
+	font-size: var(--step--1);
+	color: var(--ink-mute);
+	max-width: 54ch;
+}
+
+.cafes-app {
+	display: grid;
+	grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+	height: min(86svh, 940px);
+	border-block: 1px solid var(--line);
+}
+
+.cafes-panel {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	border-right: 1px solid var(--line);
+	background: var(--bg);
+}
+
+.cafes-controls {
+	display: grid;
+	gap: 12px;
+	padding: 18px 18px 14px var(--gutter);
+	border-bottom: 1px solid var(--line);
+}
+
+.dot-open {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #5fae63;
+}
+
+.cafes-search {
+	position: relative;
+	display: block;
+}
+
+.cafes-search svg {
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	width: 18px;
+	height: 18px;
+	transform: translateY(-50%);
+	fill: none;
+	stroke: var(--ink-mute);
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+.cafes-search input {
+	width: 100%;
+	height: 44px;
+	padding: 0 14px 0 42px;
+	border: 1.5px solid var(--line-strong);
+	border-radius: 999px;
+	background: var(--bg-raise);
+	font-size: var(--step--1);
+}
+
+.cafes-search input:focus {
+	outline: none;
+	border-color: var(--red);
+}
+
+.cafes-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 10px;
+}
+
+.cafes-row .pill svg {
+	width: 15px;
+	height: 15px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+}
+
+.cafes-row .pill svg circle {
+	fill: currentColor;
+	stroke: none;
+}
+
+.cafes-select {
+	width: 100%;
+	min-width: 0;
+	height: 38px;
+	padding: 0 12px;
+	border: 1.5px solid var(--line-strong);
+	border-radius: 999px;
+	background: var(--bg-raise);
+	font-size: var(--step--1);
+}
+
+
+.cafes-status {
+	margin: 0;
+	font: 500 var(--step--2) / 1.4 var(--font-mono);
+	color: var(--ink-mute);
+}
+
+.cafes-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overscroll-behavior: contain;
+}
+
+.cafe {
+	display: flex;
+	align-items: stretch;
+	border-bottom: 1px solid var(--line);
+}
+
+.cafe.is-active {
+	background: color-mix(in srgb, var(--red) 13%, transparent);
+}
+
+.cafe__main {
+	flex: 1;
+	min-width: 0;
+	display: grid;
+	gap: 3px;
+	padding: 13px 8px 13px var(--gutter);
+	border: 0;
+	background: none;
+	text-align: left;
+	cursor: pointer;
+}
+
+.cafe__main:hover .cafe__name {
+	color: var(--red-ink);
+}
+
+.cafe__name {
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	line-height: 1.2;
+}
+
+.cafe__name .star {
+	color: var(--red-ink);
+	margin-left: 4px;
+}
+
+.cafe__meta {
+	font-size: var(--step--2);
+	color: var(--ink-mute);
+}
+
+.cafe__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 8px;
+	align-items: center;
+	margin-top: 3px;
+	font: 500 var(--step--2) / 1 var(--font-mono);
+	color: var(--ink-mute);
+}
+
+.st {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.st::before {
+	content: '';
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--ink-mute);
+}
+
+.st--open {
+	color: #5fae63;
+}
+
+.st--open::before {
+	background: #5fae63;
+}
+
+.st--closed::before {
+	background: var(--red-ink);
+}
+
+.cafe__add {
+	width: 52px;
+	flex: none;
+	border: 0;
+	border-left: 1px solid var(--line);
+	background: none;
+	font-size: 1.3rem;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--ink-soft);
+}
+
+.cafe__add:hover {
+	color: var(--red-ink);
+}
+
+.cafe__add[aria-pressed='true'] {
+	background: var(--red);
+	color: var(--on-red);
+	font-size: 0.95rem;
+	font-weight: 800;
+	font-family: var(--font-mono);
+}
+
+.cafes-mapwrap {
+	position: relative;
+	min-height: 0;
+}
+
+.cafes-map {
+	position: absolute;
+	inset: 0;
+	background: var(--bg-sunk);
+}
+
+/* ruta */
+.route {
+	position: absolute;
+	left: 16px;
+	bottom: 16px;
+	z-index: 500;
+	width: min(380px, calc(100% - 32px));
+	max-height: calc(100% - 32px);
+	overflow-y: auto;
+	padding: 16px;
+	border: 1.5px solid var(--line-strong);
+	border-radius: var(--radius);
+	background: color-mix(in srgb, var(--bg) 94%, transparent);
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+	box-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+}
+
+.route[hidden] {
+	display: none;
+}
+
+.route__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 4px 12px;
+}
+
+.route__sum {
+	font: 500 var(--step--2) var(--font-mono);
+	color: var(--ink-mute);
+}
+
+.route__stops {
+	list-style: none;
+	margin: 12px 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+	counter-reset: stop;
+}
+
+.route__stops li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: var(--step--1);
+	counter-increment: stop;
+}
+
+.route__stops li::before {
+	content: counter(stop);
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--red);
+	color: var(--on-red);
+	font: 700 11px var(--font-mono);
+}
+
+.route__stops li.is-start::before {
+	content: '◎';
+	background: var(--ink);
+	color: var(--bg);
+}
+
+.route__stops button {
+	margin-left: auto;
+	border: 0;
+	background: none;
+	color: var(--ink-mute);
+	cursor: pointer;
+	font-size: 1rem;
+}
+
+.route__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.route__note {
+	margin: 10px 0 0;
+	font-size: var(--step--2);
+	color: var(--ink-mute);
+}
+
+/* marcadores */
+.pin-wrap {
+	background: none;
+	border: 0;
+}
+
+.pin {
+	display: grid;
+	place-items: center;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--red);
+	border: 2.5px solid var(--bg);
+	box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+	color: var(--on-red);
+	font: 800 10px/1 var(--font-mono);
+	transition:
+		transform 0.2s var(--ease),
+		opacity 0.2s var(--ease);
+}
+
+.pin.is-fav {
+	width: 22px;
+	height: 22px;
+	margin: -2px;
+}
+
+.pin.is-fav::after {
+	content: '★';
+	font-size: 11px;
+}
+
+.pin.is-dim {
+	opacity: 0.18;
+}
+
+.pin.is-hover,
+.pin.is-active {
+	transform: scale(1.45);
+	background: var(--ink);
+	color: var(--bg);
+	z-index: 1000;
+}
+
+.pin.is-stop {
+	width: 24px;
+	height: 24px;
+	margin: -3px;
+}
+
+.pin.is-stop::after {
+	content: attr(data-n);
+	font-size: 11px;
+}
+
+.pin-me {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #4f8fd6;
+	border: 3px solid #fff;
+	box-shadow: 0 0 0 6px rgb(79 143 214 / 0.25);
+}
+
+.route-line {
+	stroke: var(--red);
+	stroke-width: 3.5;
+	stroke-dasharray: 2 9;
+	stroke-linecap: round;
+	fill: none;
+}
+
+/* Leaflet con los colores del sitio */
+.cafes-map .leaflet-tile-pane {
+	filter: var(--tiles-filter);
+}
+
+.cafes-map.leaflet-container {
+	font-family: var(--font-body);
+	background: var(--bg-sunk);
+}
+
+.cafes-map .leaflet-popup-content-wrapper,
+.cafes-map .leaflet-popup-tip {
+	background: var(--bg);
+	color: var(--ink);
+	box-shadow: 0 10px 34px rgb(0 0 0 / 0.3);
+}
+
+.cafes-map .leaflet-popup-content-wrapper {
+	border-radius: 16px;
+	border: 1.5px solid var(--line-strong);
+}
+
+.cafes-map .leaflet-popup-content {
+	margin: 16px 18px;
+	font-size: var(--step--1);
+	line-height: 1.45;
+}
+
+.cafes-map .leaflet-container a.leaflet-popup-close-button,
+.cafes-map a.leaflet-popup-close-button {
+	color: var(--ink-mute);
+}
+
+.cafes-map .leaflet-control-zoom {
+	border: 1.5px solid var(--line-strong) !important;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.cafes-map .leaflet-control-zoom a {
+	background: var(--bg);
+	color: var(--ink);
+	border-color: var(--line) !important;
+}
+
+.cafes-map .leaflet-control-zoom a:hover {
+	background: var(--bg-raise);
+	color: var(--red-ink);
+}
+
+.cafes-map .leaflet-control-attribution {
+	background: color-mix(in srgb, var(--bg) 80%, transparent);
+	color: var(--ink-mute);
+	font-size: 10px;
+}
+
+.cafes-map .leaflet-control-attribution a {
+	color: var(--ink-soft);
+}
+
+.pop {
+	display: grid;
+	gap: 6px;
+	min-width: 220px;
+}
+
+.pop__name {
+	font-size: 1.08rem;
+	font-weight: 800;
+	letter-spacing: -0.035em;
+	line-height: 1.15;
+	padding-right: 12px;
+}
+
+.pop__meta,
+.pop__hours {
+	color: var(--ink-soft);
+}
+
+.pop__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.pop__note {
+	margin: 2px 0;
+	padding-left: 10px;
+	border-left: 2px solid var(--red);
+	font-style: italic;
+}
+
+.pop__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	font-size: var(--step--2);
+}
+
+.pop__links a {
+	color: var(--ink);
+	text-decoration-color: var(--red);
+}
+
+.pop .pill {
+	justify-self: start;
+	margin-top: 4px;
+}
+
+/* notas al pie */
+.cafes-about {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: clamp(24px, 4vw, 72px);
+}
+
+.cafes-howto {
+	margin: 0;
+	padding-left: 1.1em;
+	display: grid;
+	gap: 0.7rem;
+	color: var(--ink-soft);
+}
+
+.cafes-howto li::marker {
+	color: var(--red-ink);
+}
+
+.cafes-about .pill {
+	margin-top: 0.4rem;
+}
+
+.star {
+	color: var(--red-ink);
+}
+
+@media (max-width: 900px) {
+	.cafes-app {
+		grid-template-columns: 1fr;
+		height: auto;
+	}
+
+	/* en móvil: mapa arriba con altura fija, la ruta debajo del mapa y luego la lista */
+	.cafes-mapwrap {
+		order: -1;
+		height: auto;
+	}
+
+	.cafes-map {
+		position: relative;
+		inset: auto;
+		height: 62svh;
+		min-height: 380px;
+	}
+
+	.cafes-panel {
+		border-right: 0;
+	}
+
+	.cafes-controls,
+	.cafe__main {
+		padding-left: var(--gutter);
+	}
+
+	.cafes-controls {
+		padding-right: var(--gutter);
+	}
+
+	.cafes-list {
+		max-height: 70svh;
+	}
+
+	.route {
+		position: static;
+		width: auto;
+		max-height: none;
+		margin: 0;
+		border-radius: 0;
+		border-inline: 0;
+		box-shadow: none;
+		backdrop-filter: none;
+	}
+
+	.cafes-about {
+		grid-template-columns: 1fr;
+	}
+}

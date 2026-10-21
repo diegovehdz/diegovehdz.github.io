@@ -1,0 +1,36 @@
+---
+// Fila de metadatos de cada "lámina": etiqueta en negritas a la izquierda, datos a la derecha.
+// La etiqueta se "descifra" al entrar en pantalla y al pasar el mouse.
+interface Props {
+	left: string;
+	right?: string[];
+	href?: string;
+	class?: string;
+	scramble?: boolean;
+}
+
+const { left, right = [], href, class: cls, scramble = true } = Astro.props;
+---
+
+<div class:list={['metabar', cls]}>
+	{
+		href ? (
+			<a class="metabar__left" href={href}>
+				<span data-scramble={scramble ? '' : undefined}>{left}</span>
+			</a>
+		) : (
+			<span class="metabar__left" data-scramble={scramble ? '' : undefined}>
+				{left}
+			</span>
+		)
+	}
+	{
+		right.length > 0 && (
+			<span class="metabar__right">
+				{right.map((item) => (
+					<span set:html={item} />
+				))}
+			</span>
+		)
+	}
+</div>

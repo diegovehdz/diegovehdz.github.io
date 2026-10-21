@@ -1,0 +1,26 @@
+---
+title: Salto bungee
+kicker: Ecuaciones diferenciales en MATLAB
+summary: Modelé la caída de una persona de 80 kg en tres escenarios (trampolín, clavado y caída libre), primero con resistencia del aire y luego con la cuerda elástica. Aquí puedes mover los parámetros.
+year: 2025
+period: feb 2025
+context: Modelación matemática
+role: Modelado y solución analítica en MATLAB.
+stack: [MATLAB]
+tags: [simulacion]
+order: 14
+visual: bungee
+---
+
+## Dos fases
+
+1. **Caída con resistencia del aire.** Mientras la cuerda está floja (los primeros 30 m), la persona solo siente la gravedad y una resistencia proporcional a su velocidad: `m·v' = −m·g − β·v`. Tiene solución exacta con exponenciales.
+2. **La cuerda se tensa.** A partir de ahí se suma una fuerza elástica, y el sistema se vuelve un **oscilador amortiguado**: `m·y'' + β·y' + k·y = −m·g`. Con estos parámetros es subamortiguado: rebota muchas veces antes de detenerse.
+
+Los tres escenarios solo difieren en la velocidad inicial: **+4 m/s** si salta hacia arriba (trampolín), **−4 m/s** si se clava y **0** en caída libre.
+
+## Sobre la simulación
+
+En MATLAB resolví cada fase de forma analítica y las uní en el instante en que la cuerda se tensa. Aquí se resuelve el mismo modelo con **Runge-Kutta de orden 4**, todo junto, para poder mover los parámetros en vivo.
+
+Con los valores del ejercicio (k = 10.7 N/m) la cuerda es **muy** elástica y la persona baja casi 200 m. Súbele a la constante para ver un salto más realista y fíjate en el pico de aceleración: más rigidez significa menos caída, pero un tirón más fuerte.

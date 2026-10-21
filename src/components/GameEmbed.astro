@@ -1,0 +1,159 @@
+---
+// Juego de Unity Play incrustado. El iframe solo se crea al hacer clic en "Jugar": un build de WebGL pesa decenas de MB.
+interface Props {
+	src: string;
+	title: string;
+	note?: string;
+}
+
+const { src, title, note } = Astro.props;
+---
+
+<div class="game" data-game data-src={src} data-title={title}>
+	<div class="game__stage" data-stage>
+		<div class="game__poster"><slot /></div>
+		<button class="game__play" type="button" data-play aria-label={`Jugar ${title} en el navegador`}>
+			<span class="game__play-btn" aria-hidden="true">
+				<svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"></path></svg>
+			</span>
+			<span class="display game__play-label" aria-hidden="true">Jugar</span>
+			<span class="game__play-sub mono">Descarga pesada · mejor en computadora, con teclado y mouse</span>
+		</button>
+	</div>
+	<div class="game__bar">
+		<span class="mono">{note}</span>
+		<span class="game__actions">
+			<button class="pill pill--sm" type="button" data-fs hidden>Pantalla completa</button>
+			<a class="pill pill--sm pill--ghost" href={src} target="_blank" rel="noopener">Abrir en pestaña nueva ↗</a>
+		</span>
+	</div>
+</div>
+
+<style>
+	.game {
+		max-width: min(100%, calc((100svh - var(--header-h) - 130px) * 16 / 10));
+		margin-inline: auto;
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius);
+		overflow: hidden;
+		background: var(--bg-sunk);
+	}
+
+	.game__stage {
+		position: relative;
+		aspect-ratio: 16 / 10;
+		background: #000;
+		container-type: inline-size;
+	}
+
+	.game__stage:fullscreen {
+		aspect-ratio: auto;
+	}
+
+	.game__poster {
+		position: absolute;
+		inset: 0;
+	}
+
+	.game__play {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-content: center;
+		justify-items: center;
+		gap: clamp(8px, 1.6cqw, 16px);
+		border: 0;
+		cursor: pointer;
+		color: #fff;
+		background: radial-gradient(ellipse at center, rgb(0 0 0 / 0.45), rgb(0 0 0 / 0.82));
+	}
+
+	.game__play-btn {
+		display: grid;
+		place-items: center;
+		width: clamp(64px, 11cqw, 104px);
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--red);
+		animation: ring 2.4s ease-out infinite;
+		transition: transform 0.35s var(--ease-expo);
+	}
+
+	.game__play-btn svg {
+		width: 42%;
+		fill: #fff;
+		margin-left: 6%;
+	}
+
+	.game__play:hover .game__play-btn,
+	.game__play:focus-visible .game__play-btn {
+		transform: scale(1.1);
+	}
+
+	.game__play-label {
+		color: #fff;
+		font-size: clamp(2.4rem, 9cqw, 6rem);
+	}
+
+	.game__play-sub {
+		font-size: clamp(10px, 1.6cqw, 13px);
+		opacity: 0.8;
+	}
+
+	@keyframes ring {
+		0% {
+			box-shadow: 0 0 0 0 rgb(173 48 48 / 0.55);
+		}
+		80%,
+		100% {
+			box-shadow: 0 0 0 26px rgb(173 48 48 / 0);
+		}
+	}
+
+	.game__stage :global(iframe) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+		background: #000;
+	}
+
+	.game__bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px 16px;
+		padding: 12px 16px;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.game__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+</style>
+
+<script>
+	document.querySelectorAll<HTMLElement>('[data-game]').forEach((root) => {
+		const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+		const play = root.querySelector<HTMLButtonElement>('[data-play]')!;
+		const fs = root.querySelector<HTMLButtonElement>('[data-fs]')!;
+		play.addEventListener('click', () => {
+			const frame = document.createElement('iframe');
+			frame.src = root.dataset.src!;
+			frame.title = root.dataset.title || 'Juego';
+			frame.allow = 'autoplay; fullscreen; gamepad; clipboard-write';
+			frame.allowFullscreen = true;
+			stage.querySelector('.game__poster')?.remove();
+			play.remove();
+			stage.append(frame);
+			fs.hidden = false;
+			frame.focus();
+		});
+		fs.addEventListener('click', () => stage.requestFullscreen?.());
+	});
+</script>

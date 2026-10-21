@@ -1,0 +1,435 @@
+---
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import Base from '../../layouts/Base.astro';
+import { FILTERS } from '../../lib/filters';
+---
+
+<Base
+	title="Bordes en vivo"
+	description="Detección de bordes en el navegador: Sobel, Prewitt, Roberts y Canny sobre tu cámara o una imagen, sin que nada salga de tu computadora."
+	bleed="Bordes"
+>
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Lab — Bordes" href="/lab/" right={['Python → TypeScript', 'Nada sale de tu navegador']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Bordes', 'en vivo']} as="h1" size="xl" />
+				<div>
+					<p class="blurb">
+						Mi aplicación de procesamiento de imágenes para cámaras de seguridad, reescrita para el navegador: los mismos filtros, ahora sobre tu
+						cámara en tiempo real. Pasa el mouse sobre la imagen para ver los valores de rojo, verde y azul de cada píxel, como en la app original.
+					</p>
+					<p class="bd-credit"><a href="/proyectos/deteccion-de-bordes/">Cómo era el proyecto original →</a></p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="wrap bd" aria-label="Laboratorio de detección de bordes">
+		<div class="bd__controls">
+			<fieldset>
+				<legend class="mono">Imagen</legend>
+				<div class="chips no-reveal">
+					<button class="pill pill--sm" type="button" data-src="tipo" aria-pressed="true">Tipografía</button>
+					<button class="pill pill--sm" type="button" data-src="cuarto" aria-pressed="false">Habitación (Abnormality)</button>
+					<button class="pill pill--sm" type="button" data-src="camara" aria-pressed="false">
+						<span class="dot-live" aria-hidden="true"></span> Usar mi cámara
+					</button>
+					<label class="pill pill--sm pill--ghost bd__upload">
+						Subir imagen
+						<input type="file" accept="image/*" data-file class="visually-hidden" />
+					</label>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend class="mono">Filtro</legend>
+				<div class="chips no-reveal bd__filters">
+					{
+						FILTERS.map((f) => (
+							<button class="pill pill--sm" type="button" data-filter={f.id} aria-pressed={f.id === 'sobel' ? 'true' : 'false'}>
+								{f.label}
+							</button>
+						))
+					}
+				</div>
+			</fieldset>
+
+			<fieldset class="bd__params">
+				<legend class="mono">Ajustes</legend>
+				<label data-param="bin1">
+					<span>Umbral <output data-out="t1">128</output></span>
+					<input type="range" min="1" max="254" value="128" data-in="t1" />
+				</label>
+				<label data-param="canny">
+					<span>Canny bajo <output data-out="low">40</output></span>
+					<input type="range" min="5" max="200" value="40" data-in="low" />
+				</label>
+				<label data-param="canny">
+					<span>Canny alto <output data-out="high">90</output></span>
+					<input type="range" min="10" max="300" value="90" data-in="high" />
+				</label>
+				<div class="chips no-reveal">
+					<button class="pill pill--sm" type="button" data-tint aria-pressed="true">Bordes en rojo</button>
+					<button class="pill pill--sm pill--ghost" type="button" data-save>Guardar imagen</button>
+				</div>
+			</fieldset>
+
+			<div class="bd__inspector" aria-live="off">
+				<span class="bd__swatch" data-swatch></span>
+				<span class="mono" data-rgb>Pasa el mouse sobre la imagen</span>
+			</div>
+			<p class="bd__status mono" data-status aria-live="polite"></p>
+		</div>
+
+		<div class="bd__stage">
+			<canvas data-canvas aria-label="Imagen procesada"></canvas>
+			<span class="bd__hud mono" data-hud></span>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.bd-credit {
+		font-size: var(--step--1);
+	}
+
+	.bd {
+		display: grid;
+		grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+		gap: clamp(20px, 3vw, 48px);
+		align-items: start;
+		padding-bottom: var(--section-y);
+	}
+
+	@media (max-width: 900px) {
+		.bd {
+			grid-template-columns: 1fr;
+		}
+
+		.bd__stage {
+			order: -1;
+		}
+	}
+
+	fieldset {
+		border: 0;
+		margin: 0 0 1.4rem;
+		padding: 0;
+	}
+
+	legend {
+		margin-bottom: 0.6rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+		text-transform: uppercase;
+	}
+
+	.bd__upload {
+		position: relative;
+		cursor: pointer;
+	}
+
+	.bd__params label {
+		display: grid;
+		gap: 4px;
+		margin-bottom: 0.8rem;
+		font-size: var(--step--1);
+		color: var(--ink-soft);
+	}
+
+	.bd__params label[hidden] {
+		display: none;
+	}
+
+	.bd__params input[type='range'] {
+		accent-color: var(--red);
+		width: 100%;
+	}
+
+	.bd__params output {
+		font-family: var(--font-mono);
+		color: var(--ink);
+	}
+
+	.bd__inspector {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 12px;
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius-sm);
+		font-size: var(--step--2);
+	}
+
+	.bd__swatch {
+		flex: none;
+		width: 22px;
+		height: 22px;
+		border-radius: 6px;
+		border: 1px solid var(--line-strong);
+		background: var(--bg-raise);
+	}
+
+	.bd__status {
+		min-height: 1.4em;
+		margin-top: 0.8rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.bd__stage {
+		position: relative;
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius);
+		overflow: hidden;
+		background: #000;
+	}
+
+	.bd__stage canvas {
+		display: block;
+		width: 100%;
+		height: auto;
+		cursor: crosshair;
+	}
+
+	.bd__hud {
+		position: absolute;
+		left: 12px;
+		top: 10px;
+		padding: 3px 8px;
+		border-radius: 6px;
+		background: rgb(0 0 0 / 0.55);
+		color: #ddd;
+		font-size: var(--step--2);
+		pointer-events: none;
+	}
+</style>
+
+<script>
+	import { applyFilter, type FilterId } from '../../lib/filters';
+
+	const out = document.querySelector<HTMLCanvasElement>('[data-canvas]')!;
+	const octx = out.getContext('2d', { willReadFrequently: true })!;
+	const work = document.createElement('canvas');
+	const wctx = work.getContext('2d', { willReadFrequently: true })!;
+	const hud = document.querySelector<HTMLElement>('[data-hud]')!;
+	const status = document.querySelector<HTMLElement>('[data-status]')!;
+	const rgb = document.querySelector<HTMLElement>('[data-rgb]')!;
+	const swatch = document.querySelector<HTMLElement>('[data-swatch]')!;
+
+	const state = {
+		filter: 'sobel' as FilterId,
+		source: 'tipo' as 'tipo' | 'cuarto' | 'camara' | 'archivo',
+		t1: 128,
+		low: 40,
+		high: 90,
+		tint: true,
+	};
+	let frame: ImageData | null = null; // imagen original (para el inspector)
+	let stream: MediaStream | null = null;
+	let video: HTMLVideoElement | null = null;
+	let raf = 0;
+
+	const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+	const hexToRgb = (hex: string): [number, number, number] => {
+		const m = hex.replace('#', '').match(/.{2}/g) ?? ['0', '0', '0'];
+		return m.map((x) => parseInt(x, 16)) as [number, number, number];
+	};
+
+	function render() {
+		if (!frame) return;
+		const t0 = performance.now();
+		if (out.width !== frame.width || out.height !== frame.height) {
+			out.width = frame.width;
+			out.height = frame.height;
+		}
+		const dst = octx.createImageData(frame.width, frame.height);
+		applyFilter(state.filter, frame, dst, {
+			t1: state.t1,
+			low: state.low,
+			high: state.high,
+			tint: state.tint ? hexToRgb(css('--red-ink') || '#e25b50') : null,
+			bg: hexToRgb(document.documentElement.dataset.theme === 'light' ? '#f8f4ec' : '#141414'),
+		});
+		octx.putImageData(dst, 0, 0);
+		const ms = performance.now() - t0;
+		hud.textContent = `${frame.width}×${frame.height} · ${state.filter} · ${ms.toFixed(0)} ms`;
+	}
+
+	function fromCanvas(w: number, h: number, draw: (c: CanvasRenderingContext2D) => void) {
+		work.width = w;
+		work.height = h;
+		draw(wctx);
+		frame = wctx.getImageData(0, 0, w, h);
+		render();
+	}
+
+	function sampleType() {
+		fromCanvas(960, 600, (c) => {
+			c.fillStyle = '#141414';
+			c.fillRect(0, 0, 960, 600);
+			c.fillStyle = '#ad3030';
+			(c as CanvasRenderingContext2D & { fontStretch?: string }).fontStretch = 'semi-expanded';
+			c.font = '900 200px "Mona Sans Variable", "Arial Black", sans-serif';
+			c.textBaseline = 'alphabetic';
+			c.fillText('DIEGO', 40, 250);
+			c.fillText('VERGARA', 20, 470);
+			c.strokeStyle = '#e8e7e7';
+			c.lineWidth = 6;
+			c.beginPath();
+			c.arc(800, 120, 70, 0, Math.PI * 2);
+			c.stroke();
+			for (let i = 0; i < 9; i++) {
+				c.fillStyle = i % 2 ? '#e8e7e7' : '#594832';
+				c.fillRect(40 + i * 100, 520, 60, 50);
+			}
+		});
+	}
+
+	function loadImage(src: string, revoke = false) {
+		const img = new Image();
+		img.onload = () => {
+			const scale = Math.min(1, 960 / img.naturalWidth);
+			const w = Math.round(img.naturalWidth * scale);
+			const h = Math.round(img.naturalHeight * scale);
+			fromCanvas(w, h, (c) => c.drawImage(img, 0, 0, w, h));
+			if (revoke) URL.revokeObjectURL(src);
+		};
+		img.onerror = () => (status.textContent = 'No se pudo abrir esa imagen.');
+		img.src = src;
+	}
+
+	function stopCamera() {
+		cancelAnimationFrame(raf);
+		stream?.getTracks().forEach((t) => t.stop());
+		stream = null;
+		video = null;
+	}
+
+	async function startCamera() {
+		if (!navigator.mediaDevices?.getUserMedia) {
+			status.textContent = 'Tu navegador no permite usar la cámara aquí.';
+			return false;
+		}
+		try {
+			status.textContent = 'Pidiendo permiso para la cámara…';
+			stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }, audio: false });
+			video = document.createElement('video');
+			video.playsInline = true;
+			video.muted = true;
+			video.srcObject = stream;
+			await video.play();
+			status.textContent = 'Cámara activa. La imagen se procesa aquí mismo y no se guarda ni se envía.';
+			const loop = () => {
+				if (!video) return;
+				const w = video.videoWidth || 640;
+				const h = video.videoHeight || 480;
+				if (w && h) {
+					work.width = w;
+					work.height = h;
+					wctx.save();
+					wctx.translate(w, 0);
+					wctx.scale(-1, 1); // espejo, como un selfie
+					wctx.drawImage(video, 0, 0, w, h);
+					wctx.restore();
+					frame = wctx.getImageData(0, 0, w, h);
+					render();
+				}
+				raf = requestAnimationFrame(loop);
+			};
+			loop();
+			return true;
+		} catch {
+			status.textContent = 'Sin permiso para la cámara. Puedes usar una imagen de ejemplo o subir una.';
+			stopCamera();
+			return false;
+		}
+	}
+
+	function setSource(src: typeof state.source) {
+		state.source = src;
+		document.querySelectorAll<HTMLButtonElement>('[data-src]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.src === src)));
+		if (src !== 'camara') stopCamera();
+	}
+
+	document.querySelectorAll<HTMLButtonElement>('[data-src]').forEach((b) =>
+		b.addEventListener('click', async () => {
+			const src = b.dataset.src as typeof state.source;
+			if (src === 'camara') {
+				if (state.source === 'camara') return;
+				setSource('camara');
+				if (!(await startCamera())) setSource('tipo');
+				return;
+			}
+			setSource(src);
+			status.textContent = '';
+			if (src === 'tipo') sampleType();
+			else loadImage('/games/abnormality/habitacion.png');
+		}),
+	);
+
+	document.querySelector<HTMLInputElement>('[data-file]')!.addEventListener('change', (e) => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (!file) return;
+		setSource('archivo');
+		status.textContent = `Imagen: ${file.name}`;
+		loadImage(URL.createObjectURL(file), true);
+	});
+
+	const syncParams = () => {
+		document.querySelectorAll<HTMLElement>('[data-param]').forEach((el) => (el.hidden = el.dataset.param !== state.filter));
+	};
+	document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) =>
+		b.addEventListener('click', () => {
+			state.filter = b.dataset.filter as FilterId;
+			document.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+			syncParams();
+			render();
+		}),
+	);
+	document.querySelectorAll<HTMLInputElement>('[data-in]').forEach((inp) =>
+		inp.addEventListener('input', () => {
+			const key = inp.dataset.in as 't1' | 'low' | 'high';
+			state[key] = Number(inp.value);
+			const o = document.querySelector(`[data-out="${key}"]`);
+			if (o) o.textContent = inp.value;
+			render();
+		}),
+	);
+	const tintBtn = document.querySelector<HTMLButtonElement>('[data-tint]')!;
+	tintBtn.addEventListener('click', () => {
+		state.tint = !state.tint;
+		tintBtn.setAttribute('aria-pressed', String(state.tint));
+		render();
+	});
+	document.querySelector<HTMLButtonElement>('[data-save]')!.addEventListener('click', () => {
+		out.toBlob((blob) => {
+			if (!blob) return;
+			const a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = `bordes-${state.filter}.png`;
+			a.click();
+			setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+		});
+	});
+
+	// inspector de píxeles: valores de la imagen original bajo el cursor
+	out.addEventListener('pointermove', (e) => {
+		if (!frame) return;
+		const r = out.getBoundingClientRect();
+		const x = Math.floor(((e.clientX - r.left) / r.width) * frame.width);
+		const y = Math.floor(((e.clientY - r.top) / r.height) * frame.height);
+		if (x < 0 || y < 0 || x >= frame.width || y >= frame.height) return;
+		const i = (y * frame.width + x) * 4;
+		const [R, G, B] = [frame.data[i], frame.data[i + 1], frame.data[i + 2]];
+		rgb.textContent = `x ${x} · y ${y} — R ${R} · G ${G} · B ${B}`;
+		swatch.style.background = `rgb(${R},${G},${B})`;
+	});
+
+	window.addEventListener('themechange', render);
+	window.addEventListener('pagehide', stopCamera);
+	syncParams();
+	(document.fonts?.ready ?? Promise.resolve()).then(sampleType);
+</script>

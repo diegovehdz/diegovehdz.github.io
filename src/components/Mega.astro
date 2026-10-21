@@ -1,0 +1,65 @@
+---
+// Texto gigante que ocupa todo el ancho disponible (como "CREATIVE PORTFOLIO" en la plantilla).
+// Por defecto cada línea se ajusta al ancho; con `uniform` todas comparten el tamaño de la más larga.
+// `scale` (>1) hace que el texto se salga de los márgenes, como en la portada de la plantilla.
+// Movimiento: `split` (letras que suben), `intro` (anima al cargar en vez de al entrar en pantalla) y `drifts`
+// (deriva horizontal por línea con el scroll, en vw).
+interface Props {
+	lines: string[];
+	as?: 'div' | 'h1' | 'h2' | 'p';
+	bleed?: boolean;
+	uniform?: boolean;
+	scale?: number;
+	offsets?: number[];
+	label?: string;
+	class?: string;
+	split?: boolean;
+	intro?: boolean;
+	drifts?: number[];
+}
+
+const {
+	lines,
+	as: Tag = 'div',
+	bleed = false,
+	uniform = false,
+	scale = 1,
+	offsets = [],
+	label,
+	class: cls,
+	split = false,
+	intro = false,
+	drifts = [],
+} = Astro.props;
+const text = label ?? lines.join(' ');
+const longest = Math.max(...lines.map((l) => l.length), 1);
+const isHeading = Tag !== 'div';
+---
+
+<Tag
+	class:list={['mega', bleed && 'mega--bleed', cls]}
+	data-mega
+	data-uniform={uniform ? '' : undefined}
+	data-scale={scale}
+	data-split={split ? '' : undefined}
+	data-intro={intro ? 'split' : undefined}
+	aria-label={isHeading ? text : undefined}
+>
+	{
+		lines.map((line, i) => (
+			<span
+				class="mega__line"
+				aria-hidden={isHeading ? 'true' : undefined}
+				data-drift={drifts[i] ? `start x ${drifts[i]}` : undefined}
+				style={`--chars:${uniform ? longest : Math.max(line.length, 1)};${offsets[i] ? `margin-left:${offsets[i]}em;` : ''}`}
+			>
+				{line}
+			</span>
+		))
+	}
+</Tag>
+
+<script>
+	import { initMega } from '../scripts/mega-fit';
+	initMega();
+</script>

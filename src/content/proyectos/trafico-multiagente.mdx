@@ -1,0 +1,36 @@
+---
+title: Tráfico multiagente
+kicker: Simulación de una intersección con semáforos
+summary: Modelé una intersección con agentes vehículo y agentes semáforo en Python con Mesa, y la visualicé en 3D con Unity para estudiar cuándo el flujo es fluido y cuándo se congestiona.
+year: 2026
+period: ene — feb 2026
+context: Modelación de sistemas multiagentes con gráficas computacionales
+role: Autor principal del sistema multiagente (14 de 22 commits). Detección de colisiones, sistema de estados de los semáforos y exposición del estado del modelo hacia Unity.
+team: Con Jorge Nieto
+stack: [Python, Mesa, Unity, C#]
+tags: [simulacion, ia]
+featured: true
+order: 2
+visual: trafico
+---
+
+## La idea
+
+Una intersección semaforizada parece simple hasta que la simulas: cada auto decide cuándo acelerar y frenar según lo que tiene enfrente, y los semáforos cambian de estado sin que les importe la fila que se está formando. El objetivo fue modelar ese sistema con **agentes** —vehículos y semáforos— y observar el flujo en distintos escenarios.
+
+## Cómo se construyó
+
+El proyecto avanzó por incrementos:
+
+1. **Agentes vehículo** que se mueven sobre una cuadrícula definida en un archivo de texto (calles, obstáculos, posiciones iniciales y sentidos de circulación).
+2. **Detección de colisiones**, para que ningún auto ocupe la celda de otro ni se pase la de enfrente.
+3. **Semáforos como agentes**, con un sistema de estados (`trafficlightstates`) que los vehículos consultan antes de avanzar.
+4. **Puente con Unity:** el modelo de Mesa expone su estado en cada paso y Unity lo dibuja en 3D con piezas de ciudad.
+
+Además resolvimos un desafío de **planeación de rutas con A\*** sobre el mismo mapa.
+
+## La versión web
+
+La simulación de arriba es una reinterpretación para el navegador: cada auto sigue el *Intelligent Driver Model* (acelera hacia su velocidad deseada y frena según la distancia y la velocidad relativa del auto de enfrente), y un semáforo en rojo funciona como un auto detenido en la línea de alto. Mueve los controles para darle más verde a una calle y ver cómo se vacía una fila mientras crece la otra.
+
+{/* TODO (Diego): agrega un GIF o captura de la escena de Unity en /public/img/trafico-unity.gif */}

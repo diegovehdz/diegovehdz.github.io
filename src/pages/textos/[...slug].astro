@@ -1,0 +1,87 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import MetaBar from '../../components/MetaBar.astro';
+import { SITE } from '../../config/site';
+import Base from '../../layouts/Base.astro';
+import { readingTime } from '../../lib/text';
+
+export async function getStaticPaths() {
+	const textos = await getCollection('textos', ({ data }) => import.meta.env.DEV || !data.draft);
+	return textos.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+	post: CollectionEntry<'textos'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+const fecha = (date: Date) =>
+	new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
+const minutes = readingTime(post.body);
+---
+
+<Base title={d.title} description={d.description} type="article" bleed="Gracias">
+	<article class="post">
+		<header class="section section--tight">
+			<div class="wrap">
+				<MetaBar
+					left="Textos"
+					href="/textos/"
+					right={[`<time datetime="${d.pubDate.toISOString()}">${fecha(d.pubDate)}</time>`, `${minutes} min de lectura`]}
+					class="section__meta"
+				/>
+				{d.kicker && <p class="eyebrow">{d.kicker}</p>}
+				<h1 class="display post__title">{d.title}</h1>
+				<p class="lede post__dek">{d.description}</p>
+				<p class="post__by mono muted">Por {SITE.fullName}{d.updatedDate && ` · actualizado el ${fecha(d.updatedDate)}`}</p>
+			</div>
+		</header>
+		<div class="wrap post__body">
+			<div class="prose">
+				<Content />
+			</div>
+		</div>
+	</article>
+</Base>
+
+<style>
+	.post__title {
+		font-size: clamp(2.3rem, 1rem + 5vw, 6.2rem);
+		line-height: 0.86;
+		max-width: 16ch;
+		margin-top: 0.3em;
+	}
+
+	.post__dek {
+		margin-top: clamp(20px, 2.4vw, 36px);
+		max-width: 52ch;
+	}
+
+	.post__by {
+		margin-top: 1.2rem;
+		font-size: var(--step--2);
+	}
+
+	.post__body {
+		display: grid;
+		justify-items: start;
+		padding-bottom: calc(var(--section-y) * 0.5);
+	}
+
+	.post__body .prose {
+		margin-left: clamp(0px, 14vw, 260px);
+	}
+
+	@media (max-width: 900px) {
+		.post__body .prose {
+			margin-left: 0;
+		}
+	}
+
+	.post__body .prose :global(.wide) {
+		max-width: none;
+		width: min(1080px, calc(100vw - 2 * var(--gutter)));
+	}
+</style>

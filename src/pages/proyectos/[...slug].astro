@@ -1,0 +1,293 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import AbnormalityGame from '../../components/AbnormalityGame.astro';
+import Dither from '../../components/Dither.astro';
+import Frame from '../../components/Frame.astro';
+import GameEmbed from '../../components/GameEmbed.astro';
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import ProjectVisual from '../../components/visuals/ProjectVisual.astro';
+import { TAGS } from '../../config/site';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+	const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+	return proyectos.map((project, i) => ({
+		params: { slug: project.id },
+		props: {
+			project,
+			index: i,
+			total: proyectos.length,
+			prev: proyectos[(i - 1 + proyectos.length) % proyectos.length],
+			next: proyectos[(i + 1) % proyectos.length],
+		},
+	}));
+}
+
+interface Props {
+	project: CollectionEntry<'proyectos'>;
+	index: number;
+	total: number;
+	prev: CollectionEntry<'proyectos'>;
+	next: CollectionEntry<'proyectos'>;
+}
+
+const { project, index, total, prev, next } = Astro.props;
+const { Content } = await render(project);
+const p = project.data;
+const words = p.title.toUpperCase().split(' ');
+const lines = words.length > 1 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : words;
+const autoHeight = p.visual === 'bungee';
+const num = (n: number) => String(n).padStart(2, '0');
+---
+
+<Base title={p.title} description={p.summary} bleed={p.title.split(' ')[0]}>
+	<article>
+		<section class="section section--tight">
+			<div class="wrap">
+				<MetaBar
+					left={`Proyecto ${num(index + 1)} / ${num(total)}`}
+					href="/proyectos/"
+					right={[p.tags.map((t) => TAGS[t]).join(' · '), p.period ?? String(p.year)]}
+					class="section__meta"
+				/>
+				<div class="phero">
+					<div class="phero__media bleed-left">
+						<Frame ratio={autoHeight ? 'auto' : '4 / 3'} glyph={p.title.slice(0, 2)}>
+							<ProjectVisual visual={p.visual} interactive />
+						</Frame>
+					</div>
+					<div class="phero__text">
+						<Title lines={lines} as="h1" size="m" vt={`p-${project.id}`} />
+						<p class="phero__kicker">{p.kicker}</p>
+						<p class="blurb">{p.summary}</p>
+						<dl class="facts">
+							<dt>Año</dt>
+							<dd>{p.year}</dd>
+							{p.context && (<><dt>Contexto</dt><dd>{p.context}</dd></>)}
+							{p.team && (<><dt>Equipo</dt><dd>{p.team}</dd></>)}
+							<dt>Mi parte</dt>
+							<dd>{p.role}</dd>
+						</dl>
+						<ul class="chips" aria-label="Tecnologías">
+							{p.stack.map((s) => <li class="tag">{s}</li>)}
+						</ul>
+						{
+							p.links.length > 0 && (
+								<ul class="chips phero__links">
+									{p.links.map((l, i) => (
+										<li>
+											<a class:list={['pill', i === 0 && 'pill--solid']} href={l.href}>
+												{l.label} <span aria-hidden="true">{l.href.startsWith('#') ? '↓' : l.href.startsWith('/') ? '→' : '↗'}</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							)
+						}
+					</div>
+				</div>
+			</div>
+		</section>
+
+		{
+			p.play && (
+				<section class="section section--tight pplay" id="jugar">
+					<div class="wrap">
+						<MetaBar
+							left="Jugar"
+							right={[p.play.kind === 'unity' ? 'Unity Play · WebGL' : 'Port web · canvas', 'En tu navegador']}
+							class="section__meta"
+						/>
+						{p.play.kind === 'unity' && p.play.url && (
+							<GameEmbed src={p.play.url} title={p.title} note={p.play.note}>
+								{p.play.poster ? (
+									<div class="poster">
+										<Dither art={p.play.poster} fit="contain" position="100% 50%" reveal="up" light="same" class="poster__art" />
+										<p class="poster__title" aria-hidden="true">
+											{p.title}
+										</p>
+									</div>
+								) : (
+									<ProjectVisual visual={p.visual} />
+								)}
+							</GameEmbed>
+						)}
+						{p.play.kind === 'abnormality' && <AbnormalityGame />}
+						{p.play.kind !== 'unity' && p.play.note && <p class="mono muted pplay__note">{p.play.note}</p>}
+					</div>
+				</section>
+			)
+		}
+
+		<section class="section section--tight pbody">
+			<div class="wrap pbody__grid">
+				<div class="pbody__aside">
+					<span class="eyebrow">Notas</span>
+					<p class="muted mono pbody__small">{p.title} · {p.year}</p>
+				</div>
+				<div class="prose">
+					<Content />
+				</div>
+			</div>
+		</section>
+
+		<nav class="wrap pnav" aria-label="Más proyectos">
+			<a href={`/proyectos/${prev.id}/`} class="pnav__link">
+				<span class="mono muted">← Anterior</span>
+				<span class="pnav__title">{prev.data.title}</span>
+			</a>
+			<a href={`/proyectos/${next.id}/`} class="pnav__link pnav__link--next">
+				<span class="mono muted">Siguiente →</span>
+				<span class="pnav__title">{next.data.title}</span>
+			</a>
+		</nav>
+	</article>
+</Base>
+
+<style>
+	.phero {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: clamp(22px, 3vw, 56px);
+		align-items: start;
+	}
+
+	.phero__media {
+		grid-column: 1 / span 7;
+	}
+
+	.phero__text {
+		grid-column: 8 / -1;
+	}
+
+	.phero__kicker {
+		margin: 1.1rem 0 0.8rem;
+		font-weight: 700;
+		font-size: var(--step-1);
+		letter-spacing: -0.035em;
+	}
+
+	.phero__links {
+		margin-top: 1.4rem;
+	}
+
+	@media (max-width: 900px) {
+		.phero {
+			grid-template-columns: 1fr;
+		}
+
+		.phero__media,
+		.phero__text {
+			grid-column: auto;
+		}
+
+		.phero__media.bleed-left {
+			margin-left: 0;
+		}
+	}
+
+	.pplay {
+		border-top: 1px solid var(--line);
+	}
+
+	/* póster del juego: la escena tramada a la derecha y el título a la izquierda, siempre sobre negro */
+	.poster {
+		position: absolute;
+		inset: 0;
+		background: #0b0b0b;
+		color: #e8e7e7;
+	}
+
+	.poster :global(.poster__art) {
+		position: absolute;
+		inset: 0 -14% 0 34%;
+		color: #e8e7e7;
+	}
+
+	.poster__title {
+		position: absolute;
+		left: 4cqw;
+		top: 4cqw;
+		margin: 0;
+		max-width: 6ch;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 125%;
+		text-transform: uppercase;
+		letter-spacing: -0.075em;
+		line-height: 0.8;
+		font-size: 12cqw;
+		color: var(--red);
+	}
+
+	.pplay__note {
+		margin-top: 0.9rem;
+		font-size: var(--step--2);
+	}
+
+	.pbody {
+		border-top: 1px solid var(--line);
+	}
+
+	.pbody__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+		gap: clamp(24px, 4vw, 80px);
+	}
+
+	.pbody__aside {
+		position: sticky;
+		top: calc(var(--header-h) + 24px);
+		align-self: start;
+	}
+
+	.pbody__small {
+		font-size: var(--step--2);
+	}
+
+	@media (max-width: 900px) {
+		.pbody__grid {
+			grid-template-columns: 1fr;
+		}
+
+		.pbody__aside {
+			position: static;
+		}
+	}
+
+	.pnav {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		border-top: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
+		padding-block: 1.6rem;
+	}
+
+	.pnav__link {
+		display: grid;
+		gap: 0.4rem;
+		text-decoration: none;
+		font-size: var(--step--1);
+	}
+
+	.pnav__link--next {
+		text-align: right;
+	}
+
+	.pnav__title {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		text-transform: uppercase;
+		letter-spacing: -0.065em;
+		line-height: 0.9;
+		color: var(--red);
+		font-size: clamp(1.4rem, 0.9rem + 2vw, 3rem);
+	}
+
+	.pnav__link:hover .pnav__title {
+		color: var(--ink);
+	}
+</style>

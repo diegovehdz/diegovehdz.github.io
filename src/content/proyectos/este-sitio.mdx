@@ -1,0 +1,26 @@
+---
+title: Este sitio
+kicker: Portafolio, laboratorio y cuaderno
+summary: Diseñado a partir de dos plantillas editoriales y construido con Astro. Sistema de tipografía y color con tema oscuro y claro, colecciones de contenido para proyectos y textos, y experimentos interactivos sin frameworks pesados.
+year: 2026
+period: oct 2026
+context: Proyecto personal
+role: Diseño y desarrollo.
+stack: [Astro, TypeScript, MDX, Leaflet, CSS]
+tags: [web]
+order: 15
+visual: sitio
+---
+
+## Diseño
+
+El sitio traduce dos presentaciones a la web. La **plantilla oscura** (fondo `#141414`, texto `#e8e7e7`, rojo `#ad3030`) define la identidad: títulos enormes en una grotesca ancha y pesada que a veces se sale de la pantalla, y una barra de metadatos arriba de cada sección, como en una lámina. La **plantilla clara** (crema `#f8f4ec`, café `#594832`, carmesí `#bf092f`) es el tema alternativo y aporta las píldoras y las tarjetas con contorno.
+
+Las fuentes originales (Agrandir y Garet) no tienen licencia web gratuita, así que usé **Mona Sans** a 112 % de ancho y peso 900 para los títulos, y **Montserrat** para el texto. Las elegí comparándolas contra las láminas de la plantilla.
+
+## Técnica
+
+- **Astro**, con salida estática: el sitio es HTML y CSS, y el JavaScript solo carga donde hace falta (el mapa, las simulaciones).
+- **Colecciones de contenido** en MDX para proyectos y textos, con esquemas validados.
+- **Visualizaciones generadas en el build** a partir de los datos reales de cada proyecto.
+- **Leaflet** con mapas de OpenStreetMap y CARTO para el mapa de cafeterías.

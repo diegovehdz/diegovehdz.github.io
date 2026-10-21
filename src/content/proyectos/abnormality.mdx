@@ -1,0 +1,36 @@
+---
+title: Abnormality
+kicker: Videojuego de anomalías, hecho en el primer semestre
+summary: Un cuarto dibujado a mano donde, de noche, algo cambia. Tienes 60 segundos para encontrar las anomalías y hacer clic en ellas antes de que la habitación deje de ser tuya. Lo hice en Python con pygame y aquí puedes jugar un port web fiel al original.
+year: 2023
+period: ago — dic 2023
+context: Primer semestre · curso de programación en Python
+role: Proyecto individual. Idea, ilustraciones, programación y tráiler.
+stack: [Python, pygame]
+tags: [juegos]
+order: 6
+visual: abnormality
+play:
+  kind: abnormality
+  note: Port web del código original de pygame, con los mismos dibujos y reglas.
+links:
+  - label: Jugar
+    href: '#jugar'
+---
+
+## La idea
+
+*Abnormality* es un juego de observación: tu habitación, dibujada a mano en blanco y negro, a las diez de la noche. Cada tanto, la luz parpadea y algo cambia: unos ojos rojos en el póster, un mensaje en el cuadro, una sonrisa en la pantalla de la laptop. Si haces clic sobre la anomalía, desaparece. Si encuentras más de cinco antes de que se acabe el tiempo, sobrevives a la noche.
+
+<video src="/video/abnormality-trailer.mp4" controls playsinline preload="metadata" width="100%"></video>
+
+## Cómo funciona
+
+- **Un solo escenario y once anomalías.** Cada anomalía es un recorte de 60 × 60 px del mismo dibujo, con un cambio sutil, que se pega encima de la habitación en su posición exacta.
+- **Aparecen al azar:** en cada cuadro hay una probabilidad de 1 % de que surja una nueva, con un máximo de dos al mismo tiempo.
+- **El parpadeo es la trampa:** cuando aparece una anomalía, la pantalla se va a negro por un segundo para que no veas el momento del cambio.
+- **El reloj** avanza desde las 22:00 y la partida dura un minuto real.
+
+## El port web
+
+El original corre con pygame en la computadora. Para el sitio lo reescribí en TypeScript sobre un `<canvas>` respetando las reglas, los tiempos y los dibujos originales. Solo hice tres ajustes: la misma anomalía ya no puede salir dos veces a la vez, el mensaje "abnormality removed" ahora sí se alcanza a ver, y puedes volver a jugar sin reiniciar nada.

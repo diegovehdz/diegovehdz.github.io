@@ -1,0 +1,95 @@
+---
+// Rutas reales de las APIs (turismo, inventario y servicio de autenticación).
+const routes = [
+	{ m: 'POST', p: '/api/login', d: 'turismo · emite un JWT' },
+	{ m: 'GET', p: '/api/lugares', d: 'turismo · lugares' },
+	{ m: 'GET', p: '/api/lugares/:id', d: 'turismo · detalle' },
+	{ m: 'POST', p: '/api/comentarios', d: 'turismo · reseñas' },
+	{ m: 'GET', p: '/productos/:id', d: 'inventario · MySQL' },
+	{ m: 'PUT', p: '/office/:id', d: 'servicio-jwt · protegido' },
+	{ m: 'DELETE', p: '/office/:id', d: 'servicio-jwt · protegido' },
+];
+---
+
+<div class="viz-api" role="img" aria-label="Lista de rutas de las APIs REST">
+	<div class="api-top"><span></span><span></span><span></span><code>express · mysql · jwt</code></div>
+	<ul>
+		{
+			routes.map((r) => (
+				<li>
+					<span class:list={['api-m', `api-m--${r.m.toLowerCase()}`]}>{r.m}</span>
+					<span class="api-p">{r.p}</span>
+					<span class="api-d">{r.d}</span>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<style>
+	.viz-api {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-sunk);
+		font-family: var(--font-mono);
+		display: flex;
+		flex-direction: column;
+	}
+	.api-top {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--line);
+	}
+	.api-top span {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--line-strong);
+	}
+	.api-top span:first-child {
+		background: var(--red);
+	}
+	.api-top code {
+		margin-left: auto;
+		font-size: clamp(10px, 1.9cqw, 12px);
+		color: var(--ink-mute);
+	}
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: clamp(12px, 3cqw, 24px) clamp(14px, 3.4cqw, 26px);
+		display: grid;
+		gap: clamp(8px, 2.3cqw, 15px);
+		align-content: center;
+		flex: 1;
+	}
+	li {
+		display: grid;
+		grid-template-columns: 4.6em 1fr;
+		gap: 0 0.8em;
+		font-size: clamp(10px, 2.15cqw, 14px);
+		line-height: 1.25;
+	}
+	.api-m {
+		font-weight: 700;
+		color: var(--ink-soft);
+	}
+	.api-m--post,
+	.api-m--put {
+		color: var(--red-ink);
+	}
+	.api-m--delete {
+		color: var(--red-ink);
+		opacity: 0.75;
+	}
+	.api-p {
+		color: var(--ink);
+	}
+	.api-d {
+		grid-column: 2;
+		color: var(--ink-mute);
+		font-size: 0.86em;
+	}
+</style>

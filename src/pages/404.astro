@@ -1,0 +1,94 @@
+---
+import Dither from '../components/Dither.astro';
+import Mega from '../components/Mega.astro';
+import MetaBar from '../components/MetaBar.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="No encontrado" description="Esta página no existe." footer={false}>
+	<section class="nf">
+		<div class="wrap">
+			<MetaBar left="Error 404" right={['Página no encontrada']} />
+		</div>
+		<div class="wrap nf__mid">
+			<!-- las manos de la portada, esta vez sin alcanzarse -->
+			<Dither art="mano-izq" class="nf__hand nf__hand--l" position="0% 50%" reveal="right" contrast={1.2} />
+			<Dither art="mano-der" class="nf__hand nf__hand--r" position="100% 50%" reveal="left" contrast={1.2} />
+			<p class="nf__text">Esta página se fue por un café y no ha vuelto.</p>
+			<ul class="chips">
+				<li><a class="pill pill--solid" href="/">Volver al inicio</a></li>
+				<li><a class="pill" href="/cafes/">Buscarla en el mapa de cafés</a></li>
+				<li><a class="pill pill--ghost" href="/proyectos/">Ver proyectos</a></li>
+			</ul>
+		</div>
+		<div class="nf__mega mega-crop">
+			<div class="wrap">
+				<Mega lines={['404']} bleed scale={1} />
+			</div>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.nf {
+		min-height: calc(100svh - var(--header-h));
+		display: grid;
+		grid-template-rows: auto 1fr auto;
+		padding-top: clamp(16px, 2.5vw, 40px);
+		overflow: hidden;
+	}
+
+	.nf__mid {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 1.4rem;
+		text-align: center;
+		padding-block: clamp(120px, 22vw, 260px) clamp(24px, 4vw, 48px);
+	}
+
+	.nf__mid :global(.nf__hand) {
+		position: absolute;
+		top: 0;
+		width: min(34vw, 560px);
+		aspect-ratio: 2 / 1;
+	}
+
+	.nf__mid :global(.nf__hand--l) {
+		left: calc(-1 * var(--gutter) - 6vw);
+	}
+
+	.nf__mid :global(.nf__hand--r) {
+		right: calc(-1 * var(--gutter) - 6vw);
+	}
+
+	.nf__mid .chips {
+		justify-content: center;
+	}
+
+	@media (max-width: 700px) {
+		.nf__mid :global(.nf__hand) {
+			width: 62vw;
+			--cell: 2;
+		}
+
+		.nf__mid :global(.nf__hand--l) {
+			left: calc(-1 * var(--gutter) - 20vw);
+		}
+
+		.nf__mid :global(.nf__hand--r) {
+			right: calc(-1 * var(--gutter) - 20vw);
+		}
+	}
+
+	.nf__text {
+		margin: 0;
+		max-width: 22ch;
+		font-size: clamp(1.4rem, 0.9rem + 2vw, 2.8rem);
+		font-weight: 700;
+		letter-spacing: -0.05em;
+		line-height: 1.1;
+	}
+</style>

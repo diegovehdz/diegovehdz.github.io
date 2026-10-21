@@ -1,0 +1,44 @@
+---
+title: Arcane Codex
+kicker: Videojuego 3D en Unity con progreso en línea
+summary: Un mago que pelea arrastrando y combinando runas. Los jugadores se registran e inician sesión contra una API, y su progreso por niveles se guarda en el servidor. Lo iteramos en 23 builds para WebGL y aquí puedes jugar una versión de demostración.
+year: 2025
+period: feb — may 2025
+context: Proyecto de 4.º semestre · videojuego + API + base de datos
+role: Sistema de niveles. Mapa de selección con nodos, progreso del jugador e interfaz (LevelManager, LevelNode, LevelProgressManager, LevelUIManager).
+team: Equipo de 4 personas
+stack: [Unity, C#, WebGL, REST API]
+tags: [juegos]
+featured: true
+order: 5
+visual: arcane
+play:
+  kind: unity
+  url: https://play.unity.com/api/v1/games/game/85708b1e-dd10-4bda-8413-fa7bbc529dfe/build/latest/frame
+  note: Build modificado para desarrollo y demostración, publicado en Unity Play.
+  poster: espada
+links:
+  - label: Jugar
+    href: '#jugar'
+---
+
+## El juego
+
+*Arcane Codex* es un juego en tercera persona: controlas a un mago que enfrenta enemigos (esqueletos, entre otros) y lanza hechizos con una mecánica de **runas que se arrastran y combinan**, parecida a un *match-3*. Tiene escudos, proyectiles, ciclo de noche y varios niveles.
+
+## Conectado a un servidor
+
+Desde el juego, los jugadores **se registran e inician sesión** contra una API. La sesión se mantiene durante la partida y el **avance por niveles** se sincroniza con la base de datos, así que el progreso no depende de la computadora donde juegas.
+
+## Lo que hice
+
+Me encargué del **sistema de niveles**:
+
+- `LevelNode`: cada nivel del mapa, con su estado (bloqueado, disponible o completado).
+- `LevelProgressManager`: qué niveles se han desbloqueado, sincronizado con el progreso del jugador.
+- `LevelManager` y `LevelUIManager`: la navegación entre niveles y la interfaz del mapa.
+- `CursorFollower`: el cursor personalizado del menú.
+
+## 23 builds
+
+Lo publicamos para **WebGL**, para jugarlo en el navegador, y lo iteramos de la `v0.2.1a` a la `v3.1.1` antes de la versión final. La versión jugable de arriba es un build modificado para desarrollo y demostración, alojado en Unity Play.

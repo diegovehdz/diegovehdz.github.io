@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { TAGS } from '../config/site';
+
+interface Props {
+	project: CollectionEntry<'proyectos'>;
+}
+
+const { project } = Astro.props;
+const p = project.data;
+---
+
+<li class="row" data-tags={p.tags.join(' ')}>
+	<a href={`/proyectos/${project.id}/`}>
+		<span class="row__year">{p.year}</span>
+		<span class="row__title">
+			{p.title}
+			<small>{p.kicker}</small>
+		</span>
+		<span class="row__desc">{p.tags.map((t) => TAGS[t]).join(' · ')} — {p.stack.slice(0, 4).join(', ')}</span>
+		<span class="row__arrow" aria-hidden="true">→</span>
+	</a>
+</li>

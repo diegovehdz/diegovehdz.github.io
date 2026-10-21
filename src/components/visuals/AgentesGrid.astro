@@ -1,0 +1,120 @@
+---
+// Ilustración de A* en una cuadrícula con obstáculos (calculada en el build, con semilla fija).
+import { mulberry32 } from '../../lib/rng';
+
+const COLS = 26;
+const ROWS = 18;
+const rand = mulberry32(7);
+const start = { x: 1, y: ROWS - 2 };
+const goal = { x: COLS - 2, y: 1 };
+const blocked = Array.from({ length: ROWS }, (_, y) =>
+	Array.from({ length: COLS }, (_, x) => {
+		if ((x === start.x && y === start.y) || (x === goal.x && y === goal.y)) return false;
+		return rand() < 0.27;
+	}),
+);
+
+// A* con vecindad de 4 y heurística Manhattan
+const key = (x: number, y: number) => y * COLS + x;
+const h = (x: number, y: number) => Math.abs(x - goal.x) + Math.abs(y - goal.y);
+const g = new Map<number, number>([[key(start.x, start.y), 0]]);
+const came = new Map<number, number>();
+const closed = new Set<number>();
+const open: { k: number; f: number }[] = [{ k: key(start.x, start.y), f: h(start.x, start.y) }];
+let found = false;
+while (open.length) {
+	open.sort((a, b) => a.f - b.f);
+	const { k } = open.shift()!;
+	if (closed.has(k)) continue;
+	closed.add(k);
+	const x = k % COLS;
+	const y = Math.floor(k / COLS);
+	if (x === goal.x && y === goal.y) {
+		found = true;
+		break;
+	}
+	for (const [dx, dy] of [
+		[1, 0],
+		[-1, 0],
+		[0, 1],
+		[0, -1],
+	]) {
+		const nx = x + dx;
+		const ny = y + dy;
+		if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS || blocked[ny][nx]) continue;
+		const nk = key(nx, ny);
+		const ng = (g.get(k) ?? 0) + 1;
+		if (ng < (g.get(nk) ?? Number.POSITIVE_INFINITY)) {
+			g.set(nk, ng);
+			came.set(nk, k);
+			open.push({ k: nk, f: ng + h(nx, ny) });
+		}
+	}
+}
+const path: { x: number; y: number }[] = [];
+if (found) {
+	let k: number | undefined = key(goal.x, goal.y);
+	while (k !== undefined) {
+		path.unshift({ x: k % COLS, y: Math.floor(k / COLS) });
+		k = came.get(k);
+	}
+}
+const S = 22;
+const ox = 24;
+const oy = 72;
+const pts = path.map((p) => `${ox + p.x * S + S / 2},${oy + p.y * S + S / 2}`).join(' ');
+---
+
+<svg class="viz-ag" viewBox={`0 0 ${ox * 2 + COLS * S} ${oy + ROWS * S + 24}`} role="img" aria-label={`A* encuentra una ruta de ${path.length - 1} pasos explorando ${closed.size} celdas`}>
+	<text x={ox} y="34" class="g-cap">a* · vecindad 4 · heurística manhattan</text>
+	<text x={ox} y="54" class="g-cap g-cap--soft">{closed.size} celdas exploradas · ruta de {path.length - 1} pasos</text>
+	{
+		blocked.map((row, y) =>
+			row.map((b, x) =>
+				b ? (
+					<rect x={ox + x * S + 1} y={oy + y * S + 1} width={S - 2} height={S - 2} rx="3" class="g-wall" />
+				) : closed.has(key(x, y)) ? (
+					<rect x={ox + x * S + 7} y={oy + y * S + 7} width={S - 14} height={S - 14} rx="2" class="g-seen" />
+				) : null,
+			),
+		)
+	}
+	<polyline points={pts} class="g-path" />
+	<circle cx={ox + start.x * S + S / 2} cy={oy + start.y * S + S / 2} r="7" class="g-start" />
+	<rect x={ox + goal.x * S + 3} y={oy + goal.y * S + 3} width={S - 6} height={S - 6} class="g-goal" />
+</svg>
+
+<style>
+	.viz-ag {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	.g-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.g-cap--soft {
+		opacity: 0.7;
+	}
+	.g-wall {
+		fill: var(--line-strong);
+	}
+	.g-seen {
+		fill: var(--red);
+		opacity: 0.35;
+	}
+	.g-path {
+		fill: none;
+		stroke: var(--red-ink);
+		stroke-width: 4;
+		stroke-linejoin: round;
+		stroke-linecap: round;
+	}
+	.g-start {
+		fill: var(--ink);
+	}
+	.g-goal {
+		fill: var(--red);
+	}
+</style>

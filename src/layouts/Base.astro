@@ -1,0 +1,96 @@
+---
+import '@fontsource-variable/mona-sans/wdth.css';
+import '@fontsource-variable/montserrat/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
+import '../styles/global.css';
+import '../styles/motion.css';
+import monaWoff from '@fontsource-variable/mona-sans/files/mona-sans-latin-wdth-normal.woff2?url';
+import montserratWoff from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { SITE } from '../config/site';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	type?: 'website' | 'article';
+	bleed?: string;
+	footer?: boolean;
+	bodyClass?: string;
+}
+
+const {
+	title,
+	description = SITE.description,
+	image = '/og.png',
+	type = 'website',
+	bleed = 'Gracias',
+	footer = true,
+	bodyClass,
+} = Astro.props;
+
+const fullTitle = title ? `${title} — ${SITE.name}` : `${SITE.fullName} — ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+---
+
+<!doctype html>
+<html lang="es" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		<meta name="author" content={SITE.fullName} />
+		<link rel="canonical" href={canonical} />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="alternate" type="application/rss+xml" title={`Textos — ${SITE.name}`} href={new URL('rss.xml', Astro.site)} />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="preload" as="font" type="font/woff2" href={monaWoff} crossorigin />
+		<link rel="preload" as="font" type="font/woff2" href={montserratWoff} crossorigin />
+		<meta name="theme-color" content="#141414" />
+		<meta name="generator" content={Astro.generator} />
+
+		<meta property="og:type" content={type} />
+		<meta property="og:locale" content="es_MX" />
+		<meta property="og:site_name" content={SITE.fullName} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={fullTitle} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+
+		<script is:inline>
+			// Aplica el tema guardado antes de pintar para evitar parpadeos.
+			(function () {
+				var root = document.documentElement;
+				try {
+					var t = localStorage.getItem('theme');
+					if (t === 'light' || t === 'dark') root.dataset.theme = t;
+				} catch (e) {}
+				var m = document.querySelector('meta[name="theme-color"]');
+				if (m && root.dataset.theme === 'light') m.setAttribute('content', '#f8f4ec');
+				// Movimiento: solo si el visitante no pidió reducirlo. Si el JS no arranca en 2.5 s, se muestra todo.
+				if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+					root.classList.add('motion');
+					setTimeout(function () {
+						if (!window.__motion) root.classList.remove('motion');
+					}, 2500);
+				}
+			})();
+		</script>
+		<slot name="head" />
+	</head>
+	<body class={bodyClass}>
+		<a class="skip" href="#main">Saltar al contenido</a>
+		<SiteHeader />
+		<main id="main">
+			<slot />
+		</main>
+		{footer && <SiteFooter bleed={bleed} />}
+	</body>
+</html>

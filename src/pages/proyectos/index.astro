@@ -1,0 +1,221 @@
+---
+import { getCollection } from 'astro:content';
+import Frame from '../../components/Frame.astro';
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import ProjectVisual from '../../components/visuals/ProjectVisual.astro';
+import { TAGS } from '../../config/site';
+import { ARCHIVO } from '../../data/archivo';
+import Base from '../../layouts/Base.astro';
+
+const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const counts = Object.fromEntries(Object.keys(TAGS).map((t) => [t, proyectos.filter((p) => p.data.tags.includes(t as never)).length]));
+const years = proyectos.map((p) => p.data.year);
+---
+
+<Base title="Proyectos" description="Proyectos de software, simulación, datos y algoritmos de Diego Vergara Hernández." bleed="Proyectos">
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Proyectos" right={[`${proyectos.length} proyectos`, `${Math.min(...years)} — ${Math.max(...years)}`]} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Proyectos']} as="h1" size="xl" />
+				<p class="blurb">
+					De plataformas full-stack con socios formadores a simulaciones, modelos de datos y algoritmos. Filtra por tema o entra a cada uno para
+					ver el contexto, mi parte y cómo funciona.
+				</p>
+			</div>
+
+			<div class="filters" role="group" aria-label="Filtrar proyectos por tema">
+				<button class="pill" type="button" data-filter="todos" aria-pressed="true">Todos <span class="count">{proyectos.length}</span></button>
+				{
+					Object.entries(TAGS)
+						.filter(([t]) => counts[t] > 0)
+						.map(([t, label]) => (
+							<button class="pill" type="button" data-filter={t} aria-pressed="false">
+								{label} <span class="count">{counts[t]}</span>
+							</button>
+						))
+				}
+			</div>
+
+			<ul class="pgrid" data-grid>
+				{
+					proyectos.map((p, i) => (
+						<li class="pcard" data-tags={p.data.tags.join(' ')}>
+							<a href={`/proyectos/${p.id}/`}>
+								<Frame ratio="4 / 3" glyph={p.data.title.slice(0, 2)}>
+									<ProjectVisual visual={p.data.visual} />
+								</Frame>
+								<div class="pcard__body">
+									<span class="pcard__meta mono">
+										{String(i + 1).padStart(2, '0')} · {p.data.year} · {p.data.tags.map((t) => TAGS[t]).join(' / ')}
+									</span>
+									<h2 class="pcard__title" style={`view-transition-name:p-${p.id}`}>
+										{p.data.title}
+									</h2>
+									<p class="pcard__kicker">
+										{p.data.kicker}
+										{p.data.play && <span class="pcard__play">▶ jugable</span>}
+									</p>
+								</div>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+			<p class="muted empty" data-empty hidden>No hay proyectos con ese filtro.</p>
+		</div>
+	</section>
+
+	<section class="section section--tight archivo">
+		<div class="wrap">
+			<MetaBar left="Archivo" right={['Trabajos chicos y tempranos', `${ARCHIVO.length} más`]} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Archivo']} size="m" />
+				<p class="blurb">
+					Ejercicios, prototipos y proyectos de los primeros semestres que no necesitan una página propia, pero cuentan de dónde viene lo demás.
+				</p>
+			</div>
+			<ul class="rows">
+				{
+					ARCHIVO.map((a) => (
+						<li class="row">
+							<div>
+								<span class="row__year">{a.year}</span>
+								<span class="row__title">
+									{a.title}
+									<small>{a.kicker}</small>
+								</span>
+								<span class="row__desc">{a.detail}</span>
+								<span />
+							</div>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: clamp(28px, 3.5vw, 52px);
+	}
+
+	.pgrid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: clamp(28px, 3vw, 48px) clamp(16px, 2vw, 32px);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	@media (max-width: 1000px) {
+		.pgrid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 620px) {
+		.pgrid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.pcard[hidden] {
+		display: none;
+	}
+
+	.pcard a {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.pcard :global(.frame) {
+		transition: transform 0.4s var(--ease);
+	}
+
+	.pcard a:hover :global(.frame) {
+		transform: translateY(-4px);
+	}
+
+	.pcard__body {
+		padding-top: 1rem;
+	}
+
+	.pcard__meta {
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.pcard__title {
+		margin: 0.45rem 0 0.25rem;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		text-transform: uppercase;
+		letter-spacing: -0.065em;
+		line-height: 0.9;
+		color: var(--red);
+		font-size: clamp(1.6rem, 1.1rem + 1.4vw, 2.4rem);
+	}
+
+	.pcard a:hover .pcard__title {
+		color: var(--ink);
+	}
+
+	.pcard__kicker {
+		margin: 0;
+		font-size: var(--step--1);
+		color: var(--ink-soft);
+	}
+
+	.pcard__play {
+		display: inline-block;
+		margin-left: 0.5em;
+		padding: 0.1em 0.55em;
+		border-radius: 999px;
+		background: var(--red);
+		color: var(--on-red);
+		font: 600 var(--step--2) var(--font-mono);
+		vertical-align: 0.1em;
+	}
+
+	.archivo {
+		border-top: 1px solid var(--line);
+	}
+
+	.empty {
+		margin-top: 2rem;
+	}
+</style>
+
+<script>
+	const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+	const cards = document.querySelectorAll<HTMLElement>('.pcard');
+	const empty = document.querySelector<HTMLElement>('[data-empty]');
+
+	function apply(filter: string) {
+		let shown = 0;
+		cards.forEach((card) => {
+			const ok = filter === 'todos' || (card.dataset.tags || '').split(' ').includes(filter);
+			card.hidden = !ok;
+			if (ok) shown++;
+		});
+		buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+		if (empty) empty.hidden = shown > 0;
+		const url = new URL(location.href);
+		if (filter === 'todos') url.searchParams.delete('tema');
+		else url.searchParams.set('tema', filter);
+		history.replaceState(null, '', url);
+	}
+
+	buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.filter!)));
+	const initial = new URL(location.href).searchParams.get('tema');
+	if (initial && [...buttons].some((b) => b.dataset.filter === initial)) apply(initial);
+</script>

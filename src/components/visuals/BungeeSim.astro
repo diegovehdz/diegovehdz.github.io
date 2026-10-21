@@ -1,0 +1,194 @@
+---
+// Simulador del salto bungee: se pinta en el build con los parámetros del ejercicio y se recalcula al mover los controles.
+import { CASES, DEFAULTS, simulate, toPath } from '../../lib/bungee';
+
+interface Props {
+	controls?: boolean;
+}
+const { controls = false } = Astro.props;
+
+const runs = CASES.map((c) => simulate(c.v0, DEFAULTS));
+const yMin = Math.min(...runs.map((r) => r.minY)) * 1.06;
+const box = { x: 64, y: 96, w: 548, h: 340 };
+const paths = runs.map((r) => toPath(r, box, yMin, DEFAULTS.T));
+const ticks = [0, 10, 20, 30, 40];
+const fmt = (n: number) => Math.round(Math.abs(n)).toLocaleString('es-MX');
+---
+
+<div class="bj" data-bungee>
+	<svg viewBox="0 0 640 480" role="img" aria-label="Altura contra tiempo en tres escenarios de salto bungee">
+		<text x="28" y="40" class="b-cap">altura vs. tiempo · rk4</text>
+		<text x="28" y="60" class="b-cap b-cap--soft" data-b-sub>punto más bajo: {fmt(runs[1].minY)} m bajo la plataforma</text>
+		<line x1={box.x} y1={box.y} x2={box.x + box.w} y2={box.y} class="b-zero" />
+		<text x={box.x - 10} y={box.y + 4} class="b-tick" text-anchor="end">0 m</text>
+		<text x={box.x - 10} y={box.y + box.h + 4} class="b-tick" text-anchor="end" data-b-ymin>−{fmt(yMin)}</text>
+		{
+			ticks.map((t) => (
+				<text x={box.x + (t / DEFAULTS.T) * box.w} y={box.y + box.h + 24} class="b-tick" text-anchor="middle">
+					{t} s
+				</text>
+			))
+		}
+		{paths.map((d, i) => <path d={d} class={`b-line b-line--${i}`} data-b-path={i} />)}
+		{
+			CASES.map((c, i) => (
+				<g transform={`translate(${box.x + 8 + i * 150} 78)`}>
+					<rect width="16" height="4" y="-4" class={`b-key b-key--${i}`} />
+					<text x="22" y="0" class="b-leg">
+						{c.label}
+					</text>
+				</g>
+			))
+		}
+	</svg>
+	{
+		controls && (
+			<div class="bj-controls">
+				<label>
+					<span>
+						Cuerda k = <output data-out="k">{DEFAULTS.k}</output> N/m
+					</span>
+					<input type="range" min="5" max="150" step="0.1" value={DEFAULTS.k} data-p="k" />
+				</label>
+				<label>
+					<span>
+						Masa = <output data-out="m">{DEFAULTS.m}</output> kg
+					</span>
+					<input type="range" min="40" max="130" step="1" value={DEFAULTS.m} data-p="m" />
+				</label>
+				<label>
+					<span>
+						Aire β = <output data-out="beta">{DEFAULTS.beta}</output> kg/s
+					</span>
+					<input type="range" min="0.1" max="25" step="0.01" value={DEFAULTS.beta} data-p="beta" />
+				</label>
+				<button class="pill pill--sm pill--ghost" type="button" data-reset>
+					Valores del ejercicio
+				</button>
+				<p class="bj-read" data-read aria-live="polite" />
+			</div>
+		)
+	}
+</div>
+
+<style>
+	.bj {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+		display: flex;
+		flex-direction: column;
+	}
+	svg {
+		width: 100%;
+		height: auto;
+	}
+	.b-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.b-cap--soft {
+		opacity: 0.8;
+	}
+	.b-zero {
+		stroke: var(--line-strong);
+		stroke-dasharray: 4 6;
+	}
+	.b-tick {
+		font: 500 11px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.b-line {
+		fill: none;
+		stroke-width: 2.5;
+		stroke-linejoin: round;
+	}
+	.b-line--0,
+	.b-key--0 {
+		stroke: var(--red);
+		fill: var(--red);
+	}
+	.b-line--1,
+	.b-key--1 {
+		stroke: var(--ink);
+		fill: var(--ink);
+	}
+	.b-line--2,
+	.b-key--2 {
+		stroke: var(--ink-mute);
+		fill: var(--ink-mute);
+		stroke-dasharray: 6 5;
+	}
+	.b-line {
+		fill: none;
+	}
+	.b-leg {
+		font: 600 12.5px var(--font-body);
+		fill: var(--ink-soft);
+	}
+	.bj-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: end;
+		gap: 12px 20px;
+		padding: 14px 16px 16px;
+		border-top: 1px solid var(--line);
+		font-size: var(--step--2);
+	}
+	.bj-controls label {
+		display: grid;
+		gap: 4px;
+		color: var(--ink-soft);
+	}
+	.bj-controls output {
+		font-family: var(--font-mono);
+		color: var(--ink);
+	}
+	.bj-controls input {
+		accent-color: var(--red);
+		width: min(170px, 40vw);
+	}
+	.bj-read {
+		flex-basis: 100%;
+		margin: 0;
+		font: 500 var(--step--2) / 1.5 var(--font-mono);
+		color: var(--ink-mute);
+	}
+</style>
+
+<script>
+	import { CASES, DEFAULTS, simulate, toPath, type BungeeParams } from '../../lib/bungee';
+
+	document.querySelectorAll<HTMLElement>('[data-bungee]').forEach((root) => {
+		const inputs = root.querySelectorAll<HTMLInputElement>('input[data-p]');
+		if (!inputs.length) return;
+		const read = root.querySelector<HTMLElement>('[data-read]')!;
+		const sub = root.querySelector<SVGTextElement>('[data-b-sub]')!;
+		const yminLabel = root.querySelector<SVGTextElement>('[data-b-ymin]')!;
+		const box = { x: 64, y: 96, w: 548, h: 340 };
+		const fmt = (n: number) => Math.round(Math.abs(n)).toLocaleString('es-MX');
+
+		const update = () => {
+			const p: BungeeParams = { ...DEFAULTS };
+			inputs.forEach((inp) => {
+				(p as unknown as Record<string, number>)[inp.dataset.p!] = Number(inp.value);
+				const out = root.querySelector(`[data-out="${inp.dataset.p}"]`);
+				if (out) out.textContent = inp.value;
+			});
+			const runs = CASES.map((c) => simulate(c.v0, p));
+			const yMin = Math.min(...runs.map((r) => r.minY)) * 1.06;
+			runs.forEach((r, i) => root.querySelector(`[data-b-path="${i}"]`)?.setAttribute('d', toPath(r, box, yMin, p.T)));
+			yminLabel.textContent = `−${fmt(yMin)}`;
+			sub.textContent = `punto más bajo: ${fmt(runs[1].minY)} m bajo la plataforma`;
+			read.textContent = runs
+				.map((r, i) => `${CASES[i].label}: baja ${fmt(r.minY)} m a los ${r.tMin.toFixed(1)} s, pico de ${r.maxG.toFixed(1)} g`)
+				.join(' · ');
+		};
+		inputs.forEach((inp) => inp.addEventListener('input', update));
+		root.querySelector('[data-reset]')?.addEventListener('click', () => {
+			inputs.forEach((inp) => (inp.value = String((DEFAULTS as unknown as Record<string, number>)[inp.dataset.p!])));
+			update();
+		});
+		update();
+	});
+</script>

@@ -1,0 +1,69 @@
+---
+// Árbol de expansión mínima (Kruskal) y una ruta TSP (vecino más cercano + 2-opt) sobre los mismos puntos:
+// las dos caras de la actividad de "cableado" y "reparto".
+import { mulberry32 } from '../../lib/rng';
+import { nearestNeighbor, twoOpt } from '../../lib/tsp';
+
+const rand = mulberry32(2026);
+const W = 640;
+const H = 480;
+const pts = Array.from({ length: 24 }, () => ({ x: 50 + rand() * (W - 100), y: 100 + rand() * (H - 150) }));
+const dist = (i: number, j: number) => Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+
+// Kruskal con unión-búsqueda
+const edges: [number, number, number][] = [];
+for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) edges.push([dist(i, j), i, j]);
+edges.sort((a, b) => a[0] - b[0]);
+const parent = pts.map((_, i) => i);
+const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+const mst: [number, number][] = [];
+for (const [, i, j] of edges) {
+	const a = find(i);
+	const b = find(j);
+	if (a !== b) {
+		parent[a] = b;
+		mst.push([i, j]);
+	}
+}
+const tour = twoOpt(nearestNeighbor(pts.length, dist), dist, true);
+const tourPts = [...tour, tour[0]].map((i) => `${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`).join(' ');
+---
+
+<svg class="viz-graph" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Árbol de expansión mínima y ruta del agente viajero sobre 24 puntos">
+	<text x="28" y="40" class="a-cap">mst (kruskal) · ruta tsp (2-opt)</text>
+	<text x="28" y="60" class="a-cap a-cap--soft">cableado mínimo vs. recorrido de reparto</text>
+	<polyline points={tourPts} class="a-tour" />
+	{mst.map(([i, j]) => <line x1={pts[i].x} y1={pts[i].y} x2={pts[j].x} y2={pts[j].y} class="a-mst" />)}
+	{pts.map((p) => <circle cx={p.x} cy={p.y} r="5.5" class="a-pt" />)}
+</svg>
+
+<style>
+	.viz-graph {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	.a-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.a-cap--soft {
+		opacity: 0.7;
+	}
+	.a-tour {
+		fill: none;
+		stroke: var(--ink-mute);
+		stroke-width: 1.5;
+		stroke-dasharray: 5 6;
+	}
+	.a-mst {
+		stroke: var(--red);
+		stroke-width: 3.5;
+		stroke-linecap: round;
+	}
+	.a-pt {
+		fill: var(--bg);
+		stroke: var(--ink);
+		stroke-width: 2;
+	}
+</style>

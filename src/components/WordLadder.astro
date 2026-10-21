@@ -1,0 +1,625 @@
+---
+// Escalera: Poople en español. Corre completo en el navegador; el progreso y las estadísticas se guardan solo en
+// este navegador. La palabra de partida depende del día en la Ciudad de México, así que es la misma para todos.
+import { META } from '../data/escalera';
+
+const FILAS = ['qwertyuiop', 'asdfghjklñ', 'zxcvbnm'];
+---
+
+<div class="lad" data-lad>
+	<div class="lad__bar">
+		<span class="mono" data-titulo>Escalera</span>
+		<span class="mono" data-par></span>
+	</div>
+
+	<ol class="lad__rows" data-rows aria-label="Escalones, de la palabra de partida a la meta"></ol>
+	<p class="lad__msg mono" data-msg role="status" aria-live="polite"></p>
+
+	<div class="lad__kb" data-kb>
+		{
+			FILAS.map((fila, i) => (
+				<div class="lad__kbrow">
+					{i === 2 && (
+						<button type="button" class="key key--wide" data-key="enter">
+							Enviar
+						</button>
+					)}
+					{[...fila].map((k) => (
+						<button type="button" class="key" data-key={k}>
+							{k}
+						</button>
+					))}
+					{i === 2 && (
+						<button type="button" class="key key--wide" data-key="borrar" aria-label="Borrar letra">
+							⌫
+						</button>
+					)}
+				</div>
+			))
+		}
+	</div>
+
+	<div class="chips no-reveal lad__actions">
+		<button class="pill pill--sm" type="button" data-deshacer>Deshacer paso</button>
+		<button class="pill pill--sm" type="button" data-pista>Pista</button>
+		<button class="pill pill--sm pill--ghost" type="button" data-practica>Practicar con otra palabra</button>
+		<button class="pill pill--sm pill--ghost" type="button" data-hoy hidden>Volver al reto de hoy</button>
+	</div>
+
+	<section class="lad__fin" data-fin hidden aria-live="polite">
+		<p class="lad__fin-title" data-fin-titulo></p>
+		<p class="lad__fin-text" data-fin-texto></p>
+		<div class="chips no-reveal">
+			<button class="pill pill--solid" type="button" data-compartir>Compartir resultado</button>
+		</div>
+		<p class="mono lad__next" data-siguiente></p>
+	</section>
+
+	<div class="lad__stats">
+		<dl>
+			<div><dt>Jugadas</dt><dd data-stat="jugadas">0</dd></div>
+			<div><dt>Racha</dt><dd data-stat="racha">0</dd></div>
+			<div><dt>Mejor racha</dt><dd data-stat="mejor">0</dd></div>
+		</dl>
+		<ol class="lad__dist" data-dist aria-label="Pasos respecto al par">
+			{['Par o mejor', '+1', '+2', '+3 o más'].map((l) => <li><span>{l}</span><b style="--n:0"></b><i>0</i></li>)}
+		</ol>
+	</div>
+	<p class="visually-hidden">La meta es la palabra {META}.</p>
+</div>
+
+<style>
+	.lad {
+		max-width: 520px;
+		margin-inline: auto;
+	}
+
+	.lad__bar {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: 0.8rem;
+		margin-bottom: 1rem;
+		border-bottom: 1px solid var(--line);
+		font-size: var(--step--1);
+		color: var(--ink-soft);
+	}
+
+	.lad__rows {
+		display: grid;
+		gap: 8px;
+		justify-content: center;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.lad__rows :global(.lrow) {
+		display: grid;
+		grid-template-columns: repeat(4, var(--tile));
+		gap: 8px;
+		--tile: clamp(48px, 13vw, 64px);
+	}
+
+	.lad__rows :global(.ltile) {
+		display: grid;
+		place-items: center;
+		width: var(--tile);
+		aspect-ratio: 1;
+		border: 2px solid var(--line-strong);
+		border-radius: 10px;
+		background: var(--bg-raise);
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		font-size: calc(var(--tile) * 0.5);
+		line-height: 1;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.lad__rows :global(.ltile.is-changed) {
+		background: var(--red);
+		border-color: var(--red);
+		color: var(--on-red);
+	}
+
+	.lad__rows :global(.lrow.is-input .ltile) {
+		border-style: dashed;
+		background: transparent;
+	}
+
+	/* letras del escalón anterior, como guía, mientras escribes */
+	.lad__rows :global(.lrow.is-input .ltile.is-ghost) {
+		color: var(--ink-mute);
+		opacity: 0.45;
+	}
+
+	.lad__rows :global(.lrow.is-input .ltile.is-typed) {
+		border-style: solid;
+		border-color: var(--ink);
+	}
+
+	.lad__rows :global(.lrow.is-meta .ltile) {
+		background: transparent;
+		border-color: var(--red);
+		color: var(--red-ink);
+	}
+
+	.lad__rows :global(.lrow.is-meta .ltile.is-changed) {
+		background: var(--red);
+		color: var(--on-red);
+	}
+
+	.lad__rows :global(.lgap) {
+		text-align: center;
+		color: var(--ink-mute);
+		letter-spacing: 0.4em;
+		font-size: var(--step--1);
+		line-height: 1;
+	}
+
+	.motion .lad__rows :global(.lrow.is-shake) {
+		animation: lad-shake 0.32s;
+	}
+
+	@keyframes lad-shake {
+		25% {
+			transform: translateX(-6px);
+		}
+		50% {
+			transform: translateX(6px);
+		}
+		75% {
+			transform: translateX(-3px);
+		}
+	}
+
+	.lad__msg {
+		min-height: 1.5em;
+		margin: 1rem 0 0.6rem;
+		text-align: center;
+		font-size: var(--step--1);
+		color: var(--ink-soft);
+	}
+
+	.lad__kb {
+		display: grid;
+		gap: 6px;
+		user-select: none;
+	}
+
+	.lad__kbrow {
+		display: flex;
+		justify-content: center;
+		gap: 5px;
+	}
+
+	.key {
+		flex: 1 1 0;
+		max-width: 46px;
+		height: 52px;
+		padding: 0;
+		border: 1.5px solid var(--line-strong);
+		border-radius: 8px;
+		background: var(--bg-raise);
+		color: var(--ink);
+		font: 700 var(--step-0) / 1 var(--font-body);
+		text-transform: uppercase;
+		cursor: pointer;
+		touch-action: manipulation;
+	}
+
+	.key:hover,
+	.key:focus-visible {
+		border-color: var(--red);
+	}
+
+	.key--wide {
+		flex-grow: 1.6;
+		max-width: 76px;
+		font-size: var(--step--1);
+		text-transform: none;
+	}
+
+	.key:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+
+	.lad__actions {
+		justify-content: center;
+		margin-top: 1.2rem;
+	}
+
+	.lad__actions [hidden] {
+		display: none;
+	}
+
+	.lad__fin {
+		margin-top: 1.6rem;
+		padding: clamp(18px, 3vw, 28px);
+		border: 1.5px solid var(--red);
+		border-radius: var(--radius);
+		text-align: center;
+	}
+
+	.lad__fin[hidden] {
+		display: none;
+	}
+
+	.lad__fin-title {
+		margin: 0;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		text-transform: uppercase;
+		letter-spacing: -0.06em;
+		line-height: 0.9;
+		font-size: clamp(2rem, 1.4rem + 3vw, 3.4rem);
+		color: var(--red);
+	}
+
+	.lad__fin-text {
+		margin: 0.8rem auto 1.1rem;
+		max-width: 36ch;
+	}
+
+	.lad__fin .chips {
+		justify-content: center;
+	}
+
+	.lad__next {
+		margin: 1rem 0 0;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.lad__stats {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 1.4rem 2rem;
+		align-items: center;
+		margin-top: 2rem;
+		padding-top: 1.4rem;
+		border-top: 1px solid var(--line);
+		font-size: var(--step--1);
+	}
+
+	.lad__stats dl {
+		display: grid;
+		grid-template-columns: repeat(3, auto);
+		gap: 1.2rem;
+		margin: 0;
+	}
+
+	.lad__stats dt {
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.lad__stats dd {
+		margin: 0;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: var(--step-2);
+	}
+
+	.lad__dist {
+		display: grid;
+		gap: 4px;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.lad__dist li {
+		display: grid;
+		grid-template-columns: 6.5em 1fr 2em;
+		align-items: center;
+		gap: 8px;
+		font-size: var(--step--2);
+		color: var(--ink-soft);
+	}
+
+	.lad__dist b {
+		height: 10px;
+		width: calc(var(--n) * 100%);
+		min-width: 3px;
+		border-radius: 3px;
+		background: var(--red);
+	}
+
+	.lad__dist i {
+		font-style: normal;
+		font-family: var(--font-mono);
+	}
+
+	@media (max-width: 560px) {
+		.lad__stats {
+			grid-template-columns: 1fr;
+		}
+
+		.key {
+			height: 48px;
+		}
+	}
+</style>
+
+<script>
+	import PALABRAS from '../data/palabras.json';
+	import { COMUNES, INICIOS, META, PRIMER_DIA } from '../data/escalera';
+	import { barajar, cambio, diaCDMX, diaDeFecha, distancias, minutosParaMedianoche, pista, textoCompartir } from '../lib/escalera';
+
+	const root = document.querySelector<HTMLElement>('[data-lad]');
+	if (root) {
+		const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+		const rowsEl = $('[data-rows]');
+		const msg = $('[data-msg]');
+		const fin = $('[data-fin]');
+
+		// ---- diccionario, grafo y reto del día ----
+		const dict = new Set<string>(PALABRAS as string[]);
+		const comunes = new Set(COMUNES.filter((w) => dict.has(w)));
+		comunes.add(META);
+		const distComun = distancias(META, comunes);
+		const distTotal = distancias(META, dict);
+		const pool = barajar(
+			INICIOS.filter((w) => {
+				const d = distComun.get(w);
+				return d !== undefined && d >= 3 && d <= 6;
+			}),
+			20261011,
+		);
+		const hoy = diaCDMX();
+		const numero = hoy - diaDeFecha(PRIMER_DIA) + 1;
+		const inicioHoy = pool[(((numero - 1) % pool.length) + pool.length) % pool.length];
+		const url = `${location.origin}/lab/escalera/`;
+
+		// ---- estado y almacenamiento local ----
+		interface Stats {
+			jugadas: number;
+			racha: number;
+			mejor: number;
+			ultimoDia: number | null;
+			dist: number[];
+		}
+		interface Guardado {
+			dia: number;
+			escalones: string[];
+			pistas: number;
+			terminado: boolean;
+			stats: Stats;
+		}
+		const KEY = 'escalera:v1';
+		const nuevasStats = (): Stats => ({ jugadas: 0, racha: 0, mejor: 0, ultimoDia: null, dist: [0, 0, 0, 0] });
+		let guardado: Guardado | null = null;
+		try {
+			guardado = JSON.parse(localStorage.getItem(KEY) ?? 'null');
+		} catch {
+			guardado = null;
+		}
+		let stats: Stats = guardado?.stats ?? nuevasStats();
+		// una racha se rompe si pasó un día sin jugar
+		if (stats.ultimoDia !== null && hoy - stats.ultimoDia > 1) stats.racha = 0;
+
+		let modo: 'diario' | 'practica' = 'diario';
+		let escalones: string[] = [inicioHoy];
+		let pistas = 0;
+		let terminado = false;
+		let entrada = '';
+		if (guardado && guardado.dia === hoy && guardado.escalones?.[0] === inicioHoy && guardado.escalones.every((w) => w === inicioHoy || dict.has(w))) {
+			escalones = guardado.escalones;
+			pistas = guardado.pistas ?? 0;
+			terminado = guardado.terminado ?? false;
+		}
+
+		const guardar = () => {
+			if (modo !== 'diario') return;
+			try {
+				localStorage.setItem(KEY, JSON.stringify({ dia: hoy, escalones, pistas, terminado, stats } satisfies Guardado));
+			} catch {
+				/* sin almacenamiento: se juega igual, sin recordar */
+			}
+		};
+
+		const par = () => distComun.get(escalones[0]) ?? distTotal.get(escalones[0]) ?? 0;
+
+		// ---- dibujo ----
+		const fila = (w: string, cls: string, cambiada = -1) =>
+			`<li class="lrow ${cls}">${[...w].map((c, i) => `<span class="ltile${i === cambiada ? ' is-changed' : ''}">${c}</span>`).join('')}</li>`;
+
+		function render() {
+			let html = '';
+			escalones.forEach((w, i) => {
+				const k = i === 0 ? -1 : cambio(escalones[i - 1], w);
+				html += fila(w, i === 0 ? 'is-start' : w === META ? 'is-meta' : '', k);
+			});
+			if (!terminado) {
+				const prev = escalones[escalones.length - 1];
+				const tiles = [0, 1, 2, 3]
+					.map((i) => (i < entrada.length ? `<span class="ltile is-typed">${entrada[i]}</span>` : `<span class="ltile is-ghost">${prev[i]}</span>`))
+					.join('');
+				html += `<li class="lrow is-input" aria-label="Escribe el siguiente escalón">${tiles}</li>`;
+				html += `<li class="lgap" aria-hidden="true">· · ·</li>`;
+				html += fila(META, 'is-meta');
+			}
+			rowsEl.innerHTML = html;
+			$('[data-titulo]').textContent = modo === 'diario' ? `Escalera #${numero}` : 'Práctica';
+			const pasos = escalones.length - 1;
+			$('[data-par]').textContent = `Par ${par()} · ${pasos} ${pasos === 1 ? 'paso' : 'pasos'}`;
+			root!.querySelectorAll<HTMLButtonElement>('[data-key]').forEach((b) => (b.disabled = terminado));
+			$<HTMLButtonElement>('[data-deshacer]').disabled = terminado || escalones.length < 2;
+			$<HTMLButtonElement>('[data-pista]').disabled = terminado;
+			$('[data-hoy]').hidden = modo === 'diario';
+			$('[data-practica]').hidden = modo === 'practica' && !terminado;
+			renderFin();
+			renderStats();
+		}
+
+		function renderFin() {
+			fin.hidden = !terminado;
+			if (!terminado) return;
+			const pasos = escalones.length - 1;
+			const dif = pasos - par();
+			$('[data-fin-titulo]').textContent = dif < 0 ? '¡Bajo par!' : dif === 0 ? '¡Par perfecto!' : '¡Llegaste!';
+			const notas = [
+				'Encontraste un camino más corto que el que calculó la computadora.',
+				`${pasos} pasos, justo el par.`,
+				`${pasos} pasos: a uno del par.`,
+				`${pasos} pasos, ${dif} más que el par. Lo importante es llegar.`,
+			];
+			let texto = notas[Math.min(Math.max(dif, -1), 2) + 1];
+			if (pistas) texto += ` Usaste ${pistas} ${pistas === 1 ? 'pista' : 'pistas'}.`;
+			$('[data-fin-texto]').textContent = texto;
+			const m = minutosParaMedianoche();
+			$('[data-siguiente]').textContent =
+				modo === 'diario' ? `Nueva escalera en ${Math.floor(m / 60)} h ${m % 60} min (medianoche en la CDMX)` : 'Esta fue de práctica: no cuenta para tus estadísticas.';
+		}
+
+		function renderStats() {
+			$('[data-stat="jugadas"]').textContent = String(stats.jugadas);
+			$('[data-stat="racha"]').textContent = String(stats.racha);
+			$('[data-stat="mejor"]').textContent = String(stats.mejor);
+			const max = Math.max(1, ...stats.dist);
+			root!.querySelectorAll<HTMLElement>('[data-dist] li').forEach((li, i) => {
+				li.querySelector('b')!.style.setProperty('--n', String(stats.dist[i] / max));
+				li.querySelector('i')!.textContent = String(stats.dist[i]);
+			});
+		}
+
+		const decir = (t: string) => (msg.textContent = t);
+		const sacudir = () => {
+			const r = rowsEl.querySelector('.is-input');
+			r?.classList.remove('is-shake');
+			void (r as HTMLElement | null)?.offsetWidth;
+			r?.classList.add('is-shake');
+		};
+
+		// ---- jugadas ----
+		function terminar() {
+			terminado = true;
+			if (modo === 'diario') {
+				stats.jugadas++;
+				stats.racha = stats.ultimoDia === hoy - 1 ? stats.racha + 1 : 1;
+				stats.mejor = Math.max(stats.mejor, stats.racha);
+				stats.ultimoDia = hoy;
+				const dif = escalones.length - 1 - par();
+				stats.dist[Math.min(Math.max(dif, 0), 3)]++;
+			}
+			decir('');
+		}
+
+		function enviar() {
+			if (terminado) return;
+			const prev = escalones[escalones.length - 1];
+			const w = entrada;
+			if (w.length < 4) return (decir('Faltan letras: cada escalón tiene cuatro.'), sacudir());
+			const k = cambio(prev, w);
+			if (k === -1) return (decir('Es la misma palabra: cambia una letra.'), sacudir());
+			if (k === -2) return (decir('Solo puedes cambiar una letra por escalón.'), sacudir());
+			if (!dict.has(w)) return (decir(`«${w.toUpperCase()}» no está en el diccionario.`), sacudir());
+			if (escalones.includes(w)) return (decir('Esa palabra ya está en tu escalera.'), sacudir());
+			escalones.push(w);
+			entrada = '';
+			decir('');
+			if (w === META) terminar();
+			guardar();
+			render();
+		}
+
+		function tecla(k: string) {
+			if (terminado) return;
+			if (k === 'enter') return enviar();
+			if (k === 'borrar') entrada = entrada.slice(0, -1);
+			else if (/^[a-zñ]$/.test(k) && entrada.length < 4) entrada += k;
+			render();
+		}
+
+		root.querySelectorAll<HTMLButtonElement>('[data-key]').forEach((b) => b.addEventListener('click', () => tecla(b.dataset.key!)));
+		const sinAcento: Record<string, string> = { á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u', ü: 'u' };
+		window.addEventListener('keydown', (e) => {
+			if (e.ctrlKey || e.metaKey || e.altKey) return;
+			const t = e.target instanceof Element ? e.target : document.body;
+			if (t.closest('input, textarea, select, [contenteditable]')) return;
+			const key = e.key.toLowerCase();
+			if (key === 'enter') {
+				// Enter sobre un enlace o un botón con foco hace lo suyo (navegar, activar), no envía el escalón
+				if (t.closest('a, button') && !t.closest('[data-key]')) return;
+				e.preventDefault();
+				tecla('enter');
+			} else if (key === 'backspace') {
+				e.preventDefault();
+				tecla('borrar');
+			} else {
+				const c = sinAcento[key] ?? key;
+				if (/^[a-zñ]$/.test(c)) tecla(c);
+			}
+		});
+
+		$('[data-deshacer]').addEventListener('click', () => {
+			if (terminado || escalones.length < 2) return;
+			escalones.pop();
+			entrada = '';
+			decir('');
+			guardar();
+			render();
+		});
+
+		$('[data-pista]').addEventListener('click', () => {
+			if (terminado) return;
+			const h = pista(escalones[escalones.length - 1], dict, comunes, distComun, distTotal);
+			if (!h) return decir('Desde aquí no hay camino: deshaz un paso.');
+			pistas++;
+			entrada = h;
+			decir(`Pista: prueba con «${h.toUpperCase()}» y presiona Enviar.`);
+			guardar();
+			render();
+		});
+
+		$('[data-practica]').addEventListener('click', () => {
+			const otras = pool.filter((w) => w !== inicioHoy && w !== escalones[0]);
+			modo = 'practica';
+			escalones = [otras[Math.floor(Math.random() * otras.length)]];
+			pistas = 0;
+			terminado = false;
+			entrada = '';
+			decir('Práctica: no cuenta para tus estadísticas.');
+			render();
+		});
+
+		$('[data-hoy]').addEventListener('click', () => {
+			modo = 'diario';
+			escalones = [inicioHoy];
+			pistas = 0;
+			terminado = false;
+			if (guardado?.dia === hoy || stats.ultimoDia === hoy) {
+				try {
+					const g = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Guardado | null;
+					if (g && g.dia === hoy) ({ escalones, pistas, terminado } = g);
+				} catch {
+					/* nada */
+				}
+			}
+			entrada = '';
+			decir('');
+			render();
+		});
+
+		$('[data-compartir]').addEventListener('click', async () => {
+			const texto = textoCompartir({ numero: modo === 'diario' ? numero : null, escalones, par: par(), pistas, url });
+			try {
+				if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ text: texto });
+				else {
+					await navigator.clipboard.writeText(texto);
+					decir('Resultado copiado: pégalo donde quieras.');
+				}
+			} catch {
+				decir('No se pudo compartir.');
+			}
+		});
+
+		guardar();
+		render();
+	}
+</script>

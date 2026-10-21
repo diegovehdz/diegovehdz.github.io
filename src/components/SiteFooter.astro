@@ -1,0 +1,33 @@
+---
+import { SITE } from '../config/site';
+import Mega from './Mega.astro';
+
+interface Props {
+	bleed?: string;
+}
+
+const { bleed = 'Gracias' } = Astro.props;
+const year = new Date().getFullYear();
+const github = SITE.socials.find((s) => s.label === 'GitHub');
+---
+
+<footer class="site-footer" id="contacto">
+	<div class="wrap">
+		<div class="footer-bar">
+			{github ? <a href={github.href}>{github.handle}</a> : <span>@{SITE.handle}</span>}
+			<a href={SITE.url}>{SITE.domain}</a>
+			<a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+		</div>
+		<div class="footer-fine">
+			<span>© {year} {SITE.fullName} · {SITE.city}</span>
+			<span>
+				<a href="/rss.xml">RSS</a> · <a href="/cv/">CV</a> · Hecho con Astro, Leaflet y mucho café
+			</span>
+		</div>
+	</div>
+	<div class="footer-bleed mega-crop" aria-hidden="true">
+		<div class="wrap">
+			<Mega lines={[bleed]} bleed />
+		</div>
+	</div>
+</footer>

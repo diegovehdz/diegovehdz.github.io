@@ -1,0 +1,35 @@
+---
+// Título apilado en rojo ("MY / EDUCATION" en la plantilla). Cada línea sube al entrar en pantalla.
+// Se encoge solo si la palabra más larga no cabe en su columna (unidades de contenedor).
+interface Props {
+	lines: string[];
+	as?: 'h1' | 'h2' | 'h3' | 'p';
+	size?: 'xl' | 'l' | 'm' | 's';
+	ink?: boolean;
+	class?: string;
+	id?: string;
+	/** nombre para la transición entre páginas (debe ser único en la página) */
+	vt?: string;
+	/** deriva lateral con el scroll, en vw (p. ej. -3) */
+	drift?: number;
+}
+
+const { lines, as: Tag = 'h2', size = 'l', ink = false, class: cls, id, vt, drift } = Astro.props;
+const longest = Math.max(...lines.map((l) => l.length), 4);
+---
+
+<div class="title-box" data-drift={drift ? `center x ${drift}` : undefined}>
+	<Tag
+		id={id}
+		class:list={['display', 'title', size !== 'l' && `title--${size}`, ink && 'title--ink', cls]}
+		style={`--longest:${longest};${vt ? `view-transition-name:${vt};` : ''}`}
+	>
+		{
+			lines.map((line, i) => (
+				<span class="title__line" style={`--li:${i}`}>
+					<span class="title__inner">{line}</span>
+				</span>
+			))
+		}
+	</Tag>
+</div>

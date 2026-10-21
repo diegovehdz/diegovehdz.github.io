@@ -1,0 +1,420 @@
+{
+ "productos": [
+  {
+   "id": "P01",
+   "nombre": "Aceite vegetal",
+   "unidad": "litro"
+  },
+  {
+   "id": "P02",
+   "nombre": "Arroz en grano",
+   "unidad": "kg"
+  },
+  {
+   "id": "P03",
+   "nombre": "Atún en lata",
+   "unidad": "pieza"
+  },
+  {
+   "id": "P04",
+   "nombre": "Azúcar estándar",
+   "unidad": "kg"
+  },
+  {
+   "id": "P05",
+   "nombre": "Bistec de res",
+   "unidad": "kg"
+  },
+  {
+   "id": "P06",
+   "nombre": "Cebolla blanca",
+   "unidad": "kg"
+  },
+  {
+   "id": "P24",
+   "nombre": "Chile (variedad no especificada)",
+   "unidad": "kg"
+  },
+  {
+   "id": "P07",
+   "nombre": "Chile jalapeño",
+   "unidad": "kg"
+  },
+  {
+   "id": "P08",
+   "nombre": "Chuleta de cerdo",
+   "unidad": "kg"
+  },
+  {
+   "id": "P09",
+   "nombre": "Frijol negro",
+   "unidad": "kg"
+  },
+  {
+   "id": "P10",
+   "nombre": "Huevo blanco",
+   "unidad": "docena"
+  },
+  {
+   "id": "P11",
+   "nombre": "Jitomate saladet",
+   "unidad": "kg"
+  },
+  {
+   "id": "P12",
+   "nombre": "Leche entera",
+   "unidad": "litro"
+  },
+  {
+   "id": "P13",
+   "nombre": "Limón",
+   "unidad": "kg"
+  },
+  {
+   "id": "P14",
+   "nombre": "Manzana",
+   "unidad": "kg"
+  },
+  {
+   "id": "P15",
+   "nombre": "Pan de caja",
+   "unidad": "paquete"
+  },
+  {
+   "id": "P16",
+   "nombre": "Papa blanca",
+   "unidad": "kg"
+  },
+  {
+   "id": "P17",
+   "nombre": "Pasta para sopa",
+   "unidad": "paquete"
+  },
+  {
+   "id": "P23",
+   "nombre": "Pechuga de pollo",
+   "unidad": "kg"
+  },
+  {
+   "id": "P25",
+   "nombre": "Pierna y muslo de pollo",
+   "unidad": "kg"
+  },
+  {
+   "id": "P22",
+   "nombre": "Plátano",
+   "unidad": "kg"
+  },
+  {
+   "id": "P18",
+   "nombre": "Pollo entero",
+   "unidad": "kg"
+  },
+  {
+   "id": "P21",
+   "nombre": "Tomate verde",
+   "unidad": "kg"
+  },
+  {
+   "id": "P19",
+   "nombre": "Tortilla de maíz",
+   "unidad": "kg"
+  },
+  {
+   "id": "P20",
+   "nombre": "Zanahoria",
+   "unidad": "kg"
+  }
+ ],
+ "lugares": [
+  {
+   "id": "L01",
+   "nombre": "Tianguis Mercado 1",
+   "tipo": "Tianguis",
+   "zona": "",
+   "lat": 19.3797222,
+   "lng": -99.2471111,
+   "ceda_km": 16.4,
+   "registros": 26,
+   "puestos": 7,
+   "cluster": 0,
+   "indice": 0.984
+  },
+  {
+   "id": "L02",
+   "nombre": "Mercado San Juan",
+   "tipo": "Mercado público",
+   "zona": "Centro (Ernesto Pugibet)",
+   "lat": 19.4306,
+   "lng": -99.1439,
+   "ceda_km": 8.5,
+   "registros": 50,
+   "puestos": 13,
+   "cluster": 0,
+   "indice": 0.98
+  },
+  {
+   "id": "L03",
+   "nombre": "Mercado San Juan Arcos de Belén",
+   "tipo": "Mercado público",
+   "zona": "Centro (Arcos de Belén)",
+   "lat": 19.4258,
+   "lng": -99.1439,
+   "ceda_km": 8.1,
+   "registros": 50,
+   "puestos": 13,
+   "cluster": 0,
+   "indice": 0.949
+  },
+  {
+   "id": "L04",
+   "nombre": "Mercado Abelardo L. Rodríguez",
+   "tipo": "Mercado público",
+   "zona": "Centro Histórico (Rep. de Venezuela)",
+   "lat": 19.4407,
+   "lng": -99.133,
+   "ceda_km": 8.7,
+   "registros": 50,
+   "puestos": 13,
+   "cluster": 0,
+   "indice": 1.04
+  },
+  {
+   "id": "L05",
+   "nombre": "Mercado La Lagunilla",
+   "tipo": "Mercado público",
+   "zona": "Centro / Lagunilla (Rep. de Chile)",
+   "lat": 19.4453,
+   "lng": -99.136,
+   "ceda_km": 9.3,
+   "registros": 50,
+   "puestos": 13,
+   "cluster": 0,
+   "indice": 0.903
+  },
+  {
+   "id": "L06",
+   "nombre": "Mercado Santa Fe",
+   "tipo": "Mercado público",
+   "zona": "Santa Fe (C.P. 01210)",
+   "lat": 19.381785,
+   "lng": -99.240284,
+   "ceda_km": 15.7,
+   "registros": 7,
+   "puestos": 4,
+   "cluster": null,
+   "indice": null
+  },
+  {
+   "id": "L07",
+   "nombre": "Mercado Sta. María Nonoalco",
+   "tipo": "Mercado público",
+   "zona": "Santa María Nonoalco, Álvaro Obregón",
+   "lat": 0.0,
+   "lng": 0.0,
+   "ceda_km": 0.0,
+   "registros": 46,
+   "puestos": 9,
+   "cluster": 1,
+   "indice": 1.23
+  }
+ ],
+ "modelo": {
+  "intercepto": 3.3858642779980537,
+  "producto": {
+   "P02": -0.14300595812565228,
+   "P03": -0.3520230675314866,
+   "P04": -0.21961712279214055,
+   "P05": 1.8438816319314075,
+   "P06": 1.8328582759406352e-05,
+   "P07": 0.08633455843025728,
+   "P08": 1.2064226728206464,
+   "P09": 0.035509205104429356,
+   "P10": 0.08975444947123926,
+   "P11": -0.1727979431411871,
+   "P12": -0.27973576071342293,
+   "P13": -0.18370630434985263,
+   "P14": 0.22023572238977424,
+   "P15": 0.2881635961804951,
+   "P16": -0.40930722234310335,
+   "P17": -0.6193214568067376,
+   "P18": 0.7442667706626529,
+   "P19": -0.5309038905995448,
+   "P20": -0.8316506933604987,
+   "P21": -0.8944122624364881,
+   "P22": -0.5426175996648686,
+   "P23": 1.2566686490053003,
+   "P24": 0.2194850845403411
+  },
+  "lugar": {
+   "L02": 0.03444160763723762,
+   "L03": 0.007351538706564507,
+   "L04": 0.08271726147850257,
+   "L05": -0.011696108986890398,
+   "L06": 0.4094112193106293,
+   "L07": 0.17201975364596586
+  },
+  "productos_modelo": [
+   "P01",
+   "P02",
+   "P03",
+   "P04",
+   "P05",
+   "P06",
+   "P07",
+   "P08",
+   "P09",
+   "P10",
+   "P11",
+   "P12",
+   "P13",
+   "P14",
+   "P15",
+   "P16",
+   "P17",
+   "P18",
+   "P19",
+   "P20",
+   "P21",
+   "P22",
+   "P23",
+   "P24"
+  ]
+ },
+ "observados": {
+  "L01|P06": 35.0,
+  "L01|P11": 25.0,
+  "L01|P13": 30.0,
+  "L01|P14": 35.0,
+  "L01|P16": 17.5,
+  "L01|P20": 12.5,
+  "L01|P21": 10.0,
+  "L01|P22": 17.5,
+  "L01|P23": 115.0,
+  "L01|P24": 40.0,
+  "L02|P01": 28.66,
+  "L02|P02": 21.69,
+  "L02|P03": 20.865,
+  "L02|P04": 25.825,
+  "L02|P06": 29.23,
+  "L02|P08": 96.62,
+  "L02|P09": 31.915,
+  "L02|P10": 36.45,
+  "L02|P11": 27.57,
+  "L02|P12": 23.61,
+  "L02|P13": 24.32,
+  "L02|P15": 40.89,
+  "L02|P16": 20.29,
+  "L02|P17": 19.51,
+  "L02|P18": 69.675,
+  "L02|P20": 12.41,
+  "L02|P22": 16.95,
+  "L02|P23": 115.26,
+  "L02|P24": 39.25,
+  "L03|P01": 27.12,
+  "L03|P03": 20.36,
+  "L03|P04": 24.43,
+  "L03|P05": 185.995,
+  "L03|P06": 29.67,
+  "L03|P08": 99.52,
+  "L03|P09": 27.8,
+  "L03|P10": 34.01,
+  "L03|P11": 26.455,
+  "L03|P13": 28.42,
+  "L03|P15": 41.575,
+  "L03|P16": 19.235,
+  "L03|P17": 19.55,
+  "L03|P19": 17.095,
+  "L03|P20": 12.5,
+  "L03|P21": 10.11,
+  "L03|P22": 15.89,
+  "L03|P23": 100.3,
+  "L03|P24": 35.975,
+  "L04|P01": 31.28,
+  "L04|P02": 28.715,
+  "L04|P03": 20.91,
+  "L04|P04": 24.24,
+  "L04|P05": 194.51,
+  "L04|P06": 31.74,
+  "L04|P07": 40.47,
+  "L04|P08": 99.09,
+  "L04|P09": 37.4,
+  "L04|P10": 39.05,
+  "L04|P11": 28.04,
+  "L04|P12": 20.63,
+  "L04|P13": 28.825,
+  "L04|P14": 34.73,
+  "L04|P16": 21.52,
+  "L04|P17": 17.97,
+  "L04|P18": 60.85,
+  "L04|P19": 18.705,
+  "L04|P20": 13.175,
+  "L04|P21": 9.7,
+  "L04|P22": 17.86,
+  "L04|P23": 114.155,
+  "L04|P24": 42.32,
+  "L05|P02": 24.115,
+  "L05|P03": 21.42,
+  "L05|P04": 28.75,
+  "L05|P05": 191.58,
+  "L05|P07": 32.865,
+  "L05|P08": 96.67,
+  "L05|P09": 28.08,
+  "L05|P10": 32.135,
+  "L05|P11": 24.09,
+  "L05|P12": 22.47,
+  "L05|P13": 23.795,
+  "L05|P14": 35.99,
+  "L05|P15": 36.76,
+  "L05|P16": 16.585,
+  "L05|P17": 18.05,
+  "L05|P18": 71.46,
+  "L05|P19": 18.65,
+  "L05|P20": 11.34,
+  "L05|P21": 11.06,
+  "L05|P22": 18.405,
+  "L05|P23": 101.42,
+  "L05|P24": 36.04,
+  "L06|P11": 36.0,
+  "L06|P13": 35.0,
+  "L06|P16": 34.5,
+  "L06|P19": 24.0,
+  "L06|P21": 16.0,
+  "L06|P25": 75.0,
+  "L07|P01": 42.5,
+  "L07|P02": 37.5,
+  "L07|P03": 22.5,
+  "L07|P04": 25.0,
+  "L07|P05": 240.0,
+  "L07|P06": 20.0,
+  "L07|P07": 30.0,
+  "L07|P08": 140.0,
+  "L07|P09": 40.0,
+  "L07|P10": 26.0,
+  "L07|P11": 32.5,
+  "L07|P13": 25.0,
+  "L07|P14": 55.0,
+  "L07|P15": 47.5,
+  "L07|P16": 35.0,
+  "L07|P17": 11.0,
+  "L07|P18": 62.5,
+  "L07|P19": 21.0,
+  "L07|P20": 20.0,
+  "L07|P21": 27.5,
+  "L07|P22": 22.5,
+  "L07|P23": 102.5,
+  "L07|P24": 40.0,
+  "L07|P25": 47.5
+ },
+ "metricas": {
+  "r2_prueba_promedio": 0.913,
+  "mae_pesos_promedio": 4.67,
+  "registros": 279,
+  "entrenado_con": 276,
+  "fecha_entrenamiento": "2026-09-16",
+  "lugares": 7,
+  "puestos": 72,
+  "fecha_inicio": "2026-01-02",
+  "fecha_fin": "2026-09-16"
+ }
+}

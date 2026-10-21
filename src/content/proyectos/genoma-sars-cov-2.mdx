@@ -1,0 +1,36 @@
+---
+title: Genoma SARS-CoV-2
+kicker: Mutaciones del gen S en seis países
+summary: Comparamos 600 secuencias del gen de la espícula del SARS-CoV-2 (100 por país) contra la secuencia original de Wuhan, codón por codón, para encontrar qué cambios de aminoácido aparecen en México, Estados Unidos, Brasil, Alemania, Francia e India.
+year: 2024
+period: feb — may 2024
+context: Análisis de biología computacional
+role: Análisis en R. Lectura de archivos FASTA, comparación codón por codón, traducción a aminoácidos y gráficas.
+team: Con Patricio Mourra Cossio
+stack: [R, seqinr, ggplot2, dplyr]
+tags: [datos]
+order: 9
+visual: covid
+---
+
+## La pregunta
+
+¿Las variantes del virus se parecen más entre regiones con condiciones similares, sin importar la distancia? Para empezar a responderlo había que medir qué mutaciones tiene el virus en cada lugar.
+
+## El método
+
+1. **Datos:** 100 secuencias del gen S (la proteína espícula) por país, descargadas de NCBI, y la secuencia de referencia de Wuhan (NC_045512.2).
+2. **Comparación:** para cada secuencia del mismo largo que la referencia (3,822 nucleótidos) se buscan las posiciones distintas y se ubica a qué codón pertenecen.
+3. **Traducción:** se traduce el codón original y el mutado. Si cambia el aminoácido, es una **mutación no sinónima** y se registra con la notación estándar: aminoácido original, número de codón y aminoácido nuevo (por ejemplo, `D614G`).
+4. **Gráficas** de las mutaciones por país.
+
+El mayor obstáculo fueron las **inserciones y deleciones**: cambian el largo de la secuencia y rompen la comparación posición por posición. Hicimos una versión con alineamiento para mostrar el proceso, pero el análisis final se queda con las secuencias del mismo largo.
+
+## Lo que se ve en los datos
+
+La gráfica de arriba la recalculé a partir de nuestros archivos FASTA:
+
+- **D614G** aparece en prácticamente todas las secuencias de los seis países. Es la mutación que se volvió dominante en todo el mundo desde 2020.
+- En **Brasil** aparece junta la combinación L18F, T20N, P26S, D138Y, R190S, K417T, E484K, N501Y, H655Y, T1027I y V1176F. Es la firma de la variante **Gamma (P.1)**, identificada en Manaus.
+- En **Estados Unidos**, L5F, T95I, D253G, E484K y A701V coinciden con la variante **Iota (B.1.526)**, detectada en Nueva York.
+- En **Alemania y Francia** destaca S477N, común en Europa a finales de 2020.

@@ -1,0 +1,192 @@
+{
+ "referencia": "NC_045512.2 · gen S (glicoproteína de superficie)",
+ "longitud_nt": 3822,
+ "paises": [
+  {
+   "pais": "México",
+   "total": 100,
+   "analizadas": 99
+  },
+  {
+   "pais": "Estados Unidos",
+   "total": 100,
+   "analizadas": 100
+  },
+  {
+   "pais": "Brasil",
+   "total": 100,
+   "analizadas": 100
+  },
+  {
+   "pais": "Alemania",
+   "total": 100,
+   "analizadas": 99
+  },
+  {
+   "pais": "Francia",
+   "total": 100,
+   "analizadas": 100
+  },
+  {
+   "pais": "India",
+   "total": 100,
+   "analizadas": 100
+  }
+ ],
+ "mutaciones": [
+  {
+   "id": "D614G",
+   "por_pais": {
+    "México": 99,
+    "Estados Unidos": 100,
+    "Brasil": 100,
+    "Alemania": 99,
+    "Francia": 95,
+    "India": 99
+   }
+  },
+  {
+   "id": "V1176F",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 12,
+    "Brasil": 90,
+    "Alemania": 7,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "E484K",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 25,
+    "Brasil": 58,
+    "Alemania": 17,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "S477N",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 4,
+    "Brasil": 1,
+    "Alemania": 34,
+    "Francia": 60,
+    "India": 0
+   }
+  },
+  {
+   "id": "D138Y",
+   "por_pais": {
+    "México": 11,
+    "Estados Unidos": 11,
+    "Brasil": 52,
+    "Alemania": 12,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "L18F",
+   "por_pais": {
+    "México": 2,
+    "Estados Unidos": 13,
+    "Brasil": 38,
+    "Alemania": 22,
+    "Francia": 1,
+    "India": 0
+   }
+  },
+  {
+   "id": "R190S",
+   "por_pais": {
+    "México": 2,
+    "Estados Unidos": 11,
+    "Brasil": 49,
+    "Alemania": 6,
+    "Francia": 3,
+    "India": 0
+   }
+  },
+  {
+   "id": "H655Y",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 11,
+    "Brasil": 52,
+    "Alemania": 6,
+    "Francia": 1,
+    "India": 1
+   }
+  },
+  {
+   "id": "N501Y",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 11,
+    "Brasil": 51,
+    "Alemania": 7,
+    "Francia": 1,
+    "India": 0
+   }
+  },
+  {
+   "id": "P26S",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 12,
+    "Brasil": 51,
+    "Alemania": 6,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "T20N",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 11,
+    "Brasil": 51,
+    "Alemania": 6,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "K417T",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 11,
+    "Brasil": 50,
+    "Alemania": 6,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "T1027I",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 11,
+    "Brasil": 46,
+    "Alemania": 6,
+    "Francia": 0,
+    "India": 0
+   }
+  },
+  {
+   "id": "A222V",
+   "por_pais": {
+    "México": 0,
+    "Estados Unidos": 1,
+    "Brasil": 1,
+    "Alemania": 24,
+    "Francia": 3,
+    "India": 0
+   }
+  }
+ ]
+}

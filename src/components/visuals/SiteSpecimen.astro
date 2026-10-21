@@ -1,0 +1,95 @@
+---
+// Muestra del sistema visual del sitio: tipografías y los colores exactos de las dos plantillas.
+const swatches = [
+	{ hex: '#141414', name: 'fondo #1' },
+	{ hex: '#e8e7e7', name: 'texto #1' },
+	{ hex: '#ad3030', name: 'rojo #1' },
+	{ hex: '#f8f4ec', name: 'fondo #2' },
+	{ hex: '#594832', name: 'texto #2' },
+	{ hex: '#bf092f', name: 'rojo #2' },
+];
+---
+
+<div class="viz-spec" role="img" aria-label="Muestra tipográfica y paleta de colores del sitio">
+	<div class="s-type">
+		<span class="s-aa s-aa--display">Aa</span>
+		<span class="s-aa s-aa--body">Aa</span>
+	</div>
+	<div class="s-names">
+		<span>Mona Sans · 900 · ancho 112</span>
+		<span>Montserrat · 400–800</span>
+	</div>
+	<ul class="s-sw">
+		{
+			swatches.map((s) => (
+				<li>
+					<span class="s-chip" style={`background:${s.hex}`} />
+					<code>{s.hex}</code>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<style>
+	.viz-spec {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+		padding: clamp(16px, 4.5cqw, 32px);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+	.s-type {
+		display: flex;
+		align-items: baseline;
+		gap: 4cqw;
+	}
+	.s-aa {
+		line-height: 0.8;
+		font-size: 26cqw;
+	}
+	.s-aa--display {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		letter-spacing: -0.07em;
+		color: var(--red);
+	}
+	.s-aa--body {
+		font-family: var(--font-body);
+		font-weight: 700;
+		letter-spacing: -0.05em;
+		color: var(--ink);
+		font-size: 18cqw;
+	}
+	.s-names {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		font: 500 clamp(10px, 2cqw, 13px) var(--font-mono);
+		color: var(--ink-mute);
+	}
+	.s-sw {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		gap: 1.6cqw;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.s-chip {
+		display: block;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		border: 1px solid var(--line-strong);
+	}
+	.s-sw code {
+		display: block;
+		margin-top: 0.5em;
+		font-size: clamp(8px, 1.7cqw, 11px);
+		color: var(--ink-mute);
+		text-align: center;
+	}
+</style>

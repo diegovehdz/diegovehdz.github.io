@@ -1,0 +1,35 @@
+---
+title: Emergencias Cuajimalpa
+kicker: MVP para Protección Civil de la Alcaldía Cuajimalpa
+summary: Sistema web para registrar y consultar reportes de emergencias médicas y urbanas, con panel de estadísticas, gestión de usuarios, backend con HTTPS y JWT, MongoDB y bitácora de auditoría.
+year: 2025
+period: ago — nov 2025
+context: Socio formador · Protección Civil, Alcaldía Cuajimalpa
+role: Bitácora de auditoría (función ToLog() que registra cada acción en MongoDB), mejoras visuales y de accesibilidad en login, menú y barra superior, traducciones y manual de usuario.
+team: Equipo de desarrollo
+stack: [React, React-admin, MUI, Node.js, Express, MongoDB, JWT, OpenSSL, SSH]
+tags: [web, sistemas]
+featured: true
+order: 4
+visual: emergencias
+links:
+  - label: Repositorio en GitHub
+    href: https://github.com/Morris2801/SistemadeEmergenciasUrbanasMedicas
+---
+
+## Para qué sirve
+
+El personal de Protección Civil necesitaba capturar reportes de emergencias de forma ordenada y consultarlos después. El MVP tiene formularios para **emergencias médicas** y **emergencias urbanas**, un **tablero con estadísticas** y **gestión de usuarios** con permisos.
+
+## Arquitectura y despliegue
+
+- **Frontend:** React-admin sobre Material UI.
+- **Backend:** Node.js con Express, autenticación con JWT y base de datos MongoDB.
+- **Seguridad:** frontend y backend sirven por **HTTPS** con certificados generados con OpenSSL.
+- **Red:** el despliegue usa tres máquinas. Una corre el frontend, otra el backend, y los clientes entran por un **jump server** con túneles `ssh -L`, sin exponer los servidores directamente.
+
+## Lo que hice
+
+- **Bitácora de auditoría.** Implementé la función `ToLog()` y el registro de acciones en MongoDB, para saber quién hizo qué y cuándo. En un sistema que maneja reportes de emergencias, esa trazabilidad no es opcional.
+- **Interfaz y accesibilidad.** Rediseñé el login, el menú desplegable y la barra superior, con mejores etiquetas y contraste.
+- **Documentación.** Ajusté traducciones y el manual de usuario.

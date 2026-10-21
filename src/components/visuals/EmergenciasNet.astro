@@ -1,0 +1,118 @@
+---
+// Despliegue del MVP de emergencias según su guía de instalación: cliente, jump server, frontend, backend y MongoDB.
+const nodes = [
+	{ id: 'cli', x: 40, y: 200, w: 120, label: 'Cliente', sub: 'navegador' },
+	{ id: 'jump', x: 230, y: 200, w: 130, label: 'Jump server', sub: 'ssh -L' },
+	{ id: 'fe', x: 440, y: 92, w: 165, label: 'Frontend', sub: 'React-admin · :5173' },
+	{ id: 'be', x: 440, y: 308, w: 165, label: 'Backend', sub: 'Express · :3000' },
+];
+---
+
+<svg class="viz-net" viewBox="0 0 640 480" role="img" aria-label="Diagrama de red: cliente, servidor de salto, frontend, backend y base de datos MongoDB">
+	<text x="28" y="40" class="n-cap">protección civil · cuajimalpa</text>
+	<text x="28" y="60" class="n-cap n-cap--soft">túneles ssh + https con certificados propios</text>
+
+	<path d="M160 228 H230" class="n-edge n-edge--flow" />
+	<path d="M360 220 C400 220 400 120 440 120" class="n-edge n-edge--flow" />
+	<path d="M360 236 C400 236 400 336 440 336" class="n-edge n-edge--flow" />
+	<path d="M522 148 V308" class="n-edge n-edge--red" />
+	<path d="M522 364 V398" class="n-edge n-edge--red" />
+
+	<text x="196" y="218" class="n-label" text-anchor="middle">ssh</text>
+	<text x="532" y="232" class="n-label">HTTPS + JWT</text>
+	<text x="532" y="388" class="n-label">ToLog() → bitácora</text>
+
+	{
+		nodes.map((n) => (
+			<g>
+				<rect x={n.x} y={n.y} width={n.w} height="56" rx="14" class="n-box" />
+				<text x={n.x + 16} y={n.y + 25} class="n-title">
+					{n.label}
+				</text>
+				<text x={n.x + 16} y={n.y + 43} class="n-sub">
+					{n.sub}
+				</text>
+			</g>
+		))
+	}
+
+	<g transform="translate(470 398)">
+		<ellipse cx="52" cy="8" rx="52" ry="10" class="n-db" />
+		<path d="M0 8 V52 A52 10 0 0 0 104 52 V8" class="n-db" />
+		<ellipse cx="52" cy="8" rx="52" ry="10" class="n-db n-db--top" />
+		<text x="52" y="40" class="n-title" text-anchor="middle">MongoDB</text>
+		<text x="52" y="58" class="n-sub" text-anchor="middle">medic_app</text>
+	</g>
+
+	<g class="n-lock" transform="translate(500 224)">
+		<rect x="0" y="6" width="14" height="11" rx="2"></rect>
+		<path d="M3 6 V3.5 A4 4 0 0 1 11 3.5 V6" fill="none"></path>
+	</g>
+</svg>
+
+<style>
+	.viz-net {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	.n-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.n-cap--soft {
+		opacity: 0.7;
+	}
+	.n-edge {
+		fill: none;
+		stroke: var(--line-strong);
+		stroke-width: 2;
+	}
+	.n-edge--flow {
+		stroke: var(--ink-mute);
+		stroke-dasharray: 6 8;
+		animation: net-dash 1.6s linear infinite;
+	}
+	.n-edge--red {
+		stroke: var(--red);
+		stroke-width: 3;
+	}
+	.n-box {
+		fill: var(--bg);
+		stroke: var(--line-strong);
+		stroke-width: 1.5;
+	}
+	.n-title {
+		font: 800 16px var(--font-body);
+		letter-spacing: -0.03em;
+		fill: var(--ink);
+	}
+	.n-sub {
+		font: 400 11.5px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.n-label {
+		font: 500 11.5px var(--font-mono);
+		fill: var(--red-ink);
+	}
+	.n-db {
+		fill: var(--bg);
+		stroke: var(--red);
+		stroke-width: 2;
+	}
+	.n-db--top {
+		fill: var(--bg-raise);
+	}
+	.n-lock rect {
+		fill: var(--red);
+	}
+	.n-lock path {
+		stroke: var(--red);
+		stroke-width: 2;
+	}
+	@keyframes net-dash {
+		to {
+			stroke-dashoffset: -28;
+		}
+	}
+</style>

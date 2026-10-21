@@ -1,0 +1,42 @@
+---
+title: Detección de bordes
+kicker: Procesamiento de imágenes para cámaras de seguridad
+summary: Una aplicación de escritorio en Python para procesar imágenes de cámaras de seguridad, con escala de grises, binarización, suavizado y cuatro detectores de bordes (Sobel, Prewitt, Roberts y Canny). En el laboratorio está su versión web, que funciona con tu cámara.
+year: 2024
+period: feb — jun 2024
+context: Modelación de la ingeniería con matemática computacional
+role: Programador principal. Desarrollé la parte de gráficos por píxel y matrices, de la imagen como matriz a los kernels de cada filtro.
+stack: [Python, OpenCV, NumPy, Tkinter, Pillow]
+tags: [ia, algoritmos]
+order: 7
+visual: bordes
+links:
+  - label: Probar en vivo
+    href: /lab/bordes/
+---
+
+## El problema
+
+Una cámara de seguridad graba horas de video donde casi nada cambia. Para que una computadora pueda detectar personas u objetos, el primer paso es quedarse con lo que importa: **los bordes**, los lugares donde la intensidad de la imagen cambia de golpe.
+
+## La aplicación
+
+Una interfaz en Tkinter con OpenCV para abrir una imagen y aplicarle, paso a paso:
+
+- **Escala de grises** (promedio de los tres canales) y **negativo**.
+- **Binarización** con umbral fijo de 128 y con umbral en el promedio de la imagen.
+- **Suavizado** con promedio de 3 × 3 y **suavizado ponderado**, para quitar ruido antes de buscar bordes.
+- **Cuatro detectores de bordes:** Sobel y Prewitt (gradientes con máscaras de 3 × 3), Roberts (diagonales de 2 × 2) y Canny (gradiente, supresión de no máximos y doble umbral con histéresis).
+- Un **inspector de píxeles** que muestra los valores rojo, verde y azul bajo el cursor, y una barra de progreso para los filtros que recorren la imagen píxel por píxel.
+
+## Mi parte
+
+Fui el programador principal. Me tocó entender y desarrollar la parte de gráficos por píxel: una imagen es una matriz de valores, cada filtro es una operación sobre esa matriz (una convolución con un kernel de 3 × 3 o de 2 × 2) y el resultado se vuelve a dibujar píxel por píxel.
+
+## Por qué cuatro detectores
+
+Cada uno responde distinto al ruido de una cámara. Roberts es el más barato, pero el más sensible al ruido. Sobel y Prewitt suavizan un poco mientras derivan. Canny es el más caro, pero entrega bordes delgados y continuos, que es lo que se necesita para luego seguir contornos de personas.
+
+## En el navegador
+
+La versión del [laboratorio](/lab/bordes/) usa las mismas operaciones, reescritas en TypeScript, y puede procesar la imagen de tu cámara en tiempo real. Todo ocurre en tu navegador: la imagen no se envía a ningún lado.

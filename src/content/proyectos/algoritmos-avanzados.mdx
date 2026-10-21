@@ -1,0 +1,46 @@
+---
+title: Algoritmos avanzados
+kicker: Cadenas, grafos y optimización multiobjetivo
+summary: Detección de código malicioso con KMP, Manacher y subcadena común más larga; compresión Huffman; árbol de expansión mínima, ruta TSP, flujo máximo y regiones con frentes de Pareto; y la mochila resuelta con tres estrategias.
+year: 2026
+period: ene — feb 2026
+context: Análisis y diseño de algoritmos avanzados
+role: Implementación en equipo de las actividades integradoras.
+team: Equipos de 3 personas
+stack: [C++, Python, matplotlib]
+tags: [algoritmos]
+order: 11
+visual: algoritmos
+links:
+  - label: Actividad integradora 1
+    href: https://github.com/Ultracheese1/actividad-integradora1
+  - label: Mochila (knapsack)
+    href: https://github.com/leobardonm/advancedalgorithms
+  - label: Three Services Problem
+    href: https://github.com/Ultracheese1/Three-Services-Problem
+---
+
+## Cadenas: ¿hay código malicioso en esta transmisión?
+
+Dados archivos de transmisión y fragmentos de código malicioso:
+
+- **KMP** para saber si cada fragmento aparece en cada transmisión y en qué posición, en tiempo lineal.
+- **Manacher** para encontrar el palíndromo más largo, código "en espejo", en O(n).
+- **Programación dinámica** para la subcadena común más larga entre dos transmisiones.
+- **Codificación Huffman** para estimar la longitud de código esperada y detectar fragmentos que se comprimen de forma anómala.
+
+## Grafos: cablear, repartir y repartir mejor
+
+Sobre una matriz de distancias entre colonias:
+
+- **Árbol de expansión mínima** para tender fibra óptica con el menor cable posible.
+- **Ruta del agente viajero** para el reparto.
+- **Flujo máximo** para la capacidad de la red de transmisión.
+- **Regiones** que asignan cada punto a su central más cercana.
+
+La versión mejorada busca **frentes de Pareto**: en lugar de una sola "mejor" respuesta, el conjunto de soluciones que no son peores en todo frente a otra (por ejemplo, distancia total contra tramo máximo).
+
+## También
+
+- **Mochila (*Sales Trailer Problem*):** voraz O(n log n) contra programación dinámica O(nW) contra *branch and bound*, con mediciones de tiempo y de la brecha del voraz.
+- **Three Services Problem:** conectar tres casas con tres servicios sin cruces es imposible en el plano (K₃,₃ no es planar), pero sí se puede **sobre un toro**. Lo resolvimos con geodésicas que "dan la vuelta" por los bordes identificados.

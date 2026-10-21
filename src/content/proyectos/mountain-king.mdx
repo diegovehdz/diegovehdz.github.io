@@ -1,0 +1,35 @@
+---
+title: Mountain King
+kicker: Búsqueda geométrica sobre el terreno de una montaña
+summary: De una nube de 8,430 puntos de fotogrametría a una malla triangulada (TIN) por Delaunay, con consultas de elevación, pendiente, punto más cercano, rutas más cortas y curvas de nivel.
+year: 2026
+period: ene — feb 2026
+context: Análisis y diseño de algoritmos avanzados
+role: Trabajo en equipo sobre el pipeline de terreno y las consultas geométricas.
+team: Con Santiago Arista
+stack: [Python, NumPy, Delaunay, Dijkstra]
+tags: [algoritmos]
+order: 8
+visual: montana
+links:
+  - label: Repositorio en GitHub
+    href: https://github.com/santiagoarista/GeometricSearch_Mountain-King
+---
+
+## De puntos a superficie
+
+Una nube de puntos es solo eso: miles de coordenadas `(x, y, z)` sin conexión entre sí. Para hacerle preguntas al terreno hay que convertirla en una **superficie**:
+
+1. **Limpieza:** recorte por altura y filtro estadístico de valores atípicos.
+2. **Submuestreo por vóxeles:** se conserva un centroide por celda de la rejilla (8,430 → 8,020 puntos).
+3. **Triangulación de Delaunay** en el plano XY, que da una malla 2.5D de **15,924 triángulos**.
+
+## Las consultas
+
+- **Elevación en (x, y):** se localiza el triángulo con una rejilla uniforme (búsqueda casi O(1)) y se interpola con coordenadas baricéntricas.
+- **Pendiente y orientación** de cada triángulo a partir de su normal.
+- **Punto más cercano** de la superficie a un punto cualquiera en 3D.
+- **Ruta más corta** sobre la malla con **Dijkstra**, con restricción de pendiente máxima (como una ruta de senderismo).
+- **Curvas de nivel** a cualquier elevación.
+
+El visor de arriba carga 6,000 de los puntos originales. Gíralo y cambia a "color real" para ver los colores de la fotogrametría.

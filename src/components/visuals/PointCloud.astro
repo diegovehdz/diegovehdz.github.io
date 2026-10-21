@@ -1,0 +1,215 @@
+---
+// Visor 3D de la nube de puntos de la montaña (datos reales del proyecto Mountain King).
+// Proyección en perspectiva con canvas 2D, rotación automática y arrastre para girar.
+interface Props {
+	controls?: boolean;
+}
+const { controls = false } = Astro.props;
+---
+
+<div class="pc" data-pc data-src="/data/montana.json">
+	<canvas aria-label="Nube de puntos 3D de una montaña reconstruida por fotogrametría" role="img"></canvas>
+	<div class="pc-cap" data-cap>cargando nube de puntos…</div>
+	{
+		controls && (
+			<div class="pc-controls">
+				<button class="pill pill--sm" type="button" data-mode aria-pressed="false">
+					Color real
+				</button>
+				<span class="pc-hint">Arrastra para girar</span>
+			</div>
+		)
+	}
+</div>
+
+<style>
+	.pc {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+		cursor: grab;
+		touch-action: pan-y;
+	}
+	.pc:active {
+		cursor: grabbing;
+	}
+	canvas {
+		width: 100%;
+		height: 100%;
+	}
+	.pc-cap {
+		position: absolute;
+		left: 14px;
+		top: 12px;
+		font: 500 clamp(10px, 1.8cqw, 13px) / 1.5 var(--font-mono);
+		color: var(--ink-mute);
+		pointer-events: none;
+		white-space: pre;
+	}
+	.pc-controls {
+		position: absolute;
+		left: 14px;
+		bottom: 12px;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+	.pc-hint {
+		font: 500 var(--step--2) var(--font-mono);
+		color: var(--ink-mute);
+	}
+</style>
+
+<script>
+	interface Cloud {
+		n: number;
+		xyz: number[];
+		rgb: number[];
+	}
+
+	function initCloud(root: HTMLElement) {
+		const canvas = root.querySelector('canvas')!;
+		const ctx = canvas.getContext('2d')!;
+		const cap = root.querySelector<HTMLElement>('[data-cap]')!;
+		const modeBtn = root.querySelector<HTMLButtonElement>('[data-mode]');
+		let data: Cloud | null = null;
+		let W = 0;
+		let H = 0;
+		let yaw = 0.6;
+		let pitch = -0.62;
+		let realColor = false;
+		let dragging = false;
+		let lastX = 0;
+		let lastY = 0;
+		let idle = 0;
+
+		modeBtn?.addEventListener('click', () => {
+			realColor = !realColor;
+			modeBtn.setAttribute('aria-pressed', String(realColor));
+			draw();
+		});
+
+		function resize() {
+			const r = canvas.getBoundingClientRect();
+			const dpr = Math.min(window.devicePixelRatio || 1, 2);
+			W = r.width;
+			H = r.height;
+			canvas.width = Math.round(W * dpr);
+			canvas.height = Math.round(H * dpr);
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+			draw();
+		}
+
+		const order: number[] = [];
+		let proj = new Float32Array(0);
+
+		function draw() {
+			if (!data || !W) return;
+			const css = getComputedStyle(root);
+			const red = css.getPropertyValue('--red').trim() || '#ad3030';
+			const ink = css.getPropertyValue('--ink').trim() || '#e8e7e7';
+			ctx.clearRect(0, 0, W, H);
+			const { n, xyz, rgb } = data;
+			const cy = Math.cos(yaw);
+			const sy = Math.sin(yaw);
+			const cp = Math.cos(pitch);
+			const sp = Math.sin(pitch);
+			const f = Math.min(W, H) * 1.35;
+			const camD = 3.1;
+			for (let i = 0; i < n; i++) {
+				const x = xyz[i * 3];
+				const y = xyz[i * 3 + 1];
+				const z = xyz[i * 3 + 2] - 0.45;
+				// giro alrededor del eje vertical (z) y luego inclinación de la cámara
+				const x1 = x * cy - y * sy;
+				const y1 = x * sy + y * cy;
+				const y2 = y1 * cp - z * sp;
+				const z2 = y1 * sp + z * cp;
+				const depth = camD + y2;
+				proj[i * 3] = W / 2 + (x1 * f) / depth;
+				proj[i * 3 + 1] = H * 0.56 - (z2 * f) / depth;
+				proj[i * 3 + 2] = depth;
+			}
+			order.sort((a, b) => proj[b * 3 + 2] - proj[a * 3 + 2]);
+			for (const i of order) {
+				const depth = proj[i * 3 + 2];
+				const size = Math.max(1.1, 6.2 / depth);
+				if (realColor) {
+					ctx.fillStyle = `rgb(${rgb[i * 3]},${rgb[i * 3 + 1]},${rgb[i * 3 + 2]})`;
+					ctx.globalAlpha = 1;
+				} else {
+					const h = xyz[i * 3 + 2];
+					ctx.fillStyle = h > 0.55 ? ink : red;
+					ctx.globalAlpha = 0.35 + Math.min(h, 1) * 0.65;
+				}
+				ctx.fillRect(proj[i * 3] - size / 2, proj[i * 3 + 1] - size / 2, size, size);
+			}
+			ctx.globalAlpha = 1;
+		}
+
+		async function load() {
+			try {
+				const res = await fetch(root.dataset.src!);
+				data = (await res.json()) as Cloud;
+				proj = new Float32Array(data.n * 3);
+				order.length = 0;
+				for (let i = 0; i < data.n; i++) order.push(i);
+				cap.textContent = `${data.n.toLocaleString('es-MX')} puntos · fotogrametría`;
+				resize();
+				animate();
+			} catch {
+				cap.textContent = 'no se pudo cargar la nube de puntos';
+			}
+		}
+
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		let visible = false;
+		function animate() {
+			let last = performance.now();
+			const loop = (now: number) => {
+				const dt = (now - last) / 1000;
+				last = now;
+				idle += dt;
+				if (visible && !dragging && !reduce && idle > 1.2 && !document.hidden) {
+					yaw += dt * 0.25;
+					draw();
+				}
+				requestAnimationFrame(loop);
+			};
+			requestAnimationFrame(loop);
+		}
+
+		root.addEventListener('pointerdown', (e) => {
+			dragging = true;
+			lastX = e.clientX;
+			lastY = e.clientY;
+			root.setPointerCapture(e.pointerId);
+		});
+		root.addEventListener('pointermove', (e) => {
+			if (!dragging) return;
+			yaw += (e.clientX - lastX) * 0.008;
+			pitch = Math.max(-1.45, Math.min(0.2, pitch + (e.clientY - lastY) * 0.006));
+			lastX = e.clientX;
+			lastY = e.clientY;
+			idle = 0;
+			draw();
+		});
+		const stop = () => {
+			dragging = false;
+			idle = 0;
+		};
+		root.addEventListener('pointerup', stop);
+		root.addEventListener('pointercancel', stop);
+		window.addEventListener('themechange', () => draw());
+
+		new ResizeObserver(resize).observe(canvas);
+		const io = new IntersectionObserver((entries) => {
+			visible = entries[0].isIntersecting;
+			if (visible && !data) load();
+		});
+		io.observe(root);
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-pc]').forEach(initCloud);
+</script>

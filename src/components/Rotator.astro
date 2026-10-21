@@ -1,0 +1,13 @@
+---
+// Palabra que cambia cada pocos segundos. Los lectores de pantalla reciben la lista completa.
+interface Props {
+	words: string[];
+}
+
+const { words } = Astro.props;
+const list = words.length > 1 ? `${words.slice(0, -1).join(', ')} y ${words[words.length - 1]}` : words[0];
+---
+
+<span class="visually-hidden">{list}</span><span class="rotator" data-rotator aria-hidden="true"
+	><span class="rotator__track">{words.map((w) => <span class="rotator__word">{w}</span>)}</span></span
+>

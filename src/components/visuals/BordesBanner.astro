@@ -1,0 +1,31 @@
+---
+// Banner original del proyecto: Sobel, Prewitt, Roberts y Canny sobre la misma escena de cámara de seguridad.
+import { Image } from 'astro:assets';
+import banner from '../../assets/proyectos/bordes-banner.png';
+---
+
+<div class="bordes-viz">
+	<Image
+		src={banner}
+		alt="Comparación de los detectores de bordes Sobel, Prewitt, Roberts y Canny sobre una escena con gente"
+		widths={[480, 800, 1200]}
+		sizes="(max-width: 900px) 100vw, 55vw"
+		loading="lazy"
+	/>
+</div>
+
+<style>
+	.bordes-viz {
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
+		background: #20232a;
+	}
+
+	.bordes-viz :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+</style>

@@ -1,0 +1,202 @@
+---
+import { getCollection } from 'astro:content';
+import MetaBar from '../components/MetaBar.astro';
+import Title from '../components/Title.astro';
+import { EDUCATION, EXPERIENCE, SITE, SKILLS } from '../config/site';
+import Base from '../layouts/Base.astro';
+
+const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const destacados = proyectos.filter((p) => p.data.featured);
+const github = SITE.socials.find((s) => s.label === 'GitHub');
+---
+
+<Base title="CV" description={`Currículum de ${SITE.fullName}: educación, experiencia, proyectos y habilidades.`} bleed="CV">
+	<section class="section section--tight cv">
+		<div class="wrap">
+			<MetaBar left="Currículum" right={[SITE.city, `<a href="mailto:${SITE.email}">${SITE.email}</a>`]} class="section__meta" />
+
+			<div class="cv__head">
+				<Title lines={['Diego', 'Vergara']} as="h1" size="xl" />
+				<div class="cv__intro">
+					<p class="lede">
+						Estudiante de {SITE.degree} ({SITE.semester}.º semestre) en el {SITE.school}, con concentración en inteligencia artificial y ciencia de
+						datos. Experiencia en desarrollo full-stack con TypeScript, simulación multiagente y modelado de datos.
+					</p>
+					<ul class="chips cv__contact">
+						<li><a class="pill pill--sm" href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+						{github && <li><a class="pill pill--sm" href={github.href}>{github.href.replace('https://', '')}</a></li>}
+						<li><a class="pill pill--sm" href={SITE.url}>{SITE.domain}</a></li>
+					</ul>
+					<button class="pill pill--solid no-print" type="button" onclick="window.print()">Imprimir / guardar PDF</button>
+				</div>
+			</div>
+
+			<div class="cv__grid">
+				<section class="cv__block">
+					<h2 class="cv__h">Educación</h2>
+					<ul class="entries">
+						{
+							EDUCATION.map((e) => (
+								<li class="entry">
+									<h3>{e.title}</h3>
+									<span class="entry__meta">
+										{e.place} · {e.period}
+									</span>
+									<p>{e.detail}</p>
+								</li>
+							))
+						}
+					</ul>
+				</section>
+
+				<section class="cv__block">
+					<h2 class="cv__h">Experiencia</h2>
+					<ul class="entries">
+						{
+							EXPERIENCE.map((x) => (
+								<li class="entry">
+									<h3>{x.org}</h3>
+									<span class="entry__meta">
+										{x.role} · {x.period}
+									</span>
+									<p>{x.detail}</p>
+								</li>
+							))
+						}
+					</ul>
+				</section>
+
+				<section class="cv__block">
+					<h2 class="cv__h">Proyectos</h2>
+					<ul class="entries">
+						{
+							destacados.map((p) => (
+								<li class="entry">
+									<h3>
+										<a href={`/proyectos/${p.id}/`}>{p.data.title}</a>
+									</h3>
+									<span class="entry__meta">
+										{p.data.kicker} · {p.data.year}
+									</span>
+									<p>{p.data.role}</p>
+								</li>
+							))
+						}
+					</ul>
+				</section>
+
+				<section class="cv__block">
+					<h2 class="cv__h">Habilidades</h2>
+					<dl class="facts cv__skills">
+						{
+							SKILLS.map((s) => (
+								<>
+									<dt>{s.group}</dt>
+									<dd>{s.items.join(' · ')}</dd>
+								</>
+							))
+						}
+					</dl>
+					<h2 class="cv__h">Idiomas</h2>
+					<dl class="facts cv__skills">
+						{
+							SITE.languages.map((l) => (
+								<>
+									<dt>{l.name}</dt>
+									<dd>{l.level}</dd>
+								</>
+							))
+						}
+					</dl>
+				</section>
+			</div>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.cv__head {
+		display: grid;
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+		gap: clamp(24px, 4vw, 72px);
+		align-items: end;
+		padding-bottom: clamp(32px, 4vw, 64px);
+		border-bottom: 1px solid var(--line);
+	}
+
+	.cv__intro .lede {
+		color: var(--ink);
+		margin-bottom: 1.2rem;
+	}
+
+	.cv__contact {
+		margin-bottom: 1.2rem;
+	}
+
+	.cv__grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: clamp(32px, 4vw, 72px);
+		padding-top: clamp(32px, 4vw, 64px);
+	}
+
+	.cv__h {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		text-transform: uppercase;
+		letter-spacing: -0.065em;
+		line-height: 0.9;
+		color: var(--red);
+		font-size: var(--title-s);
+		margin: 0 0 1.2rem;
+	}
+
+	.cv__skills {
+		margin-top: 0;
+		margin-bottom: 2rem;
+	}
+
+	@media (max-width: 900px) {
+		.cv__head,
+		.cv__grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media print {
+		.cv {
+			padding: 0;
+		}
+
+		.cv :global(.title) {
+			font-size: 54pt;
+		}
+
+		.cv__head {
+			grid-template-columns: 1.1fr 1fr;
+		}
+
+		.cv__grid {
+			grid-template-columns: 1fr 1fr;
+			gap: 18pt;
+		}
+
+		.cv__h {
+			font-size: 18pt;
+		}
+
+		.cv :global(.entry p) {
+			font-size: 9.5pt;
+		}
+
+		.cv :global(.metabar) {
+			display: none;
+		}
+
+		@page {
+			size: letter;
+			margin: 14mm;
+		}
+	}
+</style>

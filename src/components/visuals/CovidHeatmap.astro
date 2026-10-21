@@ -1,0 +1,97 @@
+---
+// Porcentaje de secuencias del gen S con cada sustitución de aminoácido, por país (recalculado de los FASTA del proyecto).
+import data from '../../data/sars-cov-2.json';
+
+const ABBR: Record<string, string> = {
+	México: 'MEX',
+	'Estados Unidos': 'USA',
+	Brasil: 'BRA',
+	Alemania: 'ALE',
+	Francia: 'FRA',
+	India: 'IND',
+};
+const paises = data.paises;
+const muts = data.mutaciones.slice(0, 12);
+const W = 640;
+const left = 104;
+const top = 112;
+const colW = (W - left - 28) / paises.length;
+const rowH = (480 - top - 20) / muts.length;
+const pct = (m: (typeof muts)[number], p: (typeof paises)[number]) =>
+	p.analizadas ? (m.por_pais as Record<string, number>)[p.pais] / p.analizadas : 0;
+---
+
+<svg class="viz-cov" viewBox={`0 0 ${W} 480`} role="img" aria-label="Mapa de calor: porcentaje de secuencias del gen S con cada mutación, por país">
+	<text x="28" y="40" class="cv-cap">gen S · {data.longitud_nt.toLocaleString('es-MX')} nt · vs. Wuhan</text>
+	<text x="28" y="60" class="cv-cap cv-cap--soft">% de secuencias con cada cambio de aminoácido</text>
+	{
+		paises.map((p, j) => (
+			<text x={left + j * colW + colW / 2} y={top - 14} class="cv-col" text-anchor="middle">
+				{ABBR[p.pais] ?? p.pais}
+			</text>
+		))
+	}
+	{
+		muts.map((m, i) => (
+			<g>
+				<text x={left - 12} y={top + i * rowH + rowH / 2 + 4} class="cv-row" text-anchor="end">
+					{m.id}
+				</text>
+				{paises.map((p, j) => {
+					const v = pct(m, p);
+					return (
+						<g>
+							<rect
+								x={left + j * colW + 2}
+								y={top + i * rowH + 2}
+								width={colW - 4}
+								height={rowH - 4}
+								rx="3"
+								class="cv-cell"
+								style={`fill-opacity:${(0.06 + v * 0.94).toFixed(3)}`}
+							/>
+							{v >= 0.05 && (
+								<text x={left + j * colW + colW / 2} y={top + i * rowH + rowH / 2 + 4} class:list={['cv-val', v > 0.55 && 'cv-val--on']} text-anchor="middle">
+									{Math.round(v * 100)}
+								</text>
+							)}
+						</g>
+					);
+				})}
+			</g>
+		))
+	}
+</svg>
+
+<style>
+	.viz-cov {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	.cv-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.cv-cap--soft {
+		opacity: 0.75;
+	}
+	.cv-col {
+		font: 700 12px var(--font-mono);
+		fill: var(--ink-soft);
+	}
+	.cv-row {
+		font: 600 12px var(--font-mono);
+		fill: var(--ink);
+	}
+	.cv-cell {
+		fill: var(--red);
+	}
+	.cv-val {
+		font: 600 10.5px var(--font-mono);
+		fill: var(--ink-soft);
+	}
+	.cv-val--on {
+		fill: var(--on-red);
+	}
+</style>

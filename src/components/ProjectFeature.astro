@@ -1,0 +1,54 @@
+---
+// Bloque de proyecto destacado, con la composición de las láminas "FIRST PROJECT" / "SECOND PROJECT".
+import type { CollectionEntry } from 'astro:content';
+import Frame from './Frame.astro';
+import Title from './Title.astro';
+import ProjectVisual from './visuals/ProjectVisual.astro';
+
+interface Props {
+	project: CollectionEntry<'proyectos'>;
+	index: number;
+	flip?: boolean;
+}
+
+const { project, index, flip = false } = Astro.props;
+const p = project.data;
+const words = p.title.toUpperCase().split(' ');
+const lines = words.length > 1 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : words;
+const href = `/proyectos/${project.id}/`;
+---
+
+<article class:list={['feature', flip && 'feature--flip', 'reveal']}>
+	<div class:list={['feature__visual', flip ? 'bleed-right' : 'bleed-left']}>
+		<a href={href} aria-label={`Ver ${p.title}`} tabindex="-1">
+			<Frame ratio="4 / 3" glyph={p.title.slice(0, 2)}>
+				<ProjectVisual visual={p.visual} />
+			</Frame>
+		</a>
+	</div>
+	<div class="feature__text">
+		<span class="feature__num">{String(index).padStart(2, '0')} — {p.year}</span>
+		<a href={href} style="text-decoration:none">
+			<Title lines={lines} as="h3" size="m" vt={`p-${project.id}`} />
+		</a>
+		<p class="feature__kicker">{p.kicker}</p>
+		<p class="blurb">{p.summary}</p>
+		<dl class="facts">
+			{p.context && (<><dt>Contexto</dt><dd>{p.context}</dd></>)}
+			{p.team && (<><dt>Equipo</dt><dd>{p.team}</dd></>)}
+		</dl>
+		<ul class="chips" aria-label="Tecnologías">
+			{p.stack.slice(0, 6).map((s) => <li class="tag">{s}</li>)}
+		</ul>
+		<p class="feature__actions">
+			<a class="link-arrow" href={href}>Ver proyecto <span aria-hidden="true">→</span></a>
+			{
+				p.play && (
+					<a class="pill pill--solid pill--sm" href={`${href}#jugar`}>
+						<span aria-hidden="true">▶</span> Jugar en el navegador
+					</a>
+				)
+			}
+		</p>
+	</div>
+</article>

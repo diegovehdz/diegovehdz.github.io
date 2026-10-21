@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import Base from '../../layouts/Base.astro';
+import { readingTime } from '../../lib/text';
+
+const textos = (await getCollection('textos', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const fecha = (d: Date) =>
+	new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d).replace('.', '');
+---
+
+<Base title="Textos" description="Textos de divulgación sobre computación, algoritmos, datos y simulación, con ejemplos de la Ciudad de México." bleed="Textos">
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Textos" right={[`${textos.length} ${textos.length === 1 ? 'texto' : 'textos'}`, '<a href="/rss.xml">RSS</a>']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Textos']} as="h1" size="xl" />
+				<p class="blurb">
+					Explicaciones de computación con ejemplos de la ciudad. Algoritmos, datos y simulación, con piezas interactivas cuando ayudan a entender
+					mejor que un párrafo.
+				</p>
+			</div>
+			<ul class="rows">
+				{
+					textos.map((t) => (
+						<li class="row">
+							<a href={`/textos/${t.id}/`}>
+								<span class="row__year">{fecha(t.data.pubDate)}</span>
+								<span class="row__title">
+									{t.data.title}
+									{t.data.draft && <small>borrador</small>}
+									{t.data.kicker && <small>{t.data.kicker}</small>}
+								</span>
+								<span class="row__desc">
+									{t.data.description} · {readingTime(t.body)} min
+								</span>
+								<span class="row__arrow" aria-hidden="true">
+									→
+								</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+</Base>

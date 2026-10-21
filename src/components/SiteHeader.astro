@@ -1,0 +1,83 @@
+---
+import { CAFES_LINK, NAV, SITE } from '../config/site';
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(href);
+---
+
+<header class="site-header" data-header>
+	<div class="site-header__inner wrap">
+		<a href="/" class="wordmark" aria-label={`${SITE.name}, inicio`}>{SITE.name}</a>
+
+		<nav class="site-nav" aria-label="Principal">
+			<ul>
+				{
+					NAV.map((item) => (
+						<li>
+							<a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+								{item.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+
+		<div class="site-header__tools">
+			<a
+				class="cafe-pill"
+				href={CAFES_LINK.href}
+				aria-current={isCurrent(CAFES_LINK.href) ? 'page' : undefined}
+				title="Lado B: mapa de cafeterías de la CDMX"
+				data-cafe-pill
+			>
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="cafe-pill__cup">
+					<path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z"></path>
+					<path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"></path>
+					<path class="steam" d="M8 3.5c0 1 1 1.2 1 2.2S8 7 8 7M12 3.5c0 1 1 1.2 1 2.2S12 7 12 7"></path>
+				</svg>
+				<span class="cafe-pill__label">{CAFES_LINK.label}</span>
+				<span class="cafe-pill__count" data-cafe-count hidden></span>
+			</a>
+			<span class="clock" data-clock title="Hora en la Ciudad de México">{SITE.cityShort}</span>
+			<button class="icon-btn" type="button" data-theme-toggle aria-label="Cambiar a tema claro" title="Cambiar tema">
+				<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="9"></circle>
+					<path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"></path>
+				</svg>
+			</button>
+			<button class="pill pill--ghost pill--sm menu-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu">
+				Menú
+			</button>
+		</div>
+	</div>
+
+	<div class="menu" id="menu" hidden data-menu role="dialog" aria-modal="true" aria-label="Menú">
+		<div class="menu__top">
+			<a href="/" class="wordmark">{SITE.name}</a>
+			<button class="pill pill--ghost pill--sm" type="button" data-menu-close>Cerrar</button>
+		</div>
+		<ul class="menu__links">
+			<li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Inicio</a></li>
+			{
+				NAV.map((item) => (
+					<li>
+						<a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+							{item.label}
+						</a>
+					</li>
+				))
+			}
+			<li class="menu__extra"><a href={CAFES_LINK.href}>Lado B: cafés</a></li>
+		</ul>
+		<div class="metabar">
+			<a class="metabar__left" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+			<span class="metabar__right"><span data-clock>{SITE.cityShort}</span></span>
+		</div>
+	</div>
+</header>
+
+<script>
+	import { initSite } from '../scripts/site';
+	initSite();
+</script>

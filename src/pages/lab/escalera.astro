@@ -1,0 +1,122 @@
+---
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import WordLadder from '../../components/WordLadder.astro';
+import PALABRAS from '../../data/palabras.json';
+import { META } from '../../data/escalera';
+import Base from '../../layouts/Base.astro';
+
+const meta = META.toUpperCase();
+---
+
+<Base
+	title="Escalera"
+	description={`Poople, en español: convierte la palabra del día en ${meta} cambiando una letra a la vez. Un reto nuevo cada día, el mismo para todos.`}
+	bleed="Escalera"
+>
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Lab — Escalera" href="/lab/" right={['Un reto al día', 'Medianoche, hora de la CDMX']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Escalera']} as="h1" size="xl" />
+				<div>
+					<p class="blurb">
+						Convierte la palabra del día en <strong>{meta}</strong> cambiando una letra a la vez. Cada escalón tiene que ser una palabra en
+						español, y entre menos pasos, mejor. Es <a href="https://pooplegame.com/">Poople</a>, uno de mis juegos diarios favoritos, pero en
+						español: el mismo reto para todos, nuevo cada medianoche.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="wrap esc" aria-label="Juego">
+		<WordLadder />
+	</section>
+
+	<section class="section esc-how">
+		<div class="wrap">
+			<MetaBar left="Cómo funciona" right={['Grafos', 'Búsqueda en anchura']} class="section__meta" />
+			<div class="esc-how__grid">
+				<div class="prose">
+					<h2>Un grafo de palabras</h2>
+					<p>
+						Cada una de las {PALABRAS.length.toLocaleString('es-MX')} palabras de cuatro letras es un nodo, y dos palabras están conectadas si difieren
+						en una sola letra. Jugar es caminar por ese grafo hasta {meta}.
+					</p>
+					<h2>El par</h2>
+					<p>
+						Al cargar la página, una búsqueda en anchura desde {meta} calcula la distancia de cada palabra a la meta. El par del día es esa distancia,
+						pero contando solo palabras comunes, para que siempre se pueda lograr sin palabras rebuscadas. Si encuentras un atajo con una palabra rara,
+						quedas bajo par.
+					</p>
+					<h2>El reto del día</h2>
+					<p>
+						La palabra de partida sale de una lista barajada con una semilla fija y del número de días desde el primer reto, así que es la misma en
+						todos los navegadores sin necesidad de un servidor. Tu racha y tus estadísticas se guardan solo en este navegador.
+					</p>
+				</div>
+				<aside class="esc-how__rules">
+					<h3 class="eyebrow">Reglas</h3>
+					<ol>
+						<li>Cambia una sola letra en cada escalón.</li>
+						<li>Cada escalón debe ser una palabra de cuatro letras, sin acentos (la Ñ cuenta como letra).</li>
+						<li>No repitas palabras.</li>
+						<li>«Deshacer paso» no cuesta nada; las pistas quedan anotadas en tu resultado.</li>
+					</ol>
+					<p class="muted esc-how__credit">
+						Lista de palabras: <a href="https://github.com/words/an-array-of-spanish-words">an-array-of-spanish-words</a>, derivada de las listas
+						de Letterpress, sin groserías.
+					</p>
+				</aside>
+			</div>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.esc {
+		padding-bottom: var(--section-y);
+	}
+
+	.esc-how {
+		border-top: 1px solid var(--line);
+	}
+
+	.esc-how__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+		gap: clamp(24px, 4vw, 80px);
+		align-items: start;
+	}
+
+	.esc-how__rules {
+		position: sticky;
+		top: calc(var(--header-h) + 24px);
+		padding: clamp(18px, 2vw, 28px);
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius);
+	}
+
+	.esc-how__rules ol {
+		margin: 0.6rem 0 0;
+		padding-left: 1.2em;
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.esc-how__credit {
+		margin: 1.2rem 0 0;
+		font-size: var(--step--2);
+	}
+
+	@media (max-width: 900px) {
+		.esc-how__grid {
+			grid-template-columns: 1fr;
+		}
+
+		.esc-how__rules {
+			position: static;
+		}
+	}
+</style>

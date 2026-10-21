@@ -1,0 +1,30 @@
+---
+title: Machine learning desde cero
+kicker: Del perceptrón a las redes neuronales
+summary: Mis propias implementaciones de perceptrón, ADALINE, regresión lineal y logística (con regularización y en línea) y K-means para comprimir imágenes; un clasificador de texto para 20 Newsgroups con Naive Bayes y Keras; y visión computacional con PyTorch.
+year: 2026
+period: ago 2026 — hoy
+context: IA avanzada para la ciencia de datos
+role: Trabajo individual.
+stack: [Python, NumPy, pandas, scikit-learn, Keras, PyTorch]
+tags: [ia, datos]
+order: 12
+visual: ml
+---
+
+## Sin librerías mágicas
+
+Antes de usar `scikit-learn` implementé los algoritmos con NumPy, para entender qué pasa adentro:
+
+- **Perceptrón y ADALINE**, los primeros clasificadores lineales.
+- **Regresión lineal** con descenso por gradiente, **polinomial** (grado 6), con **regularización** y en versión **en línea** (un ejemplo a la vez).
+- **Regresión logística** y clasificación **uno contra todos** para más de dos clases.
+- **K-means**, incluida la compresión de una imagen a unos cuantos colores.
+
+## Texto: 20 Newsgroups
+
+Clasificar mensajes de foros en 20 temas. Lo más laborioso fue **limpiar**: quitar encabezados (que traen la categoría y harían trampa), firmas y líneas que no son texto, tokenizar y quitar *stopwords*. Comparé **Naive Bayes multinomial** contra una **red neuronal en Keras**, con búsqueda de optimizador, tasa de aprendizaje y tamaño de lote. La mejor configuración (Adam, lr = 0.001) llegó a ~69 % de exactitud en validación sobre 20 clases.
+
+## Imágenes: PyTorch
+
+Una serie de prácticas de visión computacional: imágenes como datos numéricos, máscaras, canales de color, filtros, operaciones morfológicas e histogramas, hasta **redes convolucionales**, mejora de modelos y **segmentación semántica**.

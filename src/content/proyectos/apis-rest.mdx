@@ -1,0 +1,23 @@
+---
+title: APIs REST
+kicker: Turismo, inventario y autenticación con JWT
+summary: Servicios en Node.js y Express con MySQL. Una API de lugares turísticos y comentarios con frontend en React, una API de inventario con carga de archivos y un microservicio de autenticación con JWT.
+year: 2025
+period: feb — may 2025
+context: Proyectos de 4.º semestre
+role: Desarrollo de las APIs y del frontend.
+stack: [Node.js, Express, MySQL, JWT, React, Vite, Multer]
+tags: [web]
+order: 13
+visual: apis
+---
+
+## Tres servicios, un mismo patrón
+
+Las tres APIs siguen la misma estructura de **rutas → middleware → controladores → helpers**, que separa la validación y la autenticación de la lógica de negocio:
+
+- **Turismo:** `/api/lugares`, `/api/comentarios` y `/api/login`, con un frontend en React y Vite que consume la API.
+- **Inventario:** CRUD de productos sobre MySQL, con carga de imágenes vía Multer.
+- **Servicio JWT:** emite tokens en el login y protege las rutas de escritura con un middleware que verifica el token.
+
+Son proyectos pequeños, pero cubren lo esencial de un backend: diseño de rutas, manejo de errores, variables de entorno y autenticación.

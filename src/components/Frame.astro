@@ -1,0 +1,44 @@
+---
+// Marco de imagen de la plantilla. Con `src` muestra una foto en duotono rojo (a color al pasar el mouse);
+// sin `src` muestra un patrón de medios tonos con un glifo, que funciona como sustituto intencional.
+interface Props {
+	src?: string;
+	alt?: string;
+	ratio?: string;
+	glyph?: string;
+	caption?: string;
+	duotone?: boolean;
+	focus?: [string, string];
+	class?: string;
+	eager?: boolean;
+}
+
+const {
+	src,
+	alt = '',
+	ratio = '4 / 3',
+	glyph,
+	caption,
+	duotone = true,
+	focus = ['68%', '38%'],
+	class: cls,
+	eager = false,
+} = Astro.props;
+const hasSlot = Astro.slots.has('default');
+---
+
+<figure
+	class:list={['frame', src && duotone && 'frame--duo', !src && !hasSlot && 'frame--halftone', cls]}
+	style={`--ratio:${ratio};--hx:${focus[0]};--hy:${focus[1]};margin:0;`}
+>
+	{src && <img src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" />}
+	{!src && hasSlot && <slot />}
+	{
+		!src && !hasSlot && glyph && (
+			<span class="frame__glyph" aria-hidden="true" data-drift="center y -18">
+				{glyph}
+			</span>
+		)
+	}
+	{caption && <figcaption class="frame__caption">{caption}</figcaption>}
+</figure>

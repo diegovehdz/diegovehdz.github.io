@@ -1,0 +1,171 @@
+---
+// Trayectoria por año: proyectos (con página) y archivo (sin página). Se arma sola a partir del contenido.
+import { getCollection } from 'astro:content';
+import { ARCHIVO } from '../data/archivo';
+
+const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const SEMESTRES: Record<number, string> = {
+	2023: '1.er semestre',
+	2024: '2.º y 3.er semestre',
+	2025: '4.º y 5.º semestre',
+	2026: 'invierno, 6.º y 7.º semestre',
+};
+const years = [...new Set([...proyectos.map((p) => p.data.year), ...ARCHIVO.map((a) => a.year)])].sort();
+const cols = years.map((year) => ({
+	year,
+	sem: SEMESTRES[year] ?? '',
+	items: [
+		...proyectos
+			.filter((p) => p.data.year === year)
+			.map((p) => ({ title: p.data.title, kicker: p.data.kicker, href: `/proyectos/${p.id}/` as string | undefined })),
+		...ARCHIVO.filter((a) => a.year === year).map((a) => ({ title: a.title, kicker: a.kicker, href: undefined })),
+	],
+}));
+---
+
+<div class="tl" data-draw>
+	<div class="tl__line" aria-hidden="true"><span></span></div>
+	<ol class="tl__cols" style={`--n:${cols.length}`}>
+		{
+			cols.map((c) => (
+				<li class="tl__col">
+					<span class="tl__dot" aria-hidden="true" />
+					<span class="tl__year">{c.year}</span>
+					<span class="tl__sem mono">{c.sem}</span>
+					<ul class="tl__items">
+						{c.items.map((i) => (
+							<li>
+								{i.href ? <a href={i.href}>{i.title}</a> : <span>{i.title}</span>}
+								<small>{i.kicker}</small>
+							</li>
+						))}
+					</ul>
+				</li>
+			))
+		}
+	</ol>
+</div>
+
+<style>
+	.tl {
+		position: relative;
+		overflow-x: auto;
+		scrollbar-width: thin;
+		scroll-snap-type: x proximity;
+		padding-bottom: 8px;
+	}
+
+	.tl__line {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 11px;
+		height: 2px;
+		background: var(--line);
+		min-width: 1040px;
+	}
+
+	.tl__line span {
+		display: block;
+		height: 100%;
+		background: var(--red);
+		transform-origin: 0 50%;
+	}
+
+	.tl__cols {
+		display: grid;
+		grid-template-columns: repeat(var(--n, 4), minmax(250px, 1fr));
+		gap: clamp(20px, 2.5vw, 40px);
+		min-width: 1040px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.tl__col {
+		position: relative;
+		padding-top: 40px;
+		scroll-snap-align: start;
+	}
+
+	.tl__dot {
+		position: absolute;
+		left: 0;
+		top: 4px;
+		width: 16px;
+		height: 16px;
+		border-radius: 50%;
+		background: var(--bg);
+		border: 3px solid var(--red);
+	}
+
+	.tl__year {
+		display: block;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		letter-spacing: -0.07em;
+		line-height: 0.85;
+		font-size: clamp(3rem, 1.6rem + 3.6vw, 5.6rem);
+		color: var(--red);
+		transition: color 0.4s var(--ease);
+	}
+
+	.tl__col:hover .tl__year {
+		color: var(--ink);
+	}
+
+	.tl__sem {
+		display: block;
+		margin: 0.6rem 0 1rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.tl__items {
+		display: grid;
+		gap: 0.7rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.tl__items li {
+		display: grid;
+		gap: 0.1rem;
+		padding-left: 0.9rem;
+		border-left: 2px solid var(--line);
+		transition: border-color 0.25s var(--ease);
+	}
+
+	.tl__items li:hover {
+		border-left-color: var(--red);
+	}
+
+	.tl__items a,
+	.tl__items span {
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1.2;
+		text-decoration: none;
+	}
+
+	.tl__items span {
+		color: var(--ink-soft);
+	}
+
+	.tl__items small {
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+		line-height: 1.35;
+	}
+
+	:global(.motion) .tl__line span {
+		transform: scaleX(0);
+		transition: transform 1.8s var(--ease-expo) 0.15s;
+	}
+
+	:global(.motion) .tl.is-in .tl__line span {
+		transform: scaleX(1);
+	}
+</style>

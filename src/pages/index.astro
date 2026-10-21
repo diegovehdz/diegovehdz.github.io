@@ -1,0 +1,607 @@
+---
+import { getCollection } from 'astro:content';
+import Dither from '../components/Dither.astro';
+import Frame from '../components/Frame.astro';
+import Marquee from '../components/Marquee.astro';
+import Mega from '../components/Mega.astro';
+import MetaBar from '../components/MetaBar.astro';
+import ProjectFeature from '../components/ProjectFeature.astro';
+import Rotator from '../components/Rotator.astro';
+import Timeline from '../components/Timeline.astro';
+import Title from '../components/Title.astro';
+import ProjectVisual from '../components/visuals/ProjectVisual.astro';
+import { EDUCATION, EXPERIENCE, FOCUS_AREAS, SITE, SKILLS } from '../config/site';
+import { LAB } from '../data/lab';
+import Base from '../layouts/Base.astro';
+import { metricas } from '../lib/mercado';
+
+const proyectos = (await getCollection('proyectos', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const featured = proyectos.filter((p) => p.data.featured);
+// juegos de los proyectos más los del laboratorio que no son de un proyecto
+const jugables =
+	proyectos.filter((p) => p.data.play).length +
+	LAB.filter((l) => (l.status === 'jugable' || l.status === 'diario') && !l.href.startsWith('/proyectos/')).length;
+// en la portada, el laboratorio muestra experimentos cuyo visual no se repite con los proyectos destacados
+const featuredVisuals = new Set<string>(featured.map((p) => p.data.visual ?? ''));
+const labHome = LAB.filter((l) => !featuredVisuals.has(l.visual)).slice(0, 4);
+const skills = SKILLS.flatMap((s) => s.items);
+const textos = (await getCollection('textos', ({ data }) => !data.draft)).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const today = new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Mexico_City' })
+	.format(new Date())
+	.replace('.', '');
+const fecha = (d: Date) =>
+	new Intl.DateTimeFormat('es-MX', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d).replace('.', '');
+const github = SITE.socials.find((s) => s.label === 'GitHub');
+---
+
+<Base>
+	<!-- 00 · portada -->
+	<section class="hero">
+		<div class="wrap hero__top" data-intro="fade">
+			<MetaBar left="Portafolio" right={[`${SITE.degreeShort} · ${SITE.school}`, today]} />
+		</div>
+		<div class="hero__mid">
+			<div class="wrap hero__copy">
+				<p class="hero__intro" data-words data-intro="words" style="--d:180ms">
+					Estudiante de {SITE.degree} en el {SITE.school}. Construyo <Rotator
+						words={['plataformas web', 'simulaciones', 'modelos de datos', 'videojuegos', 'herramientas para la ciudad']}
+					/>.
+				</p>
+			</div>
+			<!-- La creación de Adán, renderizada con un raymarcher propio (scripts/art) y tramada en el navegador:
+			     las yemas casi se tocan justo donde está la etiqueta de disponibilidad -->
+			<div class="hero__touch">
+				<Dither art="mano-izq" class="hero__hand hero__hand--l" position="0% 50%" reveal="right" delay={250} duration={2100} contrast={1.2} />
+				<Dither art="mano-der" class="hero__hand hero__hand--r" position="100% 50%" reveal="left" delay={250} duration={2100} contrast={1.2} />
+				<span class="hero__spark" data-intro="fade" style="--d:2200ms" aria-hidden="true"></span>
+				{
+					SITE.availability && (
+						<p class="hero__status" data-intro="fade" style="--d:1500ms">
+							<span class="dot-live" aria-hidden="true" /> {SITE.availability}
+						</p>
+					)
+				}
+			</div>
+		</div>
+		<div class="hero__mega mega-crop">
+			<div class="wrap">
+				<Mega
+					as="h1"
+					lines={['Diego', 'Vergara']}
+					label={SITE.fullName}
+					uniform
+					bleed
+					scale={1.06}
+					offsets={[0, -0.05]}
+					split
+					intro
+					drifts={[7, -9]}
+				/>
+			</div>
+		</div>
+	</section>
+
+	<Marquee label="Proyectos" items={proyectos.map((p) => ({ label: p.data.title, href: `/proyectos/${p.id}/` }))} speed={55} />
+
+	<!-- 01 · introducción -->
+	<section class="section intro" id="intro">
+		<div class="wrap">
+			<MetaBar left="01 — Introducción" right={[SITE.city, `${SITE.semester}.º semestre`]} class="section__meta" />
+			<div class="intro__grid">
+				<div class="intro__text">
+					<span class="eyebrow">Introducción</span>
+					<Title lines={['Hola, soy', 'Diego']} size="l" />
+					<div class="blurb intro__blurb">
+						<p>
+							Estoy en el penúltimo semestre de Ingeniería en Tecnologías Computacionales en el Tec de Monterrey, en la Ciudad de México. Me
+							interesa el software que resuelve problemas concretos: plataformas para empresas, simulaciones de tráfico y modelos que estiman
+							precios de mercado.
+						</p>
+						<p>
+							Este sitio es mi portafolio y también mi laboratorio. Aquí documento proyectos, publico cosas para usar (juegos que corren en el
+							navegador, un detector de bordes que trabaja con tu cámara, un modelo de precios de tianguis) y escribo para explicar ideas de
+							computación sin tecnicismos innecesarios.
+						</p>
+					</div>
+					<div class="intro__small">
+						<Frame ratio="16 / 9" caption="Popocatépetl e Iztaccíhuatl · render propio">
+							<Dither art="volcanes" fit="cover" reveal="up" duration={2200} />
+						</Frame>
+					</div>
+				</div>
+				<div class="intro__media bleed-right">
+					<Frame ratio="5 / 6" caption="fig. 01 · raymarching + tramado de Bayer 8 × 8">
+						<Dither art="alcanzar" fit="cover" position="50% 40%" reveal="up" duration={2200} />
+					</Frame>
+				</div>
+			</div>
+			<ul class="stats" aria-label="En números">
+				<li>
+					<span class="stat__n" data-count={SITE.semester} data-suffix=".º">{SITE.semester}.º</span><span class="stat__l"
+						>semestre de Ingeniería en Tecnologías Computacionales</span
+					>
+				</li>
+				<li>
+					<span class="stat__n" data-count={proyectos.length}>{proyectos.length}</span><span class="stat__l"
+						>proyectos documentados, de 2023 a hoy</span
+					>
+				</li>
+				<li>
+					<span class="stat__n" data-count={jugables}>{jugables}</span><span class="stat__l">juegos que puedes jugar aquí mismo</span>
+				</li>
+				<li>
+					<span class="stat__n" data-count={metricas.registros}>{metricas.registros}</span><span class="stat__l"
+						>precios levantados a mano en mercados y tianguis</span
+					>
+				</li>
+			</ul>
+		</div>
+	</section>
+
+	<!-- 02 · proyectos -->
+	<section class="section" id="proyectos">
+		<div class="wrap">
+			<MetaBar left="02 — Proyectos" right={[`${proyectos.length} proyectos`, '2023 — 2026']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Trabajo', 'reciente']} size="l" drift={-4} />
+				<div>
+					<p class="blurb">
+						Proyectos con socios formadores, equipos de quince personas y trabajos que empezaron como tarea y terminaron siendo algo más. Cada
+						uno tiene su página con el contexto, lo que hice y cómo funciona.
+					</p>
+					<a class="link-arrow" href="/proyectos/">Ver los {proyectos.length} proyectos <span aria-hidden="true">→</span></a>
+				</div>
+			</div>
+			{featured.map((p, i) => <ProjectFeature project={p} index={i + 1} flip={i % 2 === 1} />)}
+		</div>
+	</section>
+
+	<!-- 03 · laboratorio -->
+	<section class="section" id="lab">
+		<div class="wrap">
+			<MetaBar left="03 — Laboratorio" right={['Experimentos interactivos']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Labora-', 'torio']} size="l" drift={4} />
+				<div>
+					<p class="blurb">
+						Cosas para usar, no solo para ver: juegos que corren en el navegador, filtros de visión computacional sobre tu cámara, el modelo de
+						precios de Mercado Justo y simulaciones que puedes mover con el mouse.
+					</p>
+					<a class="link-arrow" href="/lab/">Entrar al laboratorio <span aria-hidden="true">→</span></a>
+				</div>
+			</div>
+			<div class="lab-grid">
+				{
+					labHome.map((item) => (
+						<a class="card lab-card reveal" href={item.href}>
+							<Frame ratio="4 / 3">
+								<ProjectVisual visual={item.visual} />
+							</Frame>
+							<div class="lab-card__body">
+								<span class="tag">{item.status}</span>
+								<h3>{item.title}</h3>
+								<p class="soft">{item.summary}</p>
+							</div>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<Marquee label="Herramientas" items={skills.map((s) => ({ label: s }))} speed={45} reverse small />
+
+	<!-- 04 · educación -->
+	<section class="section" id="educacion">
+		<div class="wrap">
+			<MetaBar left="04 — Educación" right={[SITE.school, '2023 — 2027']} class="section__meta" />
+			<div class="split edu">
+				<div class="edu__text">
+					<Title lines={['Mi', 'educación']} size="l" drift={-3} />
+					{
+						EDUCATION.map((e) => (
+							<div class="blurb edu__lead">
+								<p>
+									<strong>{e.title}</strong>, {e.place} ({e.period}). {e.detail}
+								</p>
+							</div>
+						))
+					}
+					<ul class="entries">
+						{
+							FOCUS_AREAS.map((f) => (
+								<li class="entry">
+									<h3>{f.title}</h3>
+									<p>{f.detail}</p>
+								</li>
+							))
+						}
+					</ul>
+				</div>
+				<div class="edu__media bleed-right">
+					<Frame ratio="4 / 5" caption={`${SITE.school} · ${EDUCATION[0].period}`}>
+						<Dither art="columnas" fit="cover" reveal="fade" duration={2000} />
+					</Frame>
+				</div>
+			</div>
+			<div class="edu__tl">
+				<h3 class="eyebrow">Trayectoria</h3>
+				<Timeline />
+			</div>
+		</div>
+	</section>
+
+	<!-- 05 · experiencia -->
+	<section class="section" id="experiencia">
+		<div class="wrap">
+			<MetaBar left="05 — Experiencia" right={['Socios formadores y equipos']} class="section__meta" />
+			<div class="split xp">
+				<div class="xp__head">
+					<Title lines={['Expe-', 'riencia']} size="l" drift={3} />
+					<p class="blurb">
+						En el Tec, los proyectos más grandes se hacen con organizaciones reales. Así trabajé con una alcaldía, en una plataforma empresarial con
+						un equipo grande y en un estudio de datos levantado en campo.
+					</p>
+				</div>
+				<ul class="entries xp__list">
+					{
+						EXPERIENCE.map((x) => (
+							<li class="entry card xp__item">
+								<a href={x.href}>
+									<h3>{x.org}</h3>
+									<span class="entry__meta">
+										{x.role} · {x.period}
+									</span>
+									<p>{x.detail}</p>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<!-- 06 · textos -->
+	<section class="section" id="textos">
+		<div class="wrap">
+			<MetaBar left="06 — Textos" right={['Divulgación', 'Notas de proyectos']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Textos']} size="l" drift={-4} />
+				<p class="blurb">
+					Explicaciones de computación con ejemplos de la ciudad: algoritmos, datos y simulación. Con piezas interactivas cuando ayudan a entender.
+				</p>
+			</div>
+			<ul class="rows">
+				{
+					textos.map((t) => (
+						<li class="row">
+							<a href={`/textos/${t.id}/`}>
+								<span class="row__year">{fecha(t.data.pubDate)}</span>
+								<span class="row__title">
+									{t.data.title}
+									{t.data.kicker && <small>{t.data.kicker}</small>}
+								</span>
+								<span class="row__desc">{t.data.description}</span>
+								<span class="row__arrow" aria-hidden="true">
+									→
+								</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<!-- 07 · contacto -->
+	<section class="section contact" id="hablemos">
+		<div class="wrap">
+			<MetaBar left="07 — Contacto" right={[SITE.city]} class="section__meta" />
+			<Title lines={['¿Hablamos?']} size="xl" />
+			<div class="contact__grid">
+				<a class="contact__mail" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+				<ul class="chips">
+					{
+						SITE.socials.map((s) => (
+							<li>
+								<a class="pill" href={s.href}>
+									{s.label} <span aria-hidden="true">↗</span>
+								</a>
+							</li>
+						))
+					}
+					<li><a class="pill pill--solid" href="/cv/">Ver CV</a></li>
+				</ul>
+			</div>
+			{github && <p class="muted contact__note">El código de este sitio y de varios proyectos está en {github.handle}.</p>}
+		</div>
+	</section>
+</Base>
+
+<style>
+	.hero {
+		position: relative;
+		min-height: calc(100svh - var(--header-h));
+		display: grid;
+		grid-template-rows: auto 1fr auto;
+		overflow: hidden;
+		padding-top: clamp(16px, 2.5vw, 40px);
+	}
+
+	/* como la referencia de Diego: dos manos que entran por los lados y casi se tocan bajo el texto.
+	   --hw: ancho de cada mano; las imágenes miden 2:1 y las yemas quedan al 79 % (Adán) y 63 % (Dios) de su alto */
+	.hero__mid {
+		--hw: min(46vw, 800px);
+		display: grid;
+		align-content: center;
+		gap: clamp(4px, 1vw, 16px);
+		padding-block: clamp(16px, 3vh, 44px) clamp(16px, 3vh, 40px);
+	}
+
+	.hero__copy {
+		display: flex;
+		justify-content: center;
+		text-align: center;
+	}
+
+	.hero__intro {
+		max-width: 34ch;
+		margin: 0;
+		font-size: clamp(1.25rem, 0.8rem + 1.5vw, 2.3rem);
+		line-height: 1.16;
+		letter-spacing: -0.045em;
+		text-wrap: balance;
+	}
+
+	.hero__touch {
+		position: relative;
+		display: grid;
+		place-items: center;
+		height: calc(var(--hw) * 0.34);
+	}
+
+	.hero__spark {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 9px;
+		height: 9px;
+		margin: -4.5px 0 0 -4.5px;
+		background: var(--red);
+		rotate: 45deg;
+	}
+
+	.hero__touch :global(.hero__hand) {
+		position: absolute;
+		width: var(--hw);
+		aspect-ratio: 2 / 1;
+	}
+
+	.hero__touch :global(.hero__hand--l) {
+		left: 0;
+		top: calc(50% - var(--hw) * 0.5 * 0.79 + 0.6vw);
+	}
+
+	.hero__touch :global(.hero__hand--r) {
+		right: 0;
+		top: calc(50% - var(--hw) * 0.5 * 0.63 - 0.4vw);
+	}
+
+	@media (max-width: 700px) {
+		.hero__mid {
+			--hw: 82vw;
+		}
+
+		.hero__touch {
+			height: calc(var(--hw) * 0.5);
+		}
+
+		.hero__touch :global(.hero__hand) {
+			--cell: 2;
+		}
+
+		.hero__touch :global(.hero__hand--l) {
+			left: -31vw;
+		}
+
+		.hero__touch :global(.hero__hand--r) {
+			right: -31vw;
+		}
+	}
+
+	.hero__status {
+		position: relative;
+		align-self: end;
+		background: var(--bg);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6em;
+		margin: 0;
+		padding: 0.5em 1em;
+		border: 1.5px solid var(--line-strong);
+		border-radius: 999px;
+		font-size: var(--step--1);
+	}
+
+	.hero__mega {
+		margin-top: auto;
+	}
+
+	@media (max-width: 700px) {
+		/* en teléfono, menos vacío arriba; ojo: no agrandar el nombre para que "se salga" más del borde,
+		   el recorte de "VERGARA" no debe quedar en una palabra distinta */
+		.hero {
+			min-height: min(calc(100svh - var(--header-h)), 620px);
+		}
+	}
+
+	.intro__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+		gap: clamp(24px, 4vw, 72px);
+		align-items: start;
+		margin-bottom: clamp(48px, 6vw, 96px);
+	}
+
+	.intro__blurb {
+		margin: clamp(20px, 2.4vw, 36px) 0 clamp(28px, 3vw, 48px);
+	}
+
+	.intro__small {
+		max-width: 92%;
+	}
+
+	@media (max-width: 900px) {
+		.intro__grid {
+			grid-template-columns: 1fr;
+		}
+
+		.intro__media.bleed-right {
+			margin-right: 0;
+		}
+
+		.intro__small {
+			display: none;
+		}
+	}
+
+	.lab-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: clamp(14px, 1.6vw, 24px);
+	}
+
+	@media (max-width: 1100px) {
+		.lab-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 600px) {
+		.lab-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.lab-card {
+		padding: 0;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.lab-card :global(.frame) {
+		border-bottom: 1.5px solid var(--line);
+	}
+
+	.lab-card__body {
+		padding: clamp(16px, 1.6vw, 24px);
+	}
+
+	.lab-card__body h3 {
+		margin: 0.8rem 0 0.4rem;
+		font-size: var(--step-1);
+		letter-spacing: -0.04em;
+	}
+
+	.lab-card__body p {
+		margin: 0;
+		font-size: var(--step--1);
+		line-height: 1.45;
+	}
+
+	.edu__text {
+		grid-column: 1 / span 7;
+	}
+
+	.edu__media {
+		grid-column: 9 / -1;
+		align-self: center;
+	}
+
+	.edu__tl {
+		margin-top: clamp(56px, 7vw, 120px);
+	}
+
+	.edu__tl .eyebrow {
+		margin-bottom: 1.4rem;
+	}
+
+	.edu__lead {
+		margin: clamp(20px, 2.4vw, 36px) 0 clamp(28px, 3vw, 44px);
+	}
+
+	.xp__head {
+		grid-column: 1 / span 5;
+		position: sticky;
+		top: calc(var(--header-h) + 32px);
+		align-self: start;
+	}
+
+	.xp__head .blurb {
+		margin-top: clamp(20px, 2.4vw, 36px);
+	}
+
+	.xp__list {
+		grid-column: 7 / -1;
+		gap: clamp(12px, 1.4vw, 20px);
+	}
+
+	.xp__item {
+		padding: 0;
+	}
+
+	.xp__item a {
+		display: block;
+		padding: clamp(20px, 2vw, 30px);
+		color: inherit;
+	}
+
+	.xp__item:hover {
+		border-color: var(--red);
+	}
+
+	@media (max-width: 900px) {
+		.edu__text,
+		.edu__media,
+		.xp__head,
+		.xp__list {
+			grid-column: 1 / -1;
+		}
+
+		.xp__head {
+			position: static;
+		}
+
+		.edu__media.bleed-right {
+			margin-right: 0;
+		}
+	}
+
+	.contact__grid {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem 2rem;
+		margin-top: clamp(28px, 4vw, 56px);
+		padding-top: clamp(20px, 2.5vw, 32px);
+		border-top: 1px solid var(--line);
+	}
+
+	.contact__mail {
+		font-weight: 800;
+		font-size: clamp(1.4rem, 0.8rem + 2.6vw, 3.4rem);
+		letter-spacing: -0.05em;
+		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+
+	.contact__note {
+		margin-top: 1.4rem;
+		font-size: var(--step--1);
+	}
+</style>

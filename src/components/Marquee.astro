@@ -1,0 +1,45 @@
+---
+// Marquesina de texto grande. Se mueve sola y acelera (o cambia de sentido) con el scroll; se frena al pasar el mouse.
+interface Item {
+	label: string;
+	href?: string;
+}
+interface Props {
+	items: Item[];
+	label: string;
+	speed?: number;
+	reverse?: boolean;
+	steady?: boolean;
+	small?: boolean;
+}
+
+const { items, label, speed = 70, reverse = false, steady = false, small = false } = Astro.props;
+---
+
+<section
+	class:list={['marquee', small && 'marquee--sm']}
+	aria-label={label}
+	data-marquee
+	data-speed={speed}
+	data-reverse={reverse ? '' : undefined}
+	data-steady={steady ? '' : undefined}
+>
+	<div class="marquee__track">
+		<ul class="marquee__group">
+			{
+				items.map((item) => (
+					<li class="marquee__item">
+						{item.href ? (
+							<a class="marquee__txt" href={item.href}>
+								{item.label}
+							</a>
+						) : (
+							<span class="marquee__txt">{item.label}</span>
+						)}
+						<span class="marquee__sep" aria-hidden="true" />
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</section>

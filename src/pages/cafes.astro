@@ -1,0 +1,143 @@
+---
+import 'leaflet/dist/leaflet.css';
+import '../styles/cafes.css';
+import MetaBar from '../components/MetaBar.astro';
+import Title from '../components/Title.astro';
+import { SITE } from '../config/site';
+import cafes from '../data/cafes.json';
+import Base from '../layouts/Base.astro';
+
+const alcaldias = [...new Set(cafes.map((c) => c.alcaldia))].sort((a, b) => a.localeCompare(b, 'es'));
+const tagCounts = new Map<string, number>();
+for (const c of cafes) for (const t of c.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+const visitadas = cafes.filter((c) => c.visitado).length;
+const conHorario = cafes.filter((c) => 'horario' in c && c.horario).length;
+const json = JSON.stringify(cafes).replace(/</g, '\\u003c');
+---
+
+<Base
+	title="Cafeterías CDMX"
+	description={`Mapa de ${cafes.length} cafeterías de la Ciudad de México con filtros, "abierto ahora", café al azar y un planificador de rutas.`}
+	bleed="Café"
+>
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Lado B — Cafés" right={[`${cafes.length} cafeterías`, `${alcaldias.length} alcaldías`, `${visitadas} visitadas`]} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Cafeterías', 'CDMX']} as="h1" size="xl" />
+				<div>
+					<p class="blurb">
+						Un mapa para encontrar café en la ciudad. Filtra por tipo o alcaldía, pregunta cuáles están abiertas ahora, deja que el azar decida o
+						arma una ruta: la página calcula el orden más corto para recorrerla.
+					</p>
+					<p class="cafes-credit">
+						Inspirado en el mapa de cafeterías fuera de la Roma y la Condesa que armó <a href="https://heliouz.com/">Heliouz</a> en 2023 con
+						recomendaciones de Twitter (<a
+							href="https://www.eluniversal.com.mx/menu/crean-mapa-de-cafeterias-fuera-de-la-roma-y-la-condesa-con-recomendaciones-de-twitter/"
+							>El Universal</a
+						>).
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="cafes-app" aria-label="Mapa interactivo de cafeterías">
+		<aside class="cafes-panel" aria-label="Filtros y lista">
+			<div class="cafes-controls">
+				<label class="cafes-search">
+					<span class="visually-hidden">Buscar cafetería</span>
+					<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+					<input type="search" placeholder="Buscar por nombre o colonia…" autocomplete="off" data-q />
+				</label>
+				<div class="chips" role="group" aria-label="Filtrar por tipo">
+					{
+						tags.map(([t, n]) => (
+							<button class="pill pill--sm" type="button" data-tag={t} aria-pressed="false">
+								{t} <span class="count">{n}</span>
+							</button>
+						))
+					}
+				</div>
+				<select class="cafes-select" data-alcaldia aria-label="Filtrar por alcaldía">
+					<option value="">Todas las alcaldías</option>
+					{alcaldias.map((a) => <option value={a}>{a}</option>)}
+				</select>
+				<div class="cafes-row">
+					<button
+						class="pill pill--sm"
+						type="button"
+						data-open
+						aria-pressed="false"
+						title={`${conHorario} de ${cafes.length} tienen horario en OpenStreetMap`}
+					>
+						<span class="dot-open" aria-hidden="true"></span>
+						Abiertas ahora
+					</button>
+					<button class="pill pill--sm" type="button" data-random>
+						<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><circle cx="9" cy="9" r="1.2"></circle><circle cx="15" cy="15" r="1.2"></circle><circle cx="15" cy="9" r="1.2"></circle><circle cx="9" cy="15" r="1.2"></circle></svg>
+						Café al azar
+					</button>
+					<button class="pill pill--sm" type="button" data-near>
+						<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+						Cerca de mí
+					</button>
+					<button class="pill pill--sm pill--ghost" type="button" data-reset>Limpiar</button>
+				</div>
+				<p class="cafes-status" data-status aria-live="polite"></p>
+			</div>
+			<ol class="cafes-list" data-list></ol>
+		</aside>
+
+		<div class="cafes-mapwrap">
+			<div class="cafes-map" data-map role="application" aria-label="Mapa de cafeterías"></div>
+			<div class="route" data-route hidden>
+				<div class="route__head">
+					<strong>Tu ruta</strong>
+					<span class="route__sum" data-route-summary></span>
+				</div>
+				<ol class="route__stops" data-route-stops></ol>
+				<div class="route__actions">
+					<a class="pill pill--sm pill--solid" data-route-gmaps target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
+					<button class="pill pill--sm" type="button" data-route-share>Copiar enlace</button>
+					<button class="pill pill--sm pill--ghost" type="button" data-route-clear>Borrar</button>
+				</div>
+				<p class="route__note">
+					Orden calculado con vecino más cercano + 2-opt, en línea recta. <a href="/textos/ruta-del-cafe/">¿Cómo funciona?</a>
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="section section--tight">
+		<div class="wrap cafes-about">
+			<div>
+				<span class="eyebrow">Cómo usarlo</span>
+				<ul class="cafes-howto">
+					<li><strong>Toca un punto</strong> o un nombre de la lista para ver dirección, horario y enlaces.</li>
+					<li><strong>Agrega cafeterías a tu ruta</strong> con el botón <span class="mono">+</span>. El orden se recalcula solo y lo puedes abrir en Google Maps o compartir con un enlace.</li>
+					<li><strong>"Abiertas ahora"</strong> usa la hora de la CDMX y los horarios de OpenStreetMap. Si no hay horario, la cafetería no aparece con ese filtro.</li>
+				</ul>
+			</div>
+			<div>
+				<span class="eyebrow">Sobre los datos</span>
+				<p class="soft">
+					La lista inicial salió de OpenStreetMap: cafeterías conocidas repartidas en varias alcaldías, con ubicación y horario cuando existe. La voy
+					curando conforme las visito. Las marcadas con <span class="star" aria-hidden="true">★</span> son mis favoritas.
+				</p>
+				<p class="soft">
+					Ubicaciones © colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (ODbL). Mapa base ©
+					<a href="https://carto.com/attributions">CARTO</a>.
+				</p>
+				<a class="pill" href={`mailto:${SITE.email}?subject=${encodeURIComponent('Sugerencia de cafetería')}`}>Sugerir una cafetería</a>
+			</div>
+		</div>
+	</section>
+
+	<script type="application/json" id="cafes-data" set:html={json} />
+</Base>
+
+<script>
+	import '../scripts/cafes';
+</script>

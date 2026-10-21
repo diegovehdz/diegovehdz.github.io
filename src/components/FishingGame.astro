@@ -1,0 +1,784 @@
+---
+// Pesca en Xochimilco: minijuego al estilo de Stardew Valley, dibujado en pixel art de una tinta a 320 × 180 y
+// escalado sin suavizado. Los colores salen del tema. La bitácora se guarda solo en este navegador.
+import { PECES } from '../data/peces';
+
+const especies = PECES.filter((p) => p.clase !== 'basura');
+---
+
+<div class="pz" data-pesca>
+	<div
+		class="pz__stage"
+		data-stage
+		tabindex="0"
+		role="application"
+		aria-label="Pesca en Xochimilco. Mantén presionado para cargar el lanzamiento y suelta para lanzar. Cuando pique, presiona. En la pelea, mantén presionado para subir la barra."
+		aria-describedby="pz-status"
+	>
+		<canvas width="320" height="180" data-canvas></canvas>
+		<p class="pz__status mono" id="pz-status" data-status aria-live="polite"></p>
+		<div class="pz__chips" data-chips></div>
+		<div class="pz__card" data-card hidden>
+			<canvas width="96" height="48" data-card-sprite aria-hidden="true"></canvas>
+			<p class="pz__tags mono" data-card-tags></p>
+			<p class="pz__card-title" data-card-title></p>
+			<p class="pz__card-meta mono" data-card-meta></p>
+			<p class="pz__card-text" data-card-text></p>
+			<button class="pill pill--solid pill--sm" type="button" data-card-ok>Seguir pescando</button>
+		</div>
+	</div>
+	<p class="pz__help mono">
+		Clic, toque o barra espaciadora: mantén presionado para cargar y suelta para lanzar (más lejos, peces más grandes). Cuando aparezca «!», presiona.
+		En la pelea, mantén presionado para subir la barra roja y deja al pez dentro hasta llenar el medidor.
+	</p>
+
+	<section class="pz__log" aria-labelledby="pz-log-title">
+		<div class="pz__log-head">
+			<h2 class="eyebrow" id="pz-log-title">Bitácora</h2>
+			<span class="mono" data-log-total></span>
+		</div>
+		<ul class="pz__grid">
+			{
+				especies.map((p) => (
+					<li class="pz__sp" data-sp={p.id}>
+						<canvas width="64" height="32" data-sp-sprite aria-hidden="true" />
+						<span class="pz__sp-name" data-sp-name>
+							???
+						</span>
+						<span class="pz__sp-meta mono" data-sp-meta>
+							Sin pescar
+						</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+</div>
+
+<style>
+	.pz {
+		/* el lienzo 16:9 completo cabe en la pantalla */
+		max-width: min(100%, 1100px, calc((100svh - var(--header-h) - 150px) * 16 / 9));
+		margin-inline: auto;
+	}
+
+	.pz__stage {
+		position: relative;
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius);
+		overflow: hidden;
+		background: var(--bg);
+		cursor: pointer;
+		touch-action: none;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
+	}
+
+	.pz__stage:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 3px;
+	}
+
+	.pz__stage > canvas {
+		display: block;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 16 / 9;
+		image-rendering: pixelated;
+	}
+
+	.pz__status {
+		position: absolute;
+		left: 12px;
+		top: 10px;
+		max-width: calc(100% - 24px);
+		margin: 0;
+		padding: 4px 10px;
+		border-radius: 8px;
+		background: color-mix(in srgb, var(--bg) 82%, transparent);
+		font-size: var(--step--2);
+		pointer-events: none;
+	}
+
+	.pz__chips {
+		position: absolute;
+		right: 12px;
+		bottom: 10px;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 6px;
+		pointer-events: none;
+	}
+
+	.pz__chips :global(span) {
+		padding: 3px 9px;
+		border-radius: 999px;
+		border: 1px solid var(--line-strong);
+		background: color-mix(in srgb, var(--bg) 82%, transparent);
+		font: 500 var(--step--2) / 1.3 var(--font-mono);
+		color: var(--ink-soft);
+	}
+
+	.pz__stage.is-fight .pz__chips {
+		display: none;
+	}
+
+	@media (max-width: 640px) {
+		.pz__chips,
+		.pz__stage.is-fight .pz__chips {
+			position: static;
+			display: flex;
+			justify-content: flex-start;
+			padding: 8px 10px;
+			border-top: 1px solid var(--line);
+		}
+	}
+
+	.pz__card {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: min(420px, calc(100% - 32px));
+		max-height: calc(100% - 24px);
+		overflow: auto;
+		transform: translate(-50%, -50%);
+		padding: clamp(14px, 2.4vw, 24px);
+		border: 1.5px solid var(--red);
+		border-radius: var(--radius);
+		background: var(--bg);
+		text-align: center;
+		cursor: default;
+	}
+
+	.pz__card[hidden] {
+		display: none;
+	}
+
+	.pz__card canvas {
+		display: block;
+		width: 96px;
+		height: 48px;
+		margin: 0 auto 6px;
+		image-rendering: pixelated;
+	}
+
+	.pz__tags {
+		min-height: 1.2em;
+		margin: 0;
+		font-size: var(--step--2);
+		color: var(--red-ink);
+	}
+
+	.pz__card-title {
+		margin: 0.2rem 0 0.3rem;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		text-transform: uppercase;
+		letter-spacing: -0.05em;
+		line-height: 0.95;
+		font-size: clamp(1.4rem, 1rem + 1.8vw, 2.2rem);
+		color: var(--red);
+	}
+
+	.pz__card-meta {
+		margin: 0;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.pz__card-text {
+		margin: 0.7rem 0 1rem;
+		font-size: var(--step--1);
+		line-height: 1.45;
+	}
+
+	.pz__help {
+		margin: 0.8rem 0 0;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.pz__log {
+		margin-top: clamp(28px, 4vw, 48px);
+	}
+
+	.pz__log-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
+		margin-bottom: 1rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.pz__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 10px;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.pz__sp {
+		display: grid;
+		gap: 4px;
+		padding: 12px;
+		border: 1.5px solid var(--line);
+		border-radius: var(--radius-sm);
+	}
+
+	.pz__sp.is-caught {
+		border-color: var(--line-strong);
+	}
+
+	.pz__sp canvas {
+		width: 64px;
+		height: 32px;
+		image-rendering: pixelated;
+	}
+
+	.pz__sp-name {
+		font-weight: 700;
+		font-size: var(--step--1);
+		letter-spacing: -0.02em;
+	}
+
+	.pz__sp-meta {
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+</style>
+
+<script>
+	import { PECES, type Pez } from '../data/peces';
+	import { diaCDMX } from '../lib/escalera';
+	import { elegir, nuevaPelea, paso, talla, TICK, type Pelea } from '../lib/pesca';
+	import { mulberry32 } from '../lib/rng';
+
+	const W = 320;
+	const H = 180;
+	const SUP = 104; // línea del agua
+	const B4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+	const TIP = { x: 130, y: 50 }; // punta de la caña en reposo
+	const BASE_CANA = { x: 92, y: SUP - 8 };
+	// riel de la pelea
+	const TX = 271;
+	const TY = 18;
+	const TW = 24;
+	const TH = 144;
+
+	// mini fuente de 3 × 5 para el letrero de la trajinera
+	const LETRAS: Record<string, string[]> = {
+		L: ['#..', '#..', '#..', '#..', '###'],
+		U: ['#.#', '#.#', '#.#', '#.#', '###'],
+		P: ['##.', '#.#', '##.', '#..', '#..'],
+		I: ['###', '.#.', '.#.', '.#.', '###'],
+		T: ['###', '.#.', '.#.', '.#.', '.#.'],
+		A: ['.#.', '#.#', '###', '#.#', '#.#'],
+	};
+
+	type Estado = 'listo' | 'cargando' | 'lanzando' | 'esperando' | 'pica' | 'pelea' | 'resultado' | 'aviso';
+	interface Registro {
+		n: number;
+		record: number;
+	}
+	interface Bitacora {
+		especies: Record<string, Registro>;
+		basura: number;
+		total: number;
+	}
+
+	const root = document.querySelector<HTMLElement>('[data-pesca]');
+	if (root) iniciar(root);
+
+	function iniciar(root: HTMLElement) {
+		const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+		const stage = $('[data-stage]');
+		const canvas = $<HTMLCanvasElement>('[data-canvas]');
+		const ctx = canvas.getContext('2d')!;
+		const base = document.createElement('canvas');
+		base.width = W;
+		base.height = H;
+		const status = $('[data-status]');
+		const card = $('[data-card]');
+
+		// ---- colores del tema ----
+		let C = { bg: '#141414', ink: '#e8e7e7', mute: '#8f8c8b', red: '#ad3030', raise: '#1c1c1c', onRed: '#f4ece3' };
+		const leerColores = () => {
+			const cs = getComputedStyle(document.documentElement);
+			const g = (v: string, d: string) => cs.getPropertyValue(v).trim() || d;
+			C = { bg: g('--bg', C.bg), ink: g('--ink', C.ink), mute: g('--ink-mute', C.mute), red: g('--red', C.red), raise: g('--bg-raise', C.raise), onRed: g('--on-red', C.onRed) };
+		};
+
+		// ---- hora y pez del día ----
+		const horaCDMX = () =>
+			Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Mexico_City', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+		let noche = false;
+		const candidatos = PECES.filter((p) => p.clase !== 'basura' && p.id !== 'ajolote-rosa');
+		const delDia = candidatos[diaCDMX() % candidatos.length];
+
+		// ---- bitácora ----
+		const KEY = 'pesca:v1';
+		let log: Bitacora = { especies: {}, basura: 0, total: 0 };
+		try {
+			log = { ...log, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') };
+		} catch {
+			/* nada guardado */
+		}
+		const guardar = () => {
+			try {
+				localStorage.setItem(KEY, JSON.stringify(log));
+			} catch {
+				/* sin almacenamiento */
+			}
+		};
+
+		// ---- dibujo de bajo nivel (píxel por píxel: nada de antialiasing) ----
+		const rect = (g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, c: string) => {
+			g.fillStyle = c;
+			g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+		};
+		const marco = (g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, c: string) => {
+			rect(g, x, y, w, 1, c);
+			rect(g, x, y + h - 1, w, 1, c);
+			rect(g, x, y, 1, h, c);
+			rect(g, x + w - 1, y, 1, h, c);
+		};
+		const trama = (g: CanvasRenderingContext2D, x0: number, y0: number, w: number, h: number, c: string, dens: (x: number, y: number) => number) => {
+			g.fillStyle = c;
+			for (let y = Math.round(y0); y < y0 + h; y++)
+				for (let x = Math.round(x0); x < x0 + w; x++) if (dens(x, y) > B4[(y & 3) * 4 + (x & 3)]) g.fillRect(x, y, 1, 1);
+		};
+		const linea = (g: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number, c: string) => {
+			g.fillStyle = c;
+			x0 = Math.round(x0);
+			y0 = Math.round(y0);
+			x1 = Math.round(x1);
+			y1 = Math.round(y1);
+			const dx = Math.abs(x1 - x0);
+			const dy = -Math.abs(y1 - y0);
+			const sx = x0 < x1 ? 1 : -1;
+			const sy = y0 < y1 ? 1 : -1;
+			let err = dx + dy;
+			for (;;) {
+				g.fillRect(x0, y0, 1, 1);
+				if (x0 === x1 && y0 === y1) break;
+				const e2 = 2 * err;
+				if (e2 >= dy) {
+					err += dy;
+					x0 += sx;
+				}
+				if (e2 <= dx) {
+					err += dx;
+					y0 += sy;
+				}
+			}
+		};
+		const sprite = (g: CanvasRenderingContext2D, rows: string[], x: number, y: number, s = 1, tinta = C.ink) => {
+			rows.forEach((row, j) => {
+				for (let i = 0; i < row.length; i++) {
+					const ch = row[i];
+					if (ch === '.') continue;
+					g.fillStyle = ch === 'r' ? C.red : tinta;
+					g.fillRect(Math.round(x) + i * s, Math.round(y) + j * s, s, s);
+				}
+			});
+		};
+
+		// ---- fondo fijo: cielo, chinampas con ahuejotes, agua tramada y la trajinera ----
+		function pintarFondo() {
+			const g = base.getContext('2d')!;
+			rect(g, 0, 0, W, H, C.bg);
+			const rand = mulberry32(7);
+			if (noche) {
+				for (let k = 0; k < 40; k++) rect(g, rand() * W, rand() * (SUP - 40), 1, 1, k % 5 ? C.mute : C.ink);
+				trama(g, 228, 14, 22, 22, C.ink, (x, y) => (Math.hypot(x - 239, y - 25) < 10 ? (Math.hypot(x - 236, y - 22) < 3 ? 0.4 : 0.9) : 0));
+			} else {
+				trama(g, 226, 14, 26, 26, C.mute, (x, y) => {
+					const r = Math.hypot(x - 239, y - 27);
+					return r < 11 ? (r > 10 ? 1 : 0.18) : 0;
+				});
+			}
+			// ahuejotes: los árboles altos y delgados de las chinampas, en dos filas (la de atrás más tenue)
+			for (const [fila, dens, alto, paso] of [
+				[0, 0.3, 0.75, 9],
+				[1, 0.62, 1, 13],
+			] as const) {
+				for (let x = 100 + fila * 5; x < W + 8; x += paso + rand() * paso) {
+					const h = (16 + rand() * 22) * alto;
+					const w = 2.2 + rand() * 2.4;
+					const base = SUP - 6 - fila * 1;
+					const copa = h * 0.82;
+					const cy = base - h + copa / 2;
+					trama(g, x, base - h * 0.3, 1, h * 0.3, C.mute, () => dens + 0.2);
+					trama(g, x - w - 1, base - h, w * 2 + 3, copa + 1, C.mute, (px, py) => (((px - x) / w) ** 2 + ((py - cy) / (copa / 2)) ** 2 < 1 ? dens : 0));
+				}
+			}
+			trama(g, 96, SUP - 10, W - 96, 10, C.mute, (x, y) => (y > SUP - 8 + Math.sin(x * 0.21) * 1.5 ? 0.45 : 0));
+			// agua: más densa entre más profunda
+			trama(g, 0, SUP + 1, W, H - SUP - 1, C.ink, (_x, y) => 0.015 + 0.11 * Math.pow((y - SUP) / (H - SUP), 1.4));
+			rect(g, 0, SUP, W, 1, C.ink);
+			pintarTrajinera(g);
+		}
+
+		function pintarTrajinera(g: CanvasRenderingContext2D) {
+			const top = SUP - 5;
+			// casco: banda roja arriba, madera tramada abajo, proa inclinada
+			for (let y = top; y <= SUP + 9; y++) {
+				const x1 = 100 - Math.max(0, y - top) * 1.1;
+				if (y <= top + 2) rect(g, 0, y, x1, 1, C.red);
+				else trama(g, 0, y, x1, 1, C.ink, () => 0.5);
+				rect(g, x1, y, 1, 1, C.ink);
+			}
+			rect(g, 0, top - 1, 101, 1, C.ink);
+			// postes, techo y flores
+			for (const x of [8, 48, 88]) rect(g, x, top - 30, 2, 30, C.ink);
+			rect(g, 2, top - 32, 92, 2, C.ink);
+			for (let x = 5; x < 92; x += 5) rect(g, x, top - 30, 1, 1, (x / 5) % 2 ? C.red : C.ink);
+			// letrero con nombre, como en las trajineras de verdad
+			rect(g, 24, top - 47, 48, 13, C.red);
+			marco(g, 24, top - 47, 48, 13, C.ink);
+			let lx = 28;
+			for (const ch of 'LUPITA') {
+				sprite(g, LETRAS[ch], lx, top - 43, 1, C.onRed);
+				lx += 7;
+			}
+			rect(g, 30, top - 34, 1, 2, C.ink);
+			rect(g, 65, top - 34, 1, 2, C.ink);
+		}
+
+		// ---- estado del juego ----
+		let estado: Estado = 'listo';
+		let presionado = false;
+		let t = 0;
+		let tEstado = 0;
+		let potencia = 0;
+		let boyaX = 180;
+		let zona: 'orilla' | 'canal' = 'orilla';
+		let picara = 0;
+		let pez: Pez | null = null;
+		let pelea: Pelea | null = null;
+		let splash = 0;
+		let aviso = '';
+		const sombras = Array.from({ length: 4 }, (_, i) => ({ x: 120 + i * 50, y: SUP + 18 + i * 12, v: (i % 2 ? -1 : 1) * (0.08 + i * 0.03) }));
+
+		const MENSAJES: Record<Estado, string> = {
+			listo: 'Mantén presionado para cargar el lanzamiento',
+			cargando: 'Suelta para lanzar',
+			lanzando: '',
+			esperando: 'Espera a que pique…',
+			pica: '¡Pica! Presiona ya',
+			pelea: 'Mantén presionado para subir la barra',
+			resultado: '',
+			aviso: '',
+		};
+
+		function cambiar(e: Estado) {
+			estado = e;
+			tEstado = 0;
+			status.textContent = e === 'aviso' ? aviso : MENSAJES[e];
+			status.hidden = !status.textContent;
+			stage.classList.toggle('is-fight', e === 'pelea');
+		}
+
+		function avisar(texto: string) {
+			aviso = texto;
+			pelea = null;
+			cambiar('aviso');
+		}
+
+		const tri = (u: number) => {
+			const f = u % 1;
+			return f < 0.5 ? f * 2 : 2 - f * 2;
+		};
+
+		function lanzar() {
+			const p = Math.max(0.06, potencia);
+			zona = p > 0.5 ? 'canal' : 'orilla';
+			boyaX = 146 + p * 100;
+			cambiar('lanzando');
+		}
+
+		function atrapar() {
+			if (!pez) return;
+			const p = pez;
+			const perfecto = !!pelea?.perfecto;
+			const cm = talla(p.talla, perfecto);
+			let nuevo = false;
+			let record = false;
+			if (p.clase === 'basura') log.basura++;
+			else {
+				const reg = log.especies[p.id] ?? { n: 0, record: 0 };
+				nuevo = reg.n === 0;
+				record = !nuevo && cm > reg.record;
+				reg.n++;
+				reg.record = Math.max(reg.record, cm);
+				log.especies[p.id] = reg;
+			}
+			log.total++;
+			guardar();
+			pintarBitacora();
+			mostrarTarjeta(p, cm, perfecto && p.clase !== 'basura', nuevo, record);
+			cambiar('resultado');
+		}
+
+		function mostrarTarjeta(p: Pez, cm: number, perfecto: boolean, nuevo: boolean, record: boolean) {
+			const sc = $<HTMLCanvasElement>('[data-card-sprite]');
+			const g = sc.getContext('2d')!;
+			g.clearRect(0, 0, sc.width, sc.height);
+			const w = Math.max(...p.sprite.map((r) => r.length));
+			const s = Math.floor(Math.min(sc.width / w, sc.height / p.sprite.length));
+			sprite(g, p.sprite, (sc.width - w * s) / 2, (sc.height - p.sprite.length * s) / 2, s);
+			$('[data-card-tags]').textContent = [nuevo && 'Especie nueva', record && 'Récord', perfecto && 'Pesca perfecta'].filter(Boolean).join(' · ');
+			$('[data-card-title]').textContent = p.clase === 'basura' ? `Sacaste ${p.nombre.toLowerCase()}` : `¡${p.art === 'una' ? 'Una' : 'Un'} ${p.nombre.toLowerCase()}!`;
+			$('[data-card-meta]').textContent = p.clase === 'basura' ? 'Basura fuera del canal' : `${cm.toLocaleString('es-MX')} cm · ${p.cientifico ?? ''}`;
+			const destino = { nativa: 'Lo regresaste al agua.', protegida: 'Lo regresaste al canal.', invasora: 'Este no regresa al canal.', basura: '' }[p.clase];
+			$('[data-card-text]').textContent = `${p.dato} ${destino}`.trim();
+			card.hidden = false;
+			$<HTMLButtonElement>('[data-card-ok]').focus({ preventScroll: true });
+		}
+
+		function cerrarTarjeta() {
+			card.hidden = true;
+			pez = null;
+			pelea = null;
+			cambiar('listo');
+			stage.focus({ preventScroll: true });
+		}
+
+		// ---- entrada: clic/toque sostenido o barra espaciadora ----
+		function presionar() {
+			if (presionado) return;
+			presionado = true;
+			if (estado === 'listo') cambiar('cargando');
+			else if (estado === 'esperando') avisar('Muy pronto: lo espantaste.');
+			else if (estado === 'pica' && pez) {
+				if (pez.clase === 'basura') atrapar();
+				else {
+					pelea = nuevaPelea();
+					cambiar('pelea');
+				}
+			} else if (estado === 'resultado') cerrarTarjeta();
+		}
+		function soltar() {
+			if (!presionado) return;
+			presionado = false;
+			if (estado === 'cargando') lanzar();
+		}
+
+		stage.addEventListener('pointerdown', (e) => {
+			if ((e.target as HTMLElement).closest('[data-card]')) return;
+			e.preventDefault();
+			stage.focus({ preventScroll: true });
+			presionar();
+		});
+		window.addEventListener('pointerup', soltar);
+		window.addEventListener('pointercancel', soltar);
+		window.addEventListener('blur', soltar);
+		stage.addEventListener('keydown', (e) => {
+			if (e.key !== ' ' && e.key !== 'Enter') return;
+			if ((e.target as HTMLElement).closest('[data-card]')) return;
+			e.preventDefault();
+			if (!e.repeat) presionar();
+		});
+		stage.addEventListener('keyup', (e) => {
+			if (e.key === ' ' || e.key === 'Enter') soltar();
+		});
+		$('[data-card-ok]').addEventListener('click', cerrarTarjeta);
+
+		// ---- simulación a 60 Hz fijos ----
+		function tick() {
+			t += TICK;
+			tEstado += TICK;
+			if (estado === 'cargando') potencia = tri(tEstado / 1400);
+			else if (estado === 'lanzando' && tEstado >= 520) {
+				cambiar('esperando');
+				picara = 1300 + Math.random() * 3700;
+				splash = 1;
+			} else if (estado === 'esperando' && tEstado >= picara) {
+				pez = elegir(PECES, zona, noche, delDia.id);
+				cambiar('pica');
+			} else if (estado === 'pica' && tEstado >= 950) avisar('Se fue la mordida. Lanza otra vez.');
+			else if (estado === 'pelea' && pelea && pez) {
+				const r = paso(pelea, pez, presionado);
+				if (r === 'atrapado') atrapar();
+				else if (r === 'escapo') avisar(pez.clase === 'protegida' ? 'Se escapó. Al menos sigue en el canal.' : 'Se te escapó…');
+			} else if (estado === 'aviso' && tEstado >= 1500) cambiar('listo');
+			if (splash) splash = splash > 20 ? 0 : splash + 1;
+			// las sombras de los peces se pasean; una se acerca a la boya antes de picar
+			for (const [i, s] of sombras.entries()) {
+				const cebo = i === 0 && (estado === 'pica' || (estado === 'esperando' && picara - tEstado < 900));
+				if (cebo) {
+					s.x += (boyaX - 4 - s.x) * 0.05;
+					s.y += (SUP + 8 - s.y) * 0.05;
+				} else {
+					s.x += s.v;
+					if (s.x < 110 || s.x > W - 12) s.v *= -1;
+					s.y += Math.sin((t / 900) * (1 + i * 0.3) + i) * 0.03;
+				}
+			}
+		}
+
+		// ---- dibujo de cada cuadro ----
+		function render() {
+			ctx.drawImage(base, 0, 0);
+			// destellos en la superficie
+			for (let k = 0; k < 14; k++) {
+				const x = ((k * 53 + (t / 60) * (0.2 + (k % 3) * 0.1)) % (W + 40)) - 20;
+				if (x < 104) continue;
+				rect(ctx, x, SUP + 3 + (k % 4) * 6, 3 + (k % 3) * 2, 1, C.mute);
+			}
+			for (const s of sombras) trama(ctx, s.x - 6, s.y - 2, 13, 5, C.ink, (x, y) => (((x - s.x) / 6) ** 2 + ((y - s.y) / 2) ** 2 < 1 ? 0.45 : 0));
+
+			// caña: se carga hacia atrás y se dobla durante la pelea
+			let tip = TIP;
+			if (estado === 'cargando') tip = { x: TIP.x - potencia * 22, y: TIP.y - 4 + potencia * 4 };
+			if (estado === 'pelea' && pelea) tip = { x: TIP.x + 8, y: TIP.y + 10 + Math.sin(t / 45) * (presionado ? 2 : 1) };
+			linea(ctx, BASE_CANA.x, BASE_CANA.y, tip.x, tip.y, C.ink);
+			linea(ctx, BASE_CANA.x + 1, BASE_CANA.y, tip.x + 1, tip.y, C.ink);
+
+			// boya y sedal
+			let bx = boyaX;
+			let by = SUP - 2 + Math.round(Math.sin(t / 380));
+			let enAgua = true;
+			if (estado === 'lanzando') {
+				const u = Math.min(1, tEstado / 520);
+				bx = tip.x + (boyaX - tip.x) * u;
+				by = tip.y + (SUP - 2 - tip.y) * u - Math.sin(u * Math.PI) * 34;
+				enAgua = false;
+			}
+			if (estado === 'pica') by += 3;
+			const conBoya = estado === 'lanzando' || estado === 'esperando' || estado === 'pica' || estado === 'pelea';
+			if (conBoya) {
+				const tensa = estado === 'pelea' || estado === 'lanzando';
+				const cx = (tip.x + bx) / 2;
+				const cy = Math.max(tip.y, by) + (tensa ? 0 : 16);
+				// sedal: curva cuadrática, trazada en tramos rectos de un píxel
+				let px = tip.x;
+				let py = tip.y;
+				for (let k = 1; k <= 24; k++) {
+					const u = k / 24;
+					const x = (1 - u) ** 2 * tip.x + 2 * (1 - u) * u * cx + u * u * bx;
+					const y = (1 - u) ** 2 * tip.y + 2 * (1 - u) * u * cy + u * u * by;
+					linea(ctx, px, py, x, y, C.ink);
+					px = x;
+					py = y;
+				}
+				sprite(ctx, ['.r.', 'rrr', '###', '...'], bx - 1, by - 2);
+				if (enAgua) rect(ctx, bx - 1, by + 1, 3, 1, C.bg);
+				if (estado === 'pica' && Math.floor(t / 150) % 2 === 0) {
+					rect(ctx, bx, by - 13, 2, 6, C.red);
+					rect(ctx, bx, by - 5, 2, 2, C.red);
+				}
+			}
+			if (splash) {
+				const r = splash * 0.7;
+				for (const a of [-1, -0.5, 0.5, 1]) rect(ctx, boyaX + a * r * 2, SUP - 2 - Math.sin((splash / 20) * Math.PI) * 6 * Math.abs(a), 1, 1, C.ink);
+			}
+
+			// medidor de fuerza del lanzamiento
+			if (estado === 'cargando') {
+				marco(ctx, 104, SUP - 50, 6, 42, C.ink);
+				rect(ctx, 105, SUP - 9 - potencia * 40, 4, potencia * 40, C.red);
+			}
+
+			// pelea: riel con la barra, el pez y el medidor
+			if (estado === 'pelea' && pelea && pez) {
+				rect(ctx, TX - 9, TY - 7, 52, TH + 14, C.raise);
+				marco(ctx, TX - 9, TY - 7, 52, TH + 14, C.ink);
+				trama(ctx, TX, TY, TW, TH, C.ink, () => 0.1);
+				marco(ctx, TX - 1, TY - 1, TW + 2, TH + 2, C.ink);
+				const y0 = TY + TH - (pelea.barra + pelea.alto) * TH;
+				const hb = pelea.alto * TH;
+				trama(ctx, TX, y0, TW, hb, C.red, () => 0.55);
+				rect(ctx, TX, y0, TW, 1, C.red);
+				rect(ctx, TX, y0 + hb - 1, TW, 1, C.red);
+				const w = Math.max(...pez.sprite.map((r) => r.length));
+				const fy = TY + TH - pelea.pez * TH - pez.sprite.length / 2;
+				sprite(ctx, pez.sprite, TX + (TW - w) / 2, fy);
+				const MX = TX + TW + 5;
+				marco(ctx, MX - 1, TY - 1, 8, TH + 2, C.ink);
+				const hp = pelea.progreso * TH;
+				rect(ctx, MX, TY + TH - hp, 6, hp, pelea.progreso < 0.3 ? C.red : C.ink);
+			}
+
+			// resultado: lo que pescaste cuelga de la caña
+			if (estado === 'resultado' && pez) {
+				linea(ctx, tip.x, tip.y, tip.x, tip.y + 22, C.ink);
+				const w = Math.max(...pez.sprite.map((r) => r.length));
+				sprite(ctx, pez.sprite, tip.x - w, tip.y + 22, 2);
+			}
+		}
+
+		// ---- bitácora ----
+		function pintarBitacora() {
+			let vistas = 0;
+			root!.querySelectorAll<HTMLElement>('[data-sp]').forEach((li) => {
+				const p = PECES.find((x) => x.id === li.dataset.sp)!;
+				const reg = log.especies[p.id];
+				const sc = li.querySelector<HTMLCanvasElement>('[data-sp-sprite]')!;
+				const g = sc.getContext('2d')!;
+				g.clearRect(0, 0, sc.width, sc.height);
+				const w = Math.max(...p.sprite.map((r) => r.length));
+				const s = Math.floor(Math.min(sc.width / w, sc.height / p.sprite.length));
+				// sin pescar, solo la silueta
+				const rows = reg ? p.sprite : p.sprite.map((r) => r.replace(/r/g, '#'));
+				sprite(g, rows, (sc.width - w * s) / 2, (sc.height - p.sprite.length * s) / 2, s, reg ? C.ink : C.mute);
+				li.classList.toggle('is-caught', !!reg);
+				li.querySelector('[data-sp-name]')!.textContent = reg ? p.nombre : '???';
+				li.querySelector('[data-sp-meta]')!.textContent = reg ? `× ${reg.n} · récord ${reg.record.toLocaleString('es-MX')} cm` : 'Sin pescar';
+				if (reg) vistas++;
+			});
+			const total = root!.querySelectorAll('[data-sp]').length;
+			$('[data-log-total]').textContent = `${vistas} de ${total} especies · ${log.basura} de basura fuera del canal`;
+		}
+
+		function pintarChips() {
+			const chips = [`Hoy pica más: ${delDia.nombre.toLowerCase()}`, noche ? 'De noche salen más ajolotes' : 'De día'];
+			$('[data-chips]').innerHTML = chips.map((c) => `<span>${c}</span>`).join('');
+		}
+
+		function preparar() {
+			noche = (() => {
+				const h = horaCDMX();
+				return h >= 20 || h < 6;
+			})();
+			leerColores();
+			pintarFondo();
+			pintarBitacora();
+			pintarChips();
+		}
+
+		window.addEventListener('themechange', () => requestAnimationFrame(preparar));
+
+		// solo en desarrollo: para probar el juego completo con un jugador automático
+		if (import.meta.env.DEV) {
+			(window as unknown as { __pesca: unknown }).__pesca = { estado: () => estado, pelea: () => pelea, pez: () => pez?.id };
+		}
+
+		// ---- bucle ----
+		let last = performance.now();
+		let acc = 0;
+		const loop = (now: number) => {
+			const dt = Math.min(now - last, 100);
+			last = now;
+			if (!document.hidden) {
+				acc += dt;
+				while (acc >= TICK) {
+					acc -= TICK;
+					tick();
+				}
+			}
+			render();
+			requestAnimationFrame(loop);
+		};
+		preparar();
+		cambiar('listo');
+		requestAnimationFrame(loop);
+	}
+</script>

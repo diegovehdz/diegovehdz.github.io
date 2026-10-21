@@ -1,0 +1,70 @@
+---
+import FishingGame from '../../components/FishingGame.astro';
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+	title="Pesca en Xochimilco"
+	description="Un minijuego de pesca al estilo de Stardew Valley en los canales de Xochimilco: especies nativas, invasoras, basura y ajolotes que se liberan."
+	bleed="Pesca"
+>
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Lab — Pesca" href="/lab/" right={['Minijuego', 'Inspirado en Stardew Valley']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Pesca en', 'Xochimilco']} as="h1" size="xl" />
+				<div>
+					<p class="blurb">
+						Lanza la caña desde una trajinera, espera a que piquen y mantén al pez dentro de la barra, como en la pesca de Stardew Valley. En los
+						canales hay especies nativas, invasoras que conviene sacar, basura y, con suerte, ajolotes, que siempre regresan al agua. De noche (hora
+						de la CDMX) salen más.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="wrap pesca" aria-label="Juego">
+		<FishingGame />
+	</section>
+
+	<section class="section pesca-how">
+		<div class="wrap">
+			<MetaBar left="Cómo funciona" right={['Física por pasos fijos', 'Pixel art en canvas']} class="section__meta" />
+			<div class="prose pesca-how__text">
+				<h2>Una barra contra un pez</h2>
+				<p>
+					Mientras mantienes presionado, la barra roja acelera hacia arriba; al soltar, la gravedad la regresa y rebota un poco en el fondo. El pez
+					elige destinos al azar en el riel: la dificultad decide qué tan seguido cambia de idea, qué tan lejos va y qué tan rápido acelera. Cada
+					especie tiene su carácter: el charal da tirones, la carpa nada suave, el acocil y el ajolote se hunden y el mexclapique flota.
+				</p>
+				<h2>Pasos fijos</h2>
+				<p>
+					La física avanza en pasos de 1/60 de segundo sin importar la velocidad de tu pantalla, así que el juego se siente igual en un monitor de
+					144 Hz que en un teléfono. Si cambias de pestaña, el juego se pausa.
+				</p>
+				<h2>Calibrado con simulaciones</h2>
+				<p>
+					Para ajustar la dificultad simulé miles de peleas con un jugador automático que reacciona tarde y se equivoca: casi siempre atrapa al
+					acocil, al ajolote entre la mitad y nueve de cada diez veces, según su "habilidad", y al ajolote leucístico muy pocas veces.
+				</p>
+			</div>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.pesca {
+		padding-bottom: var(--section-y);
+	}
+
+	.pesca-how {
+		border-top: 1px solid var(--line);
+	}
+
+	.pesca-how__text {
+		max-width: 68ch;
+	}
+</style>

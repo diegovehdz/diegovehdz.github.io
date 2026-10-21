@@ -1,0 +1,111 @@
+---
+import Frame from '../../components/Frame.astro';
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import ProjectVisual from '../../components/visuals/ProjectVisual.astro';
+import { LAB } from '../../data/lab';
+import Base from '../../layouts/Base.astro';
+---
+
+<Base title="Laboratorio" description="Juegos y experimentos interactivos: pesca en Xochimilco, una escalera de palabras diaria, tramado, detección de bordes, modelo de precios y simulaciones." bleed="Lab">
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Laboratorio" right={[`${LAB.length} experimentos`, 'Hecho a mano, sin frameworks pesados']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Labora-', 'torio']} as="h1" size="xl" />
+				<p class="blurb">
+					Herramientas y simulaciones para usar en el navegador. Algunas nacieron de proyectos de la carrera y otras de preguntas sobre la ciudad.
+					Todas corren en tu computadora, sin servidores de por medio.
+				</p>
+			</div>
+			<ul class="lab-list">
+				{
+					LAB.map((item, i) => (
+						<li class="lab-item reveal">
+							<a href={item.href}>
+								<Frame ratio="4 / 3">
+									<ProjectVisual visual={item.visual} />
+								</Frame>
+								<div class="lab-item__body">
+									<span class="lab-item__meta mono">
+										{String(i + 1).padStart(2, '0')} · {item.status}
+									</span>
+									<h2 class="lab-item__title">{item.title}</h2>
+									<p class="lab-item__kicker">{item.kicker}</p>
+									<p class="soft lab-item__summary">{item.summary}</p>
+								</div>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.lab-list {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: clamp(32px, 3.5vw, 56px) clamp(16px, 2vw, 32px);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	@media (max-width: 1000px) {
+		.lab-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 620px) {
+		.lab-list {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.lab-item a {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.lab-item__body {
+		padding-top: 1rem;
+	}
+
+	.lab-item__meta {
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+		text-transform: uppercase;
+	}
+
+	.lab-item__title {
+		margin: 0.45rem 0 0.2rem;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-stretch: 112%;
+		text-transform: uppercase;
+		letter-spacing: -0.065em;
+		line-height: 0.9;
+		color: var(--red);
+		font-size: clamp(1.6rem, 1.1rem + 1.4vw, 2.4rem);
+	}
+
+	.lab-item a:hover .lab-item__title {
+		color: var(--ink);
+	}
+
+	.lab-item__kicker {
+		margin: 0 0 0.5rem;
+		font-weight: 700;
+		font-size: var(--step--1);
+	}
+
+	.lab-item__summary {
+		margin: 0;
+		font-size: var(--step--1);
+		line-height: 1.5;
+	}
+</style>

@@ -1,0 +1,206 @@
+---
+// Port web de Abnormality (pygame, primer semestre): mismas reglas, tiempos y dibujos originales.
+---
+
+<div class="abn" data-abn>
+	<canvas width="800" height="600" aria-label="Abnormality: encuentra las anomalías de la habitación y haz clic en ellas"></canvas>
+	<p class="abn__help mono">
+		Clic para empezar · Haz clic en lo que cambie en la habitación · 60 segundos · Encuentra más de 5 para ganar
+	</p>
+</div>
+
+<style>
+	.abn {
+		/* el lienzo 4:3 completo cabe en la pantalla */
+		max-width: min(100%, calc((100svh - var(--header-h) - 120px) * 4 / 3));
+		margin-inline: auto;
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius);
+		overflow: hidden;
+		background: #000;
+	}
+
+	canvas {
+		display: block;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 4 / 3;
+		cursor: crosshair;
+		touch-action: manipulation;
+	}
+
+	.abn__help {
+		margin: 0;
+		padding: 12px 16px;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+		background: var(--bg-sunk);
+	}
+</style>
+
+<script>
+	const W = 800;
+	const H = 600;
+	const TICK = 1000 / 30; // el original corre a 30 fps
+	const GAME_MS = 60_000;
+	const FLASH_MS = 1000;
+	const BASE = '/games/abnormality/';
+	// posiciones originales: (x, y - 60) de main.py; el área de clic es de 100 × 100
+	const EVENTS: [number, number][] = [
+		[114, 52], [223, 72], [156, 164], [216, 201], [348, 173], [694, 80],
+		[57, 453], [444, 416], [637, 240], [633, 311], [699, 282],
+	];
+	const BAD = ['oh no', 'Fin del juego', 'Perdiste'];
+	const FONT = '"Courier New", Courier, monospace';
+
+	type State = 'loading' | 'title' | 'play' | 'end';
+
+	function load(src: string) {
+		return new Promise<HTMLImageElement>((res, rej) => {
+			const img = new Image();
+			img.onload = () => res(img);
+			img.onerror = rej;
+			img.src = src;
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-abn]').forEach(async (root) => {
+		const canvas = root.querySelector('canvas')!;
+		const ctx = canvas.getContext('2d')!;
+		let state: State = 'loading';
+		let room: HTMLImageElement | null = null;
+		let sprites: HTMLImageElement[] = [];
+		let t = 0; // tiempo de juego en ms (se detiene si la pestaña no está visible)
+		let start = 0;
+		let clock = 22 * 3600;
+		let score = 0;
+		let active: number[] = [];
+		let flashUntil = 0;
+		let flashText = '';
+		let endMsg = '';
+		let win = false;
+		let acc = 0;
+		let last = performance.now();
+
+		const text = (s: string, size: number, color: string, y: number, weight = 'bold') => {
+			ctx.fillStyle = color;
+			ctx.font = `${weight} ${size}px ${FONT}`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(s, W / 2, y);
+		};
+
+		const render = () => {
+			if (state === 'loading') {
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, W, H);
+				text('cargando…', 26, '#fff', H / 2, 'normal');
+				return;
+			}
+			if (state === 'title') {
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, W, H);
+				text('Abnormality', 72, '#fff', H / 3);
+				text('clic para jugar', 30, '#fff', H / 2, 'normal');
+				return;
+			}
+			if (state === 'end') {
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, W, H);
+				text(endMsg, 72, win ? '#fff' : '#ff0000', H / 2 - 20);
+				text(`anomalías encontradas: ${score}`, 22, '#aaa', H / 2 + 60, 'normal');
+				text('clic para jugar otra vez', 22, '#aaa', H / 2 + 95, 'normal');
+				return;
+			}
+			if (t < flashUntil) {
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, W, H);
+				if (flashText) text(flashText, 34, '#fff', H / 2);
+				return;
+			}
+			ctx.fillStyle = '#fff';
+			ctx.fillRect(0, 0, W, H);
+			if (room) ctx.drawImage(room, 0, 0, W, H);
+			for (const i of active) ctx.drawImage(sprites[i], EVENTS[i][0], EVENTS[i][1]);
+			const hh = Math.floor((clock % 86400) / 3600);
+			const mm = Math.floor((clock % 3600) / 60);
+			ctx.fillStyle = '#000';
+			ctx.font = `bold 26px ${FONT}`;
+			ctx.textAlign = 'left';
+			ctx.textBaseline = 'top';
+			ctx.fillText(`Hora: ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`, W - 200, 15);
+		};
+
+		const tick = () => {
+			if (state !== 'play') return;
+			clock += 30;
+			if (t - start >= GAME_MS) {
+				state = 'end';
+				win = score > 5;
+				endMsg = win ? 'Bien hecho!' : BAD[Math.floor(Math.random() * BAD.length)];
+				return;
+			}
+			if (t >= flashUntil && active.length < 2 && Math.random() * 100 < 1) {
+				const free = EVENTS.map((_, i) => i).filter((i) => !active.includes(i));
+				active.push(free[Math.floor(Math.random() * free.length)]);
+				flashUntil = t + FLASH_MS;
+				flashText = '';
+			}
+		};
+
+		const begin = () => {
+			state = 'play';
+			start = t;
+			clock = 22 * 3600;
+			score = 0;
+			active = [];
+			flashUntil = 0;
+			flashText = '';
+		};
+
+		canvas.addEventListener('pointerdown', (e) => {
+			if (state === 'title' || state === 'end') {
+				begin();
+				return;
+			}
+			if (state !== 'play' || t < flashUntil) return;
+			const r = canvas.getBoundingClientRect();
+			const x = ((e.clientX - r.left) * W) / r.width;
+			const y = ((e.clientY - r.top) * H) / r.height;
+			const hit = active.find((i) => x > EVENTS[i][0] && x < EVENTS[i][0] + 100 && y > EVENTS[i][1] && y < EVENTS[i][1] + 100);
+			if (hit !== undefined) {
+				active = active.filter((i) => i !== hit);
+				score++;
+				flashUntil = t + FLASH_MS;
+				flashText = 'abnormality removed';
+			}
+		});
+
+		const loop = (now: number) => {
+			const dt = Math.min(now - last, 100);
+			last = now;
+			if (!document.hidden) {
+				t += dt;
+				acc += dt;
+				while (acc >= TICK) {
+					acc -= TICK;
+					tick();
+				}
+			}
+			render();
+			requestAnimationFrame(loop);
+		};
+		render();
+		requestAnimationFrame(loop);
+
+		try {
+			[room, ...sprites] = await Promise.all([
+				load(`${BASE}habitacion.png`),
+				...EVENTS.map((_, i) => load(`${BASE}events/event${i + 1}.png`)),
+			]);
+			state = 'title';
+		} catch {
+			state = 'loading';
+		}
+	});
+</script>

@@ -1,0 +1,66 @@
+---
+// Costo de la canasta común (1 kg de cada producto) por lugar, calculado con los datos y el modelo reales.
+import { canastaComun, costoCanasta, lugaresComparables, mxn } from '../../lib/mercado';
+
+const canasta = canastaComun();
+const lista = Object.fromEntries(canasta.map((p) => [p, 1]));
+const filas = costoCanasta(lista, lugaresComparables);
+const max = Math.max(...filas.map((f) => f.costo));
+const W = 640;
+const left = 28;
+const barMax = W - left - 120;
+const top = 92;
+const rowH = 56;
+---
+
+<svg class="viz-mj" viewBox={`0 0 ${W} 480`} role="img" aria-label={`Costo de la canasta común por mercado; el más barato es ${filas[0].lugar.nombre} con ${mxn(filas[0].costo)}`}>
+	<text x={left} y="40" class="m-cap">canasta común · {canasta.length} productos · 1 kg c/u</text>
+	<text x={left} y="60" class="m-cap m-cap--soft">precios medianos observados, ene–sep 2026</text>
+	{
+		filas.map((f, i) => {
+			const y = top + i * rowH;
+			const w = (f.costo / max) * barMax;
+			return (
+				<g>
+					<text x={left} y={y} class="m-name">
+						{f.lugar.nombre}
+					</text>
+					<rect x={left} y={y + 9} width={w} height="18" class={i === 0 ? 'm-bar m-bar--best' : 'm-bar'} />
+					<text x={left + w + 10} y={y + 23} class="m-val">
+						{mxn(f.costo)}
+					</text>
+				</g>
+			);
+		})
+	}
+</svg>
+
+<style>
+	.viz-mj {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	.m-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.m-cap--soft {
+		opacity: 0.7;
+	}
+	.m-name {
+		font: 700 14px var(--font-body);
+		letter-spacing: -0.02em;
+		fill: var(--ink);
+	}
+	.m-bar {
+		fill: var(--line-strong);
+	}
+	.m-bar--best {
+		fill: var(--red);
+	}
+	.m-val {
+		font: 500 12.5px var(--font-mono);
+		fill: var(--ink-soft);
+	}
+</style>

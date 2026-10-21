@@ -1,0 +1,31 @@
+---
+// Tarjeta del laboratorio de tramado: la escena de la luna, en caracteres ASCII.
+import Dither from '../Dither.astro';
+---
+
+<div class="viz-tramado">
+	<Dither art="alcanzar" mode="ascii" cell={4} fit="contain" ramp="numeros" contrast={1.15} />
+	<span class="t-cap mono">ascii · rampa .:;7?JY5PGB#&@</span>
+</div>
+
+<style>
+	.viz-tramado {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+
+	.viz-tramado :global(.dither) {
+		position: absolute;
+		inset: 0;
+	}
+
+	.t-cap {
+		position: absolute;
+		left: 12px;
+		bottom: 10px;
+		font-size: clamp(9px, 1.8cqw, 12px);
+		color: var(--ink-mute);
+	}
+</style>

@@ -1,0 +1,27 @@
+---
+title: Agentes inteligentes
+kicker: Reactivo vs. A* vs. Q-learning en seis mapas
+summary: Tres tipos de agente que navegan una cuadrícula con obstáculos (uno reactivo, uno que planea con A* y uno que aprende con Q-learning), comparados en seis mapas. Además, minimax para juegos de dos jugadores.
+year: 2026
+period: ene — feb 2026
+context: Sistemas multiagentes
+role: Implementación y comparación de los agentes.
+stack: [Python, Mesa, C++]
+tags: [ia, simulacion]
+order: 10
+visual: agentes
+---
+
+## Tres formas de llegar a la meta
+
+- **Agente reactivo.** No tiene memoria ni plan: decide cada paso con lo que percibe a su alrededor. Es rápido, pero se atora con facilidad en callejones sin salida.
+- **Agente con A\*.** Conoce el mapa y planea la ruta completa antes de moverse, guiado por una heurística (distancia Manhattan) que nunca sobreestima lo que falta. Encuentra la ruta óptima explorando muchas menos celdas que una búsqueda a ciegas.
+- **Agente con Q-learning.** No conoce el mapa. Aprende por prueba y error una tabla `Q(estado, acción)` con tasa de aprendizaje α = 0.1, descuento γ = 0.9 y exploración ε = 0.2, y la guarda para reutilizarla.
+
+Los tres corren sobre **Mesa** en seis mapas (A1 a C2). Así se ve el costo real de cada enfoque: cuántos nodos explora, cuántos pasos da y si llega.
+
+## Minimax
+
+Para juegos de suma cero implementé **minimax** en C++ y generé el árbol de búsqueda en Graphviz para visualizar qué ramas se evalúan.
+
+La ilustración de arriba se genera en cada build: A\* sobre una cuadrícula aleatoria, con las celdas exploradas en rojo tenue.

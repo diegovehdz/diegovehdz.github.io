@@ -1,0 +1,78 @@
+---
+// Tarjeta de Escalera: un camino de ejemplo hasta la meta, con la letra que cambia en rojo.
+import { META } from '../../data/escalera';
+
+const pasos = ['luna', 'cuna', 'cana', META];
+const cambia = (a: string, b: string) => [...a].findIndex((c, i) => c !== b[i]);
+---
+
+<div class="viz-esc" role="img" aria-label={`Ejemplo: ${pasos.join(', ')}`}>
+	<ol>
+		{
+			pasos.map((w, i) => (
+				<li>
+					{[...w].map((c, j) => (
+						<span class:list={['t', i > 0 && j === cambia(pasos[i - 1], w) && 'is-on', i === pasos.length - 1 && 'is-meta']}>{c}</span>
+					))}
+				</li>
+			))
+		}
+	</ol>
+	<span class="e-cap mono">una letra a la vez · par 3</span>
+</div>
+
+<style>
+	.viz-esc {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
+		background: var(--bg-raise);
+	}
+
+	ol {
+		display: grid;
+		gap: 1.4cqw;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	li {
+		display: flex;
+		gap: 1.4cqw;
+	}
+
+	.t {
+		display: grid;
+		place-items: center;
+		width: 9.5cqw;
+		aspect-ratio: 1;
+		border: 2px solid var(--line-strong);
+		border-radius: 1.6cqw;
+		font: 900 5cqw / 1 var(--font-display);
+		font-stretch: 112%;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.t.is-meta {
+		border-color: var(--red);
+		color: var(--red-ink);
+	}
+
+	.t.is-on {
+		background: var(--red);
+		border-color: var(--red);
+		color: var(--on-red);
+	}
+
+	.e-cap {
+		position: absolute;
+		left: 12px;
+		bottom: 10px;
+		font-size: clamp(9px, 1.8cqw, 12px);
+		color: var(--ink-mute);
+	}
+</style>

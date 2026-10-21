@@ -1,0 +1,71 @@
+---
+title: ¿Cuál es la ruta más corta para visitar cinco cafeterías?
+description: El problema del agente viajero explicado con café. Por qué probar todas las rutas es imposible y cómo dos ideas simples, el vecino más cercano y 2-opt, dan rutas casi perfectas en milisegundos.
+kicker: Algoritmos · TSP
+pubDate: 2026-10-07
+tags: [algoritmos, tsp, cdmx]
+---
+
+import TspPlayground from '../../components/TspPlayground.astro';
+
+En el [mapa de cafeterías](/cafes/) de este sitio puedes elegir varias y la página arma la ruta sola: te dice en qué orden visitarlas para caminar lo menos posible. Parece un problema de primaria, pero detrás está uno de los problemas más famosos de la computación: el **problema del agente viajero**, o TSP por sus siglas en inglés.
+
+## El problema
+
+Tienes una lista de lugares y conoces la distancia entre cada par. Quieres el recorrido más corto que pase por todos. En la versión clásica también regresas al punto de partida.
+
+Con tres cafeterías no hay mucho que pensar. Con cinco ya empieza a costar: ¿voy primero a Coyoacán y luego a Del Valle, o al revés? Con diez, ni con papel y lápiz.
+
+## ¿Por qué no probar todas las rutas?
+
+Porque son muchísimas. Si fijas el punto de partida, las demás paradas pueden ir en cualquier orden: (n − 1)! maneras. Como recorrer una ruta al revés mide lo mismo, quedan **(n − 1)! / 2** rutas distintas:
+
+| Paradas | Rutas distintas |
+| ------: | --------------: |
+| 5 | 12 |
+| 8 | 2,520 |
+| 10 | 181,440 |
+| 15 | 43,589,145,600 |
+| 20 | 60,822,550,204,416,000 |
+
+Si una computadora revisara **mil millones de rutas por segundo**, las de 20 paradas le tomarían casi dos años. Y cada parada extra multiplica el trabajo.
+
+El TSP es **NP-difícil**: no se conoce ningún algoritmo que encuentre siempre la ruta óptima en tiempo polinomial, y si alguien lo encontrara habría resuelto el problema de P contra NP, uno de los siete Problemas del Milenio. Eso no impide resolver casos grandes con mucho ingenio. En 1954, Dantzig, Fulkerson y Johnson resolvieron de forma óptima una instancia de 49 ciudades de Estados Unidos, y en 2006 el programa Concorde certificó la ruta óptima de una instancia con 85,900 puntos. Pero para un mapa que tiene que responder al instante en tu celular, la estrategia es otra: **heurísticas**.
+
+## Idea 1: ir siempre a la más cercana
+
+La estrategia más intuitiva: desde donde estás, ve a la cafetería más cercana que no hayas visitado. Repite hasta terminar.
+
+Se llama **vecino más cercano** y es rápida: con n paradas hace del orden de n² comparaciones. Su defecto es la miopía. Al principio todo va bien, pero las últimas paradas quedan desperdigadas y la ruta termina con saltos largos y, muchas veces, **cruces**.
+
+## Idea 2: deshacer los cruces
+
+Una ruta que se cruza a sí misma nunca es óptima. Si dos tramos se cruzan, puedes "descruzarlos": quitas esos dos tramos, reconectas los extremos de la otra forma posible e inviertes el pedazo de ruta que quedó en medio. Por la desigualdad del triángulo, la ruta nueva siempre es más corta.
+
+Esa operación se llama **2-opt** (la propuso G. A. Croes en 1958). El algoritmo es repetirla mientras alguna mejore la ruta. Cuando ya ninguna ayuda, la ruta no tiene cruces y está en un *óptimo local*: no necesariamente la mejor del mundo, pero ningún cambio de dos tramos la mejora.
+
+## Pruébalo
+
+Toca el lienzo para poner cafeterías (o usa "8 al azar"). Primero corre el vecino más cercano, luego mejóralo con 2-opt y, si hay 9 o menos, compara contra la fuerza bruta, que sí revisa todas las rutas.
+
+<TspPlayground />
+
+Casi siempre verás lo mismo: el vecino más cercano deja algún cruce, 2-opt lo deshace y queda a muy poco del óptimo. Muchas veces lo iguala.
+
+## ¿Qué tan buenas son?
+
+Con pocos puntos, como una ruta de cafeterías, 2-opt suele dar la ruta óptima o una casi idéntica. En instancias aleatorias grandes, los estudios clásicos de Johnson y McGeoch encontraron que el vecino más cercano queda en promedio alrededor de **25 %** por encima de la mejor ruta posible, y 2-opt alrededor de **5 %**. Todo eso en milisegundos, contra los años de la fuerza bruta.
+
+En el mapa de cafeterías uso exactamente esto: vecino más cercano para una primera ruta y 2-opt para pulirla. Hay un detalle: la ruta no regresa al inicio (nadie quiere volver a la primera cafetería) y el punto de partida es fijo: tu ubicación si la compartes, o la primera cafetería que agregaste.
+
+## Lo que el mapa no sabe
+
+Las distancias del mapa son **en línea recta** (la distancia más corta sobre la superficie de la Tierra, con la fórmula del haversine). Las calles reales tienen sentidos, Periférico, camellones y glorietas. Para eso haría falta el grafo de calles de la ciudad y calcular la distancia real entre cada par de cafeterías con Dijkstra o A\*. Por eso el botón "Abrir en Google Maps" le pasa tu ruta ya ordenada para que trace el camino por las calles.
+
+## Referencias
+
+- G. A. Croes (1958). "A Method for Solving Traveling-Salesman Problems". *Operations Research*, 6(6), 791–812.
+- G. Dantzig, R. Fulkerson y S. Johnson (1954). "Solution of a Large-Scale Traveling-Salesman Problem". *Journal of the Operations Research Society of America*, 2(4), 393–410.
+- D. S. Johnson y L. A. McGeoch (1997). "The Traveling Salesman Problem: A Case Study in Local Optimization". En *Local Search in Combinatorial Optimization*. Wiley.
+- D. Applegate, R. Bixby, V. Chvátal y W. Cook (2006). *The Traveling Salesman Problem: A Computational Study*. Princeton University Press.
+- W. Cook (2012). *In Pursuit of the Traveling Salesman*. Princeton University Press.

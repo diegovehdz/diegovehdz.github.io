@@ -1,0 +1,493 @@
+---
+import 'leaflet/dist/leaflet.css';
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import Base from '../../layouts/Base.astro';
+import { canastaComun, lugares, metricas, productos } from '../../lib/mercado';
+
+const sorted = [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+const canasta = canastaComun();
+---
+
+<Base
+	title="Mercado Justo"
+	description="Arma tu lista y estima cuánto costaría en siete mercados y tianguis de la CDMX, con un modelo entrenado sobre 279 precios levantados en campo."
+	bleed="Mercado"
+>
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar
+				left="Lab — 02"
+				href="/lab/"
+				right={[`${metricas.registros} precios`, `${metricas.lugares} lugares`, `${metricas.puestos} puestos`]}
+				class="section__meta"
+			/>
+			<div class="section__head">
+				<Title lines={['Mercado', 'Justo']} as="h1" size="xl" />
+				<div>
+					<p class="blurb">
+						¿Dónde conviene comprar tu lista? Elige productos y cantidades: para cada mercado se usa el precio mediano que medimos en campo y, si
+						ese lugar no lo vendía, lo estima un modelo de regresión entrenado con los datos.
+					</p>
+					<p class="mj-credit">
+						Proyecto de datos con Héctor Lugo Gabino y Santino Matías Im. <a href="/proyectos/mercado-justo/">Cómo lo hicimos →</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="mj wrap" aria-label="Calculadora de canasta">
+		<div class="mj__list">
+			<div class="mj__head">
+				<h2>Tu lista</h2>
+				<div class="chips">
+					<button class="pill pill--sm" type="button" data-preset="comun">Canasta común</button>
+					<button class="pill pill--sm" type="button" data-preset="ejemplo">Lista de ejemplo</button>
+					<button class="pill pill--sm pill--ghost" type="button" data-preset="vaciar">Vaciar</button>
+				</div>
+			</div>
+			<label class="mj__search">
+				<span class="visually-hidden">Buscar producto</span>
+				<input type="search" placeholder="Buscar producto…" data-mj-q autocomplete="off" />
+			</label>
+			<ul class="mj__products" data-products>
+				{
+					sorted.map((p) => (
+						<li class="prod" data-id={p.id} data-name={p.nombre.toLowerCase()}>
+							<span class="prod__name">
+								{p.nombre}
+								<small>por {p.unidad}</small>
+							</span>
+							<span class="prod__qty">
+								<button type="button" data-step="-1" aria-label={`Menos ${p.nombre}`}>
+									−
+								</button>
+								<output data-qty>0</output>
+								<button type="button" data-step="1" aria-label={`Más ${p.nombre}`}>
+									+
+								</button>
+							</span>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+
+		<div class="mj__results">
+			<div class="mj__head">
+				<h2>Cuánto costaría</h2>
+				<span class="mono muted mj__count" data-mj-count></span>
+			</div>
+			<ol class="mj__bars" data-bars aria-live="polite"></ol>
+			<p class="mj__empty muted" data-mj-empty>Agrega productos a tu lista para comparar.</p>
+			<div class="mj__map" data-mj-map aria-label="Mapa de los lugares del estudio"></div>
+			<p class="mj__fine muted">
+				Precios medianos levantados entre {metricas.fecha_inicio.slice(0, 7)} y {metricas.fecha_fin.slice(0, 7)} en los lugares de la muestra.
+				"Estimado" significa que ese lugar no vendía el producto cuando fuimos y el precio sale del modelo. El Mercado Santa Fe tiene pocos registros,
+				así que sus estimaciones son menos confiables.
+			</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="wrap">
+			<MetaBar left="El modelo" right={['Regresión lineal sobre ln(precio)']} class="section__meta" />
+			<div class="mj-model">
+				<div>
+					<Title lines={['Cómo', 'estima']} size="m" />
+					<div class="blurb" style="margin-top:1.5rem">
+						<p>
+							Cada precio se modela como <code>ln(precio) = β₀ + β<sub>producto</sub> + β<sub>lugar</sub></code>. Trabajar con el logaritmo
+							vuelve multiplicativos los efectos: el lugar no suma pesos, multiplica. Un factor de 1.08 significa "8 % más caro que el lugar de
+							referencia".
+						</p>
+						<p>
+							La canasta común son los {canasta.length} productos que se vendían en todos los lugares con suficientes registros. Con esa canasta,
+							la diferencia entre el lugar más barato y el más caro es de casi 20 %.
+						</p>
+					</div>
+				</div>
+				<ul class="mj-stats stats">
+					<li><span class="stat__n">{metricas.r2_prueba_promedio}</span><span class="stat__l">R² promedio en prueba (30 particiones)</span></li>
+					<li><span class="stat__n">${metricas.mae_pesos_promedio}</span><span class="stat__l">error absoluto medio por producto</span></li>
+					<li><span class="stat__n">{metricas.registros}</span><span class="stat__l">precios en el conjunto de datos</span></li>
+					<li><span class="stat__n">{lugares.length}</span><span class="stat__l">mercados y tianguis</span></li>
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<script type="application/json" id="mj-canasta" set:html={JSON.stringify(canasta)} />
+</Base>
+
+<style>
+	.mj-credit {
+		font-size: var(--step--1);
+		color: var(--ink-mute);
+	}
+
+	.mj {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+		gap: clamp(20px, 3vw, 56px);
+		align-items: start;
+		padding-bottom: var(--section-y);
+	}
+
+	@media (max-width: 900px) {
+		.mj {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.mj__head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px 16px;
+		margin-bottom: 14px;
+	}
+
+	.mj__head h2 {
+		font-size: var(--step-2);
+		letter-spacing: -0.05em;
+	}
+
+	.mj__search input {
+		width: 100%;
+		height: 42px;
+		padding: 0 16px;
+		border: 1.5px solid var(--line-strong);
+		border-radius: 999px;
+		background: var(--bg-raise);
+		font-size: var(--step--1);
+	}
+
+	.mj__search input:focus {
+		outline: none;
+		border-color: var(--red);
+	}
+
+	.mj__products {
+		list-style: none;
+		margin: 14px 0 0;
+		padding: 0;
+		border-top: 1px solid var(--line);
+		max-height: min(66svh, 640px);
+		overflow-y: auto;
+	}
+
+	.prod {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 9px 2px;
+		border-bottom: 1px solid var(--line);
+	}
+
+	.prod[hidden] {
+		display: none;
+	}
+
+	.prod.is-on .prod__name {
+		color: var(--red-ink);
+	}
+
+	.prod__name {
+		font-weight: 600;
+		font-size: var(--step--1);
+		letter-spacing: -0.02em;
+	}
+
+	.prod__name small {
+		display: block;
+		font-weight: 400;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.prod__qty {
+		display: inline-flex;
+		align-items: center;
+		border: 1.5px solid var(--line-strong);
+		border-radius: 999px;
+		overflow: hidden;
+		flex: none;
+	}
+
+	.prod__qty button {
+		width: 34px;
+		height: 32px;
+		border: 0;
+		background: none;
+		cursor: pointer;
+		font-size: 1rem;
+	}
+
+	.prod__qty button:hover {
+		background: var(--bg-raise);
+		color: var(--red-ink);
+	}
+
+	.prod__qty output {
+		min-width: 2.6em;
+		text-align: center;
+		font: 600 var(--step--1) var(--font-mono);
+	}
+
+	.mj__bars {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 14px;
+	}
+
+	.mj__bars :global(li) {
+		display: grid;
+		gap: 6px;
+	}
+
+	.mj__bars :global(.bar-top) {
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+		font-size: var(--step--1);
+	}
+
+	.mj__bars :global(.bar-name) {
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	.mj__bars :global(.bar-cost) {
+		font-family: var(--font-mono);
+		white-space: nowrap;
+	}
+
+	.mj__bars :global(.bar-track) {
+		height: 14px;
+		background: var(--bg-raise);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+
+	.mj__bars :global(.bar-fill) {
+		height: 100%;
+		background: var(--line-strong);
+		border-radius: 999px;
+		transition: width 0.5s var(--ease);
+	}
+
+	.mj__bars :global(li.is-best .bar-fill) {
+		background: var(--red);
+	}
+
+	.mj__bars :global(.bar-note) {
+		font: 500 var(--step--2) var(--font-mono);
+		color: var(--ink-mute);
+	}
+
+	.mj__empty[hidden] {
+		display: none;
+	}
+
+	.mj__map {
+		height: 300px;
+		margin-top: 24px;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		background: var(--bg-sunk);
+	}
+
+	.mj__map :global(.leaflet-tile-pane) {
+		filter: var(--tiles-filter);
+	}
+
+	.mj__map :global(.mj-pin) {
+		display: grid;
+		place-items: center;
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		background: var(--line-strong);
+		border: 2px solid var(--bg);
+		color: var(--ink);
+		font: 800 11px var(--font-mono);
+	}
+
+	.mj__map :global(.mj-pin.is-best) {
+		background: var(--red);
+		color: var(--on-red);
+	}
+
+	.mj__map :global(.leaflet-control-attribution) {
+		background: color-mix(in srgb, var(--bg) 80%, transparent);
+		color: var(--ink-mute);
+		font-size: 10px;
+	}
+
+	.mj__map :global(.leaflet-tooltip) {
+		background: var(--bg);
+		color: var(--ink);
+		border: 1px solid var(--line-strong);
+		font-family: var(--font-body);
+		box-shadow: none;
+	}
+
+	.mj__fine {
+		margin-top: 16px;
+		font-size: var(--step--2);
+		line-height: 1.5;
+	}
+
+	.mj-model {
+		display: grid;
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+		gap: clamp(24px, 4vw, 72px);
+		align-items: end;
+	}
+
+	.mj-model code {
+		font-family: var(--font-mono);
+		font-size: 0.85em;
+		letter-spacing: 0;
+		background: var(--bg-raise);
+		padding: 0.1em 0.35em;
+		border-radius: 6px;
+	}
+
+	.mj-stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	@media (max-width: 900px) {
+		.mj-model {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<script>
+	import L from 'leaflet';
+	import { TILE_OPTIONS, TILE_URL } from '../../lib/map-tiles';
+	import { costoCanasta, lugares, mxn, productos } from '../../lib/mercado';
+
+	const qty = new Map<string, number>();
+	const stepFor = (id: string) => {
+		const u = productos.find((p) => p.id === id)?.unidad ?? 'kg';
+		return u === 'kg' || u === 'litro' ? 0.5 : 1;
+	};
+	const canasta: string[] = JSON.parse(document.getElementById('mj-canasta')?.textContent || '[]');
+	const presets: Record<string, Record<string, number>> = {
+		comun: Object.fromEntries(canasta.map((p) => [p, 1])),
+		ejemplo: { P16: 2, P11: 1, P06: 1, P23: 1, P10: 1, P09: 0.5 },
+		vaciar: {},
+	};
+
+	const bars = document.querySelector<HTMLOListElement>('[data-bars]')!;
+	const empty = document.querySelector<HTMLElement>('[data-mj-empty]')!;
+	const count = document.querySelector<HTMLElement>('[data-mj-count]')!;
+
+	// mapa pequeño con los lugares del estudio
+	const mapEl = document.querySelector<HTMLElement>('[data-mj-map]')!;
+	const map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: false, attributionControl: true });
+	L.tileLayer(TILE_URL, TILE_OPTIONS).addTo(map);
+	const located = lugares.filter((l) => l.lat && l.lng);
+	map.fitBounds(L.latLngBounds(located.map((l) => [l.lat, l.lng] as [number, number])), { padding: [30, 30] });
+	const pins = new Map<string, L.Marker>();
+	for (const l of located) {
+		const m = L.marker([l.lat, l.lng], {
+			icon: L.divIcon({ className: '', html: `<span class="mj-pin">·</span>`, iconSize: [26, 26], iconAnchor: [13, 13] }),
+		})
+			.bindTooltip(l.nombre, { direction: 'top', offset: [0, -12] })
+			.addTo(map);
+		pins.set(l.id, m);
+	}
+
+	function update() {
+		const lista = Object.fromEntries([...qty.entries()].filter(([, q]) => q > 0));
+		const n = Object.keys(lista).length;
+		document.querySelectorAll<HTMLElement>('.prod').forEach((li) => {
+			const q = qty.get(li.dataset.id!) ?? 0;
+			li.querySelector('output')!.textContent = String(q);
+			li.classList.toggle('is-on', q > 0);
+		});
+		count.textContent = n ? `${n} producto${n === 1 ? '' : 's'}` : '';
+		empty.hidden = n > 0;
+		if (!n) {
+			bars.innerHTML = '';
+			pins.forEach((m) => {
+				const el = m.getElement()?.querySelector('.mj-pin');
+				if (el) {
+					el.textContent = '·';
+					el.classList.remove('is-best');
+				}
+			});
+			return;
+		}
+		const filas = costoCanasta(lista);
+		const max = Math.max(...filas.map((f) => f.costo));
+		bars.innerHTML = filas
+			.map((f, i) => {
+				const notes = [
+					i === 0 ? 'el más barato' : `+${f.vsMasBarato.toFixed(1)} %`,
+					f.estimados ? `${f.estimados} estimado${f.estimados === 1 ? '' : 's'}` : 'todo observado',
+					f.sinDato ? `${f.sinDato} sin dato` : '',
+					f.lugar.registros < 20 ? 'pocos registros' : '',
+				].filter(Boolean);
+				return `<li class="${i === 0 ? 'is-best' : ''}">
+					<div class="bar-top"><span class="bar-name">${i + 1}. ${f.lugar.nombre}</span><span class="bar-cost">${mxn(f.costo)}</span></div>
+					<div class="bar-track"><div class="bar-fill" style="width:${((f.costo / max) * 100).toFixed(1)}%"></div></div>
+					<span class="bar-note">${notes.join(' · ')}</span>
+				</li>`;
+			})
+			.join('');
+		filas.forEach((f, i) => {
+			const el = pins.get(f.lugar.id)?.getElement()?.querySelector('.mj-pin');
+			if (el) {
+				el.textContent = String(i + 1);
+				el.classList.toggle('is-best', i === 0);
+			}
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('.prod').forEach((li) => {
+		const id = li.dataset.id!;
+		li.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+			b.addEventListener('click', () => {
+				const next = Math.max(0, Math.round(((qty.get(id) ?? 0) + Number(b.dataset.step) * stepFor(id)) * 10) / 10);
+				qty.set(id, next);
+				update();
+			}),
+		);
+	});
+
+	document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) =>
+		b.addEventListener('click', () => {
+			qty.clear();
+			Object.entries(presets[b.dataset.preset!]).forEach(([id, q]) => qty.set(id, q));
+			update();
+		}),
+	);
+
+	const search = document.querySelector<HTMLInputElement>('[data-mj-q]')!;
+	search.addEventListener('input', () => {
+		const q = search.value
+			.trim()
+			.toLowerCase()
+			.normalize('NFD')
+			.replace(/[̀-ͯ]/g, '');
+		document.querySelectorAll<HTMLElement>('.prod').forEach((li) => {
+			const name = (li.dataset.name || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+			li.hidden = !!q && !name.includes(q);
+		});
+	});
+
+	Object.entries(presets.comun).forEach(([id, q]) => qty.set(id, q));
+	update();
+</script>

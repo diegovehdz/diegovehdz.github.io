@@ -1,0 +1,675 @@
+---
+import MetaBar from '../../components/MetaBar.astro';
+import Title from '../../components/Title.astro';
+import Base from '../../layouts/Base.astro';
+import { bayer } from '../../lib/dither';
+
+const ESCENAS = [
+	{ id: 'mano-der', label: 'Mano' },
+	{ id: 'alcanzar', label: 'Luna' },
+	{ id: 'columnas', label: 'Columnas' },
+	{ id: 'volcanes', label: 'Volcanes' },
+	{ id: 'espada', label: 'Espada' },
+];
+const METODOS = [
+	{ id: 'bayer2', label: 'Bayer 2 × 2' },
+	{ id: 'bayer4', label: 'Bayer 4 × 4' },
+	{ id: 'bayer8', label: 'Bayer 8 × 8' },
+	{ id: 'floyd', label: 'Floyd–Steinberg' },
+	{ id: 'atkinson', label: 'Atkinson' },
+	{ id: 'umbral', label: 'Umbral' },
+	{ id: 'ascii', label: 'ASCII' },
+];
+// la matriz de Bayer 8 × 8 como números enteros 0–63, para la explicación
+const matriz = Array.from(bayer(8), (v) => Math.round(v * 64 - 0.5));
+---
+
+<Base
+	title="Tramado"
+	description="Dithering y arte ASCII en el navegador: el motor que dibuja las imágenes del sitio, para tramar escenas 3D, una foto o tu cámara."
+	bleed="Tramado"
+>
+	<section class="section section--tight">
+		<div class="wrap">
+			<MetaBar left="Lab — Tramado" href="/lab/" right={['Dithering y arte ASCII', 'Nada sale de tu navegador']} class="section__meta" />
+			<div class="section__head">
+				<Title lines={['Tramado']} as="h1" size="xl" />
+				<div>
+					<p class="blurb">
+						Las imágenes de este sitio no son fotos ni ilustraciones descargadas. Son escenas 3D que modelé con funciones de distancia, rendericé
+						con un raymarcher propio y que tu navegador convierte en puntos con una matriz de Bayer. Aquí puedes tramar esas escenas, cualquier
+						imagen o tu cámara, y guardar el resultado.
+					</p>
+					<p class="td-credit"><a href="/lab/bordes/">El mismo trabajo con matrices de píxeles, en bordes en vivo →</a></p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="wrap td" aria-label="Laboratorio de tramado">
+		<div class="td__controls">
+			<fieldset>
+				<legend class="mono">Imagen</legend>
+				<div class="chips no-reveal">
+					{
+						ESCENAS.map((e, i) => (
+							<button class="pill pill--sm" type="button" data-src={e.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+								{e.label}
+							</button>
+						))
+					}
+					<button class="pill pill--sm" type="button" data-src="camara" aria-pressed="false">
+						<span class="dot-live" aria-hidden="true"></span> Usar mi cámara
+					</button>
+					<label class="pill pill--sm pill--ghost td__upload">
+						Subir imagen
+						<input type="file" accept="image/*" data-file class="visually-hidden" />
+					</label>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend class="mono">Método</legend>
+				<div class="chips no-reveal">
+					{
+						METODOS.map((m) => (
+							<button class="pill pill--sm" type="button" data-algo={m.id} aria-pressed={m.id === 'bayer8' ? 'true' : 'false'}>
+								{m.label}
+							</button>
+						))
+					}
+				</div>
+			</fieldset>
+
+			<fieldset class="td__params">
+				<legend class="mono">Ajustes</legend>
+				<label>
+					<span>Tamaño del punto <output data-out="cell">4 px</output></span>
+					<input type="range" min="2" max="12" value="4" data-in="cell" />
+				</label>
+				<label>
+					<span>Brillo <output data-out="bright">0</output></span>
+					<input type="range" min="-50" max="50" value="0" data-in="bright" />
+				</label>
+				<label>
+					<span>Contraste <output data-out="contrast">1.2</output></span>
+					<input type="range" min="50" max="250" value="120" data-in="contrast" />
+				</label>
+				<label>
+					<span>Gamma <output data-out="gamma">1.0</output></span>
+					<input type="range" min="40" max="250" value="100" data-in="gamma" />
+				</label>
+				<label data-only="ascii" hidden>
+					<span>Caracteres</span>
+					<select data-ramp>
+						<option value="clasica">Clásica · .:-=+*#%@</option>
+						<option value="numeros">Firmas · .:;7?JY5PGB#&@</option>
+						<option value="fina">Fina (70 caracteres)</option>
+						<option value="bloques">Bloques ░▒▓█</option>
+					</select>
+				</label>
+				<div class="chips no-reveal">
+					<button class="pill pill--sm" type="button" data-toggle="invert" aria-pressed="false">Invertir</button>
+					<button class="pill pill--sm" type="button" data-toggle="round" aria-pressed="false">Puntos redondos</button>
+					<button class="pill pill--sm" type="button" data-toggle="red" aria-pressed="false">En rojo</button>
+					<button class="pill pill--sm" type="button" data-toggle="transparent" aria-pressed="false">Fondo transparente</button>
+				</div>
+			</fieldset>
+
+			<div class="chips no-reveal td__actions">
+				<button class="pill pill--sm pill--solid" type="button" data-save>Guardar PNG</button>
+				<button class="pill pill--sm pill--ghost" type="button" data-copy hidden>Copiar texto</button>
+			</div>
+			<p class="td__status mono" data-status aria-live="polite"></p>
+		</div>
+
+		<div class="td__stage" data-stage>
+			<canvas data-canvas aria-label="Imagen tramada"></canvas>
+			<span class="td__hud mono" data-hud></span>
+		</div>
+	</section>
+
+	<section class="section td-how">
+		<div class="wrap">
+			<MetaBar left="Cómo funciona" right={['Matrices de umbral', 'Difusión de error', 'Raymarching']} class="section__meta" />
+			<div class="td-how__grid">
+				<figure class="td-matrix" aria-label="Matriz de Bayer de 8 por 8">
+					<div class="td-matrix__grid">
+						{matriz.map((v) => <span class:list={[v > 31 && 'is-dark']} style={`--v:${v / 63}`}>{v}</span>)}
+					</div>
+					<figcaption class="mono">Matriz de Bayer 8 × 8. Cada píxel se compara con el número de su casilla (÷ 64).</figcaption>
+				</figure>
+				<div class="prose td-how__text">
+					<h2>Un umbral distinto para cada píxel</h2>
+					<p>
+						Con un solo umbral, todo lo gris se vuelve blanco o negro y se pierde la forma. El tramado ordenado compara cada píxel con un umbral
+						distinto, tomado de una matriz que se repite como un azulejo. La matriz de Bayer está construida para que los umbrales parecidos
+						queden lo más lejos posible entre sí, así que cualquier gris se convierte en un patrón parejo de puntos.
+					</p>
+					<h2>Repartir el error</h2>
+					<p>
+						Floyd–Steinberg y Atkinson recorren la imagen y reparten entre los vecinos el error de redondear cada píxel. Se ven más orgánicos,
+						pero un cambio pequeño reacomoda todos los puntos, así que no sirven para animar.
+					</p>
+					<h2>Por qué el sitio usa Bayer</h2>
+					<p>
+						Si el umbral sube poco a poco, los puntos aparecen en el orden de la matriz. Esa es la animación con la que se revelan las imágenes
+						del sitio, y se calcula al tamaño exacto de tu pantalla, con el color de tu tema.
+					</p>
+					<h2>De dónde salen las escenas</h2>
+					<p>
+						Las manos, la luna, las columnas y la espada son funciones de distancia con signo: esferas, conos y cajas que se funden con una unión
+						suave, trazadas con raymarching en Node.js. Los volcanes son un campo de alturas con ruido. El código está en
+						<code>scripts/art/</code> y cada imagen pesa entre 20 y 130 KB.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.td-credit {
+		font-size: var(--step--1);
+	}
+
+	.td {
+		display: grid;
+		grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+		gap: clamp(20px, 3vw, 48px);
+		align-items: start;
+		padding-bottom: var(--section-y);
+	}
+
+	@media (max-width: 900px) {
+		.td {
+			grid-template-columns: 1fr;
+		}
+
+		.td__stage {
+			order: -1;
+		}
+	}
+
+	fieldset {
+		border: 0;
+		margin: 0 0 1.4rem;
+		padding: 0;
+	}
+
+	legend {
+		margin-bottom: 0.6rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+		text-transform: uppercase;
+	}
+
+	.td__upload {
+		position: relative;
+		cursor: pointer;
+	}
+
+	.td__params label {
+		display: grid;
+		gap: 4px;
+		margin-bottom: 0.8rem;
+		font-size: var(--step--1);
+		color: var(--ink-soft);
+	}
+
+	.td__params label[hidden] {
+		display: none;
+	}
+
+	.td__params input[type='range'] {
+		accent-color: var(--red);
+		width: 100%;
+	}
+
+	.td__params select {
+		font: inherit;
+		color: var(--ink);
+		background: var(--bg-raise);
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius-sm);
+		padding: 6px 8px;
+	}
+
+	.td__params output {
+		font-family: var(--font-mono);
+		color: var(--ink);
+	}
+
+	.td__actions [hidden] {
+		display: none;
+	}
+
+	.td__status {
+		min-height: 1.4em;
+		margin-top: 0.8rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	.td__stage {
+		position: relative;
+		display: grid;
+		place-items: center;
+		min-height: 240px;
+		border: 1.5px solid var(--line-strong);
+		border-radius: var(--radius);
+		overflow: hidden;
+		background: var(--bg);
+	}
+
+	/* con fondo transparente, una cuadrícula sutil deja ver qué partes no tienen color */
+	.td__stage.is-transparent {
+		background-image: linear-gradient(45deg, var(--bg-raise) 25%, transparent 25%, transparent 75%, var(--bg-raise) 75%),
+			linear-gradient(45deg, var(--bg-raise) 25%, transparent 25%, transparent 75%, var(--bg-raise) 75%);
+		background-size: 16px 16px;
+		background-position:
+			0 0,
+			8px 8px;
+	}
+
+	.td__stage canvas {
+		display: block;
+		max-width: 100%;
+		image-rendering: pixelated;
+	}
+
+	.td__hud {
+		position: absolute;
+		left: 12px;
+		top: 10px;
+		padding: 3px 8px;
+		border-radius: 6px;
+		background: rgb(0 0 0 / 0.55);
+		color: #ddd;
+		font-size: var(--step--2);
+		pointer-events: none;
+	}
+
+	.td-how {
+		border-top: 1px solid var(--line);
+	}
+
+	.td-how__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+		gap: clamp(24px, 4vw, 80px);
+		align-items: start;
+	}
+
+	@media (max-width: 900px) {
+		.td-how__grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.td-matrix {
+		margin: 0;
+		position: sticky;
+		top: calc(var(--header-h) + 24px);
+	}
+
+	.td-matrix__grid {
+		display: grid;
+		grid-template-columns: repeat(8, 1fr);
+		gap: 3px;
+	}
+
+	.td-matrix__grid span {
+		display: grid;
+		place-items: center;
+		aspect-ratio: 1;
+		border-radius: 4px;
+		font: 600 clamp(9px, 1.1vw, 14px) var(--font-mono);
+		background: color-mix(in srgb, var(--ink) calc(var(--v) * 100%), var(--bg-raise));
+		color: var(--ink);
+	}
+
+	.td-matrix__grid .is-dark {
+		color: var(--bg);
+	}
+
+	.td-matrix figcaption {
+		margin-top: 0.8rem;
+		font-size: var(--step--2);
+		color: var(--ink-mute);
+	}
+
+	@media (max-width: 900px) {
+		.td-matrix {
+			position: static;
+		}
+	}
+</style>
+
+<script>
+	import { diffuse, luma, ordered, rampIndex, RAMPS, type Ramp, bayer, tone } from '../../lib/dither';
+
+	type Algo = 'bayer2' | 'bayer4' | 'bayer8' | 'floyd' | 'atkinson' | 'umbral' | 'ascii';
+
+	const out = document.querySelector<HTMLCanvasElement>('[data-canvas]')!;
+	const ctx = out.getContext('2d')!;
+	const stage = document.querySelector<HTMLElement>('[data-stage]')!;
+	const hud = document.querySelector<HTMLElement>('[data-hud]')!;
+	const status = document.querySelector<HTMLElement>('[data-status]')!;
+	const copyBtn = document.querySelector<HTMLButtonElement>('[data-copy]')!;
+	const work = document.createElement('canvas');
+	const wctx = work.getContext('2d', { willReadFrequently: true })!;
+	const small = document.createElement('canvas');
+	const B8 = bayer(8);
+
+	const state = {
+		src: 'mano-der',
+		algo: 'bayer8' as Algo,
+		cell: 4,
+		bright: 0,
+		contrast: 1.2,
+		gamma: 1,
+		ramp: 'clasica' as Ramp,
+		invert: false,
+		round: false,
+		red: false,
+		transparent: false,
+	};
+	let source: HTMLImageElement | HTMLVideoElement | null = null;
+	let srcW = 0;
+	let srcH = 0;
+	let mirror = false;
+	let stream: MediaStream | null = null;
+	let raf = 0;
+	let lastText = '';
+
+	const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+	const hexToRgb = (hex: string): [number, number, number] => {
+		const h = hex.replace('#', '');
+		const full = h.length === 3 ? [...h].map((c) => c + c).join('') : h;
+		return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)) as [number, number, number];
+	};
+	const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+
+	function render() {
+		if (!source || !srcW || !srcH) return;
+		const t0 = performance.now();
+		const ascii = state.algo === 'ascii';
+		// tamaño en pantalla: todo el ancho disponible, sin pasar del 72 % de la altura de la ventana
+		const maxW = stage.clientWidth;
+		const maxH = Math.max(240, window.innerHeight * 0.72);
+		let W = maxW;
+		let H = (W * srcH) / srcW;
+		if (H > maxH) {
+			H = maxH;
+			W = (H * srcW) / srcH;
+		}
+		const cw = state.cell;
+		const ch = ascii ? Math.round((cw / 0.6) * 1.18) : cw;
+		const gw = Math.max(8, Math.floor(W / cw));
+		const gh = Math.max(8, Math.floor(H / ch));
+
+		// muestreo a la resolución de la cuadrícula; las escenas tienen alfa y el fondo queda vacío
+		work.width = gw;
+		work.height = gh;
+		wctx.clearRect(0, 0, gw, gh);
+		wctx.imageSmoothingQuality = 'high';
+		if (mirror) {
+			wctx.save();
+			wctx.translate(gw, 0);
+			wctx.scale(-1, 1);
+			wctx.drawImage(source, 0, 0, gw, gh);
+			wctx.restore();
+		} else wctx.drawImage(source, 0, 0, gw, gh);
+		const px = wctx.getImageData(0, 0, gw, gh).data;
+		const n = gw * gh;
+		const values = new Float32Array(n);
+		const t = { gamma: state.gamma, contrast: state.contrast, brightness: state.bright };
+		for (let i = 0; i < n; i++) {
+			const a = px[i * 4 + 3] / 255;
+			if (a === 0) continue;
+			const v = tone(luma(px[i * 4], px[i * 4 + 1], px[i * 4 + 2]), t);
+			values[i] = (state.invert ? 1 - v : v) * a;
+		}
+
+		const dpr = Math.min(window.devicePixelRatio || 1, 3);
+		const cpx = Math.max(1, Math.round(cw * dpr));
+		const chpx = ascii ? Math.round(ch * dpr) : cpx;
+		out.width = gw * cpx;
+		out.height = gh * chpx;
+		out.style.width = `${out.width / dpr}px`;
+		out.style.height = `${out.height / dpr}px`;
+		const ink = state.red ? hexToRgb(css('--red-ink') || '#e25b50') : hexToRgb(theme() === 'light' ? '#594832' : '#e8e7e7');
+		const bg = theme() === 'light' ? '#f8f4ec' : '#141414';
+
+		ctx.clearRect(0, 0, out.width, out.height);
+		if (ascii) {
+			const ramp = RAMPS[state.ramp];
+			ctx.fillStyle = `rgb(${ink.join(',')})`;
+			ctx.font = `500 ${Math.round(cpx / 0.6)}px "JetBrains Mono Variable", ui-monospace, monospace`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			const lines: string[] = [];
+			for (let y = 0; y < gh; y++) {
+				let line = '';
+				for (let x = 0; x < gw; x++) {
+					const i = y * gw + x;
+					const k = rampIndex(values[i], ramp.length, (B8[(y % 8) * 8 + (x % 8)] - 0.5) * 0.9);
+					const c = ramp[k];
+					line += c;
+					if (k > 0) ctx.fillText(c, x * cpx + cpx / 2, y * chpx + chpx / 2);
+				}
+				lines.push(line.replace(/\s+$/, ''));
+			}
+			lastText = lines.join('\n');
+		} else {
+			let bits: Uint8Array;
+			if (state.algo === 'floyd' || state.algo === 'atkinson') bits = diffuse(values, gw, gh, state.algo);
+			else if (state.algo === 'umbral') bits = Uint8Array.from(values, (v) => (v > 0.5 ? 1 : 0));
+			else bits = ordered(values, gw, gh, Number(state.algo.slice(5)) as 2 | 4 | 8);
+			// una celda = un píxel; luego se escala sin suavizado y se recorta cada celda a un punto
+			small.width = gw;
+			small.height = gh;
+			const sctx = small.getContext('2d')!;
+			const im = sctx.createImageData(gw, gh);
+			for (let i = 0; i < n; i++) {
+				if (!bits[i]) continue;
+				im.data[i * 4] = ink[0];
+				im.data[i * 4 + 1] = ink[1];
+				im.data[i * 4 + 2] = ink[2];
+				im.data[i * 4 + 3] = 255;
+			}
+			sctx.putImageData(im, 0, 0);
+			ctx.imageSmoothingEnabled = false;
+			ctx.drawImage(small, 0, 0, out.width, out.height);
+			const gap = cpx >= 4 ? Math.round(cpx * 0.25) : cpx >= 3 ? 1 : 0;
+			if (gap || state.round) {
+				const tile = document.createElement('canvas');
+				tile.width = tile.height = cpx;
+				const tc = tile.getContext('2d')!;
+				tc.fillStyle = '#000';
+				if (state.round) {
+					tc.beginPath();
+					tc.arc(cpx / 2, cpx / 2, (cpx - gap) / 2 + 0.25, 0, Math.PI * 2);
+					tc.fill();
+				} else tc.fillRect(0, 0, cpx - gap, cpx - gap);
+				ctx.globalCompositeOperation = 'destination-in';
+				ctx.fillStyle = ctx.createPattern(tile, 'repeat')!;
+				ctx.fillRect(0, 0, out.width, out.height);
+			}
+			ctx.globalCompositeOperation = 'source-over';
+		}
+		if (!state.transparent) {
+			ctx.globalCompositeOperation = 'destination-over';
+			ctx.fillStyle = bg;
+			ctx.fillRect(0, 0, out.width, out.height);
+			ctx.globalCompositeOperation = 'source-over';
+		}
+		const label = document.querySelector(`[data-algo="${state.algo}"]`)?.textContent?.trim() ?? state.algo;
+		hud.textContent = `${gw}×${gh} celdas · ${label} · ${(performance.now() - t0).toFixed(0)} ms`;
+	}
+
+	function loadImage(src: string, revoke = false) {
+		const img = new Image();
+		img.onload = () => {
+			source = img;
+			srcW = img.naturalWidth;
+			srcH = img.naturalHeight;
+			mirror = false;
+			render();
+			if (revoke) URL.revokeObjectURL(src);
+		};
+		img.onerror = () => (status.textContent = 'No se pudo abrir esa imagen.');
+		img.src = src;
+	}
+
+	function stopCamera() {
+		cancelAnimationFrame(raf);
+		stream?.getTracks().forEach((tr) => tr.stop());
+		stream = null;
+	}
+
+	async function startCamera() {
+		if (!navigator.mediaDevices?.getUserMedia) {
+			status.textContent = 'Tu navegador no permite usar la cámara aquí.';
+			return false;
+		}
+		try {
+			status.textContent = 'Pidiendo permiso para la cámara…';
+			stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }, audio: false });
+			const video = document.createElement('video');
+			video.playsInline = true;
+			video.muted = true;
+			video.srcObject = stream;
+			await video.play();
+			status.textContent = 'Cámara activa. La imagen se procesa aquí mismo y no se guarda ni se envía.';
+			source = video;
+			mirror = true;
+			const loop = () => {
+				if (!stream) return;
+				srcW = video.videoWidth || 640;
+				srcH = video.videoHeight || 480;
+				render();
+				raf = requestAnimationFrame(loop);
+			};
+			loop();
+			return true;
+		} catch {
+			status.textContent = 'Sin permiso para la cámara. Puedes usar una de las escenas o subir una imagen.';
+			stopCamera();
+			return false;
+		}
+	}
+
+	function setSource(src: string) {
+		state.src = src;
+		document.querySelectorAll<HTMLButtonElement>('[data-src]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.src === src)));
+		if (src !== 'camara') stopCamera();
+	}
+
+	document.querySelectorAll<HTMLButtonElement>('[data-src]').forEach((b) =>
+		b.addEventListener('click', async () => {
+			const src = b.dataset.src!;
+			if (src === 'camara') {
+				if (state.src === 'camara') return;
+				setSource('camara');
+				if (!(await startCamera())) {
+					setSource('mano-der');
+					loadImage('/art/mano-der.png');
+				}
+				return;
+			}
+			setSource(src);
+			status.textContent = '';
+			loadImage(`/art/${src}.png`);
+		}),
+	);
+
+	document.querySelector<HTMLInputElement>('[data-file]')!.addEventListener('change', (e) => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (!file) return;
+		setSource('archivo');
+		status.textContent = `Imagen: ${file.name}`;
+		loadImage(URL.createObjectURL(file), true);
+	});
+
+	document.querySelectorAll<HTMLButtonElement>('[data-algo]').forEach((b) =>
+		b.addEventListener('click', () => {
+			state.algo = b.dataset.algo as Algo;
+			document.querySelectorAll('[data-algo]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+			const ascii = state.algo === 'ascii';
+			document.querySelectorAll<HTMLElement>('[data-only="ascii"]').forEach((el) => (el.hidden = !ascii));
+			copyBtn.hidden = !ascii;
+			// en ASCII conviene una celda más grande para que los caracteres se lean
+			if (ascii && state.cell < 6) setRange('cell', 7);
+			render();
+		}),
+	);
+
+	const fmt: Record<string, (v: number) => string> = {
+		cell: (v) => `${v} px`,
+		bright: (v) => (v > 0 ? `+${v}` : String(v)),
+		contrast: (v) => (v / 100).toFixed(1),
+		gamma: (v) => (v / 100).toFixed(1),
+	};
+	function setRange(key: string, v: number) {
+		const inp = document.querySelector<HTMLInputElement>(`[data-in="${key}"]`)!;
+		inp.value = String(v);
+		apply(key, v);
+	}
+	function apply(key: string, v: number) {
+		if (key === 'cell') state.cell = v;
+		if (key === 'bright') state.bright = v / 100;
+		if (key === 'contrast') state.contrast = v / 100;
+		if (key === 'gamma') state.gamma = v / 100;
+		const o = document.querySelector(`[data-out="${key}"]`);
+		if (o) o.textContent = fmt[key](v);
+	}
+	document.querySelectorAll<HTMLInputElement>('[data-in]').forEach((inp) =>
+		inp.addEventListener('input', () => {
+			apply(inp.dataset.in!, Number(inp.value));
+			render();
+		}),
+	);
+	document.querySelector<HTMLSelectElement>('[data-ramp]')!.addEventListener('change', (e) => {
+		state.ramp = (e.target as HTMLSelectElement).value as Ramp;
+		render();
+	});
+	document.querySelectorAll<HTMLButtonElement>('[data-toggle]').forEach((b) =>
+		b.addEventListener('click', () => {
+			const key = b.dataset.toggle as 'invert' | 'round' | 'red' | 'transparent';
+			state[key] = !state[key];
+			b.setAttribute('aria-pressed', String(state[key]));
+			stage.classList.toggle('is-transparent', state.transparent);
+			render();
+		}),
+	);
+
+	document.querySelector<HTMLButtonElement>('[data-save]')!.addEventListener('click', () => {
+		out.toBlob((blob) => {
+			if (!blob) return;
+			const a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = `tramado-${state.src}-${state.algo}.png`;
+			a.click();
+			setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+		});
+	});
+	copyBtn.addEventListener('click', async () => {
+		try {
+			await navigator.clipboard.writeText(lastText);
+			status.textContent = `Copiado: ${lastText.split('\n').length} líneas de texto.`;
+		} catch {
+			status.textContent = 'No se pudo copiar al portapapeles.';
+		}
+	});
+
+	let resizeRaf = 0;
+	new ResizeObserver(() => {
+		cancelAnimationFrame(resizeRaf);
+		resizeRaf = requestAnimationFrame(render);
+	}).observe(stage);
+	window.addEventListener('themechange', render);
+	window.addEventListener('pagehide', stopCamera);
+	loadImage('/art/mano-der.png');
+</script>

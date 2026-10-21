@@ -1,0 +1,48 @@
+---
+import AbnormalityRoom from './AbnormalityRoom.astro';
+import AgentesGrid from './AgentesGrid.astro';
+import BordesBanner from './BordesBanner.astro';
+import CovidHeatmap from './CovidHeatmap.astro';
+import AlgoGraph from './AlgoGraph.astro';
+import ApisSnippet from './ApisSnippet.astro';
+import ArcaneBuilds from './ArcaneBuilds.astro';
+import BungeeSim from './BungeeSim.astro';
+import CafeDots from './CafeDots.astro';
+import EmergenciasNet from './EmergenciasNet.astro';
+import EscaleraCard from './EscaleraCard.astro';
+import MercadoBars from './MercadoBars.astro';
+import MlBoundary from './MlBoundary.astro';
+import MonarcaFlow from './MonarcaFlow.astro';
+import PescaCard from './PescaCard.astro';
+import PointCloud from './PointCloud.astro';
+import SiteSpecimen from './SiteSpecimen.astro';
+import TrafficSim from './TrafficSim.astro';
+import TramadoCard from './TramadoCard.astro';
+
+interface Props {
+	visual?: string;
+	interactive?: boolean;
+}
+
+const { visual, interactive = false } = Astro.props;
+---
+
+{visual === 'monarca' && <MonarcaFlow />}
+{visual === 'trafico' && <TrafficSim controls={interactive} />}
+{visual === 'emergencias' && <EmergenciasNet />}
+{visual === 'mercado' && <MercadoBars />}
+{visual === 'arcane' && <ArcaneBuilds />}
+{visual === 'montana' && <PointCloud controls={interactive} />}
+{visual === 'agentes' && <AgentesGrid />}
+{visual === 'algoritmos' && <AlgoGraph />}
+{visual === 'ml' && <MlBoundary />}
+{visual === 'apis' && <ApisSnippet />}
+{visual === 'bungee' && <BungeeSim controls={interactive} />}
+{visual === 'sitio' && <SiteSpecimen />}
+{visual === 'cafes' && <CafeDots />}
+{visual === 'abnormality' && <AbnormalityRoom />}
+{visual === 'bordes' && <BordesBanner />}
+{visual === 'covid' && <CovidHeatmap />}
+{visual === 'tramado' && <TramadoCard />}
+{visual === 'pesca' && <PescaCard />}
+{visual === 'escalera' && <EscaleraCard />}

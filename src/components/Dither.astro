@@ -1,0 +1,91 @@
+---
+// Imagen tramada (dithering) o en ASCII, dibujada en el navegador con el color de texto del tema.
+// `art` es el nombre de una imagen de public/art/ (las genera `npm run art`, ver scripts/art/).
+// Es decorativa salvo que reciba `label`.
+interface Props {
+	art: string;
+	/** tamaño de cada punto (o ancho de cada carácter) en px */
+	cell?: number;
+	fit?: 'contain' | 'cover';
+	/** como object-position: "100% 50%" pega la imagen al borde derecho */
+	position?: string;
+	/** cómo aparece: por umbral (fade), como un frente que avanza (left/right/up/down) o ya completa (none) */
+	reveal?: 'fade' | 'left' | 'right' | 'up' | 'down' | 'none';
+	delay?: number;
+	duration?: number;
+	gamma?: number;
+	contrast?: number;
+	/** en el tema claro: invertir (la sombra es tinta, como un grabado) o conservar el mapeo */
+	light?: 'invert' | 'same';
+	mode?: 'dots' | 'ascii';
+	dot?: 'square' | 'round';
+	ramp?: 'clasica' | 'fina' | 'bloques' | 'numeros';
+	label?: string;
+	class?: string;
+	style?: string;
+}
+
+const {
+	art,
+	cell = 3,
+	fit = 'contain',
+	position = '50% 50%',
+	reveal = 'fade',
+	delay = 0,
+	duration = 1600,
+	gamma = 1,
+	contrast = 1,
+	light = 'invert',
+	mode = 'dots',
+	dot = 'square',
+	ramp = 'clasica',
+	label,
+	class: cls,
+	style,
+} = Astro.props;
+---
+
+<div
+	class:list={['dither', cls]}
+	style={style}
+	data-dither={`/art/${art}.png`}
+	data-cell={cell}
+	data-fit={fit}
+	data-position={position}
+	data-reveal={reveal}
+	data-delay={delay}
+	data-duration={duration}
+	data-gamma={gamma}
+	data-contrast={contrast}
+	data-light={light}
+	data-mode={mode}
+	data-dot={dot}
+	data-ramp={ramp}
+	role={label ? 'img' : undefined}
+	aria-label={label}
+	aria-hidden={label ? undefined : 'true'}
+>
+	<canvas></canvas>
+</div>
+
+<style>
+	.dither {
+		position: relative;
+		overflow: hidden;
+		color: var(--ink);
+		pointer-events: none;
+	}
+
+	canvas {
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: block;
+		image-rendering: pixelated;
+	}
+</style>
+
+<script>
+	import { initDither } from '../scripts/dither-art';
+	initDither();
+</script>

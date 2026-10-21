@@ -1,0 +1,746 @@
+[
+  {
+    "id": "buna",
+    "nombre": "Buna",
+    "lat": 19.421943,
+    "lng": -99.160505,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Orizaba 42",
+    "tags": [
+      "especialidad",
+      "tostador"
+    ],
+    "fuente": "osm:node/4564596893",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "quentin-cafe",
+    "nombre": "Quentin Café",
+    "lat": 19.418498,
+    "lng": -99.157589,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Avenida Alvaro Obregón 64",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Su 08:00-23:00",
+    "web": "http://quentin.mx/",
+    "fuente": "osm:node/6281751989",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-nin",
+    "nombre": "Café Nin",
+    "lat": 19.425315,
+    "lng": -99.160755,
+    "colonia": "Juárez",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Havre 73",
+    "tags": [
+      "panadería"
+    ],
+    "horario": "Mo-Sa 07:00-21:00; Su 07:30-18:00",
+    "web": "https://www.cafenin.com.mx/",
+    "fuente": "osm:node/6284918785",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "panaderia-rosetta",
+    "nombre": "Panadería Rosetta",
+    "lat": 19.419974,
+    "lng": -99.16061,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Colima 179",
+    "tags": [
+      "panadería"
+    ],
+    "horario": "Mo-We 07:00-21:00; Th-Sa 07:00-22:00; Su 07:30-20:30",
+    "fuente": "osm:way/1421204673",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "chiquitito-cafe-condesa",
+    "nombre": "Chiquitito Café (Condesa)",
+    "lat": 19.406952,
+    "lng": -99.173017,
+    "colonia": "Hipódromo",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Alfonso Reyes 232",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Fr 07:30-20:30, Su 08:30-19:00, Sa 07:30-20:30",
+    "web": "http://www.chiquititocafe.com/",
+    "fuente": "osm:node/4103943390",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "chiquitito-cafe-cuauhtemoc",
+    "nombre": "Chiquitito Café (Cuauhtémoc)",
+    "lat": 19.42807,
+    "lng": -99.170061,
+    "colonia": "Cuauhtémoc",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Río Lerma 179",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/4455791789",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cicatriz-cafe",
+    "nombre": "Cicatriz Café",
+    "lat": 19.427788,
+    "lng": -99.158538,
+    "colonia": "Juárez",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Dinamarca 44",
+    "tags": [],
+    "horario": "Mo-Su 09:00-24:00",
+    "web": "https://www.cicatrizcafe.com/",
+    "fuente": "osm:node/4695884289",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "blend-station",
+    "nombre": "Blend Station",
+    "lat": 19.421868,
+    "lng": -99.166866,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Puebla 237",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/8413157917",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cardinal-casa-de-cafe",
+    "nombre": "Cardinal Casa de Café",
+    "lat": 19.417415,
+    "lng": -99.158068,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Córdoba 132",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Su 09:00-19:00; PH closed",
+    "fuente": "osm:way/1427373285",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "abarrotes-delirio",
+    "nombre": "Abarrotes Delirio",
+    "lat": 19.420219,
+    "lng": -99.157914,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Colima 114",
+    "tags": [],
+    "horario": "Mo-Sa 08:00-21:00; Su 09:00-19:00",
+    "fuente": "osm:node/4966731426",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "maque",
+    "nombre": "Maque",
+    "lat": 19.415138,
+    "lng": -99.168076,
+    "colonia": "Hipódromo",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Huichapan 24",
+    "tags": [
+      "panadería"
+    ],
+    "horario": "Su-We 08:00-21:00; Th-Sa 080:00-22:00",
+    "fuente": "osm:node/4164136089",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "boicot-cafe-roma",
+    "nombre": "Boicot Café (Roma)",
+    "lat": 19.418627,
+    "lng": -99.161387,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Jalapa 99",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Fr 07:00-22:00; Sa,Su 08:00-22:00",
+    "fuente": "osm:node/4953928621",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "enhorabuena-cafe",
+    "nombre": "Enhorabuena Café",
+    "lat": 19.41563,
+    "lng": -99.172926,
+    "colonia": "Condesa",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Atlixco 13",
+    "tags": [],
+    "fuente": "osm:node/4657810590",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "drip",
+    "nombre": "Drip",
+    "lat": 19.419919,
+    "lng": -99.172597,
+    "colonia": "Roma Norte",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Guadalajara 36",
+    "tags": [
+      "especialidad"
+    ],
+    "web": "https://dripcafe.mx/",
+    "fuente": "osm:node/6019938386",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cucurucho-cafe",
+    "nombre": "Cucurucho Café",
+    "lat": 19.432251,
+    "lng": -99.166993,
+    "colonia": "Cuauhtémoc",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Río Nazas 52",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/8237666117",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "esencial-barra-de-cafe",
+    "nombre": "Esencial Barra de Café",
+    "lat": 19.409315,
+    "lng": -99.174073,
+    "colonia": "Hipódromo",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Campeche 356",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/12831705657",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cleotilde-barra-de-cafe",
+    "nombre": "Cleotilde Barra de Café",
+    "lat": 19.402123,
+    "lng": -99.171645,
+    "colonia": "Escandón 2ª Sección",
+    "alcaldia": "Miguel Hidalgo",
+    "direccion": "Avenida Progreso",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/13129018801",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cumbe-coffee-roasters",
+    "nombre": "Cumbé Coffee Roasters",
+    "lat": 19.433619,
+    "lng": -99.161851,
+    "colonia": "San Rafael",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Miguel E. Schultz",
+    "tags": [
+      "especialidad",
+      "tostador"
+    ],
+    "fuente": "osm:node/9760016617",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-la-habana",
+    "nombre": "Café La Habana",
+    "lat": 19.43246,
+    "lng": -99.151252,
+    "colonia": "Juárez",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Avenida Morelos 62",
+    "tags": [
+      "histórico"
+    ],
+    "horario": "Mo-Su 08:00-24:00",
+    "fuente": "osm:way/1223699950",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-de-tacuba",
+    "nombre": "Café de Tacuba",
+    "lat": 19.435718,
+    "lng": -99.137608,
+    "colonia": "Centro",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Tacuba 28",
+    "tags": [
+      "histórico"
+    ],
+    "horario": "08:00-23:30",
+    "web": "https://cafedetacuba.mx/",
+    "fuente": "osm:node/4181864727",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-villarias",
+    "nombre": "Café Villarías",
+    "lat": 19.430862,
+    "lng": -99.142311,
+    "colonia": "Centro",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle López",
+    "tags": [
+      "histórico",
+      "tostador"
+    ],
+    "fuente": "osm:node/11926927856",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-equis",
+    "nombre": "Café Equis",
+    "lat": 19.430246,
+    "lng": -99.126814,
+    "colonia": "Centro",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Roldán 16",
+    "tags": [
+      "histórico",
+      "tostador"
+    ],
+    "horario": "Mo-Sa 10:00-14:00, 14:30-17:00",
+    "fuente": "osm:node/12883958801",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "churreria-el-moro-centro",
+    "nombre": "Churrería El Moro (Centro)",
+    "lat": 19.43139,
+    "lng": -99.141135,
+    "colonia": "Centro",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Lázaro Cárdenas 67",
+    "tags": [
+      "histórico",
+      "churros"
+    ],
+    "horario": "24/7",
+    "fuente": "osm:node/5842139800",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-emir",
+    "nombre": "Café Emir",
+    "lat": 19.430562,
+    "lng": -99.138041,
+    "colonia": "Centro",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "República de Uruguay 45",
+    "tags": [
+      "histórico"
+    ],
+    "fuente": "osm:node/3649569754",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "curva-cafe-de-especialidad",
+    "nombre": "Curva Café de Especialidad",
+    "lat": 19.433119,
+    "lng": -99.149636,
+    "colonia": "Centro",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Artículo 123 126",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Su 08:00-21:00",
+    "instagram": "curva.cafe",
+    "fuente": "osm:node/14029082902",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "camino-a-comala",
+    "nombre": "Camino a Comala",
+    "lat": 19.440729,
+    "lng": -99.16004,
+    "colonia": "San Rafael",
+    "alcaldia": "Cuauhtémoc",
+    "direccion": "Calle Miguel E. Schultz",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/8235320722",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "leonor-cafeteria-de-especialidad",
+    "nombre": "Leonor Cafetería de Especialidad",
+    "lat": 19.420374,
+    "lng": -99.103888,
+    "colonia": "Jardín Balbuena",
+    "alcaldia": "Venustiano Carranza",
+    "direccion": "Calle Cecilio Robelo 513",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Tu-Su 10:00-20:00",
+    "instagram": "https://www.instagram.com/soyleonorcafeteria",
+    "fuente": "osm:node/14256231012",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-avellaneda",
+    "nombre": "Café Avellaneda",
+    "lat": 19.34825,
+    "lng": -99.16069,
+    "colonia": "La Concepción",
+    "alcaldia": "Coyoacán",
+    "direccion": "Higuera 40",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Su 08:00-22:00",
+    "fuente": "osm:node/4348835091",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-ruta-de-la-seda",
+    "nombre": "Café Ruta de la Seda",
+    "lat": 19.348167,
+    "lng": -99.169444,
+    "colonia": "Romero de Terreros",
+    "alcaldia": "Coyoacán",
+    "direccion": "Aurora 1 Bis",
+    "tags": [
+      "postres"
+    ],
+    "horario": "Mo-Su 08:00-22:00",
+    "web": "https://www.caferutadelaseda.com/",
+    "fuente": "osm:node/4340195747",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-el-jarocho",
+    "nombre": "Café El Jarocho",
+    "lat": 19.351214,
+    "lng": -99.161828,
+    "colonia": "Del Carmen",
+    "alcaldia": "Coyoacán",
+    "direccion": "Calle Cuauhtémoc",
+    "tags": [
+      "histórico"
+    ],
+    "fuente": "osm:node/381148591",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "coyote-specialty-coffee-tea-bar",
+    "nombre": "Coyote Specialty Coffee & Tea Bar",
+    "lat": 19.348707,
+    "lng": -99.163352,
+    "colonia": "Del Carmen",
+    "alcaldia": "Coyoacán",
+    "direccion": "Calle Felipe Carillo Puerto",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/6020024185",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "marabunta-cafe-libreria",
+    "nombre": "Marabunta Café + Librería",
+    "lat": 19.345195,
+    "lng": -99.170203,
+    "colonia": "Tecualiapan",
+    "alcaldia": "Coyoacán",
+    "direccion": "Avenida Miguel Ángel de Quevedo 485c",
+    "tags": [
+      "librería"
+    ],
+    "horario": "Mo-Sa 07:00-23:00; Su 12:00-22:00",
+    "web": "http://www.facebook.com/marabuntacafe",
+    "fuente": "osm:node/5203619721",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cafe-passmar",
+    "nombre": "Café Passmar",
+    "lat": 19.39583,
+    "lng": -99.166345,
+    "colonia": "Del Valle",
+    "alcaldia": "Benito Juárez",
+    "direccion": "Calle Adolfo Prieto Local 237",
+    "tags": [
+      "especialidad",
+      "mercado"
+    ],
+    "horario": "Mo-Sa 07:30-19:30",
+    "web": "https://www.cafepassmar.com/",
+    "fuente": "osm:node/3445441092",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "almanegra-cafe",
+    "nombre": "Almanegra Café",
+    "lat": 19.370684,
+    "lng": -99.144017,
+    "colonia": "San Simón Ticumac",
+    "alcaldia": "Benito Juárez",
+    "direccion": "Balboa 203",
+    "tags": [
+      "especialidad"
+    ],
+    "horario": "Mo-Su 09:00-19:00",
+    "web": "https://almanegra.cafe/",
+    "fuente": "osm:node/8843502572",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "la-dosis-tostaduria",
+    "nombre": "La Dosis Tostaduría",
+    "lat": 19.398873,
+    "lng": -99.152383,
+    "colonia": "Narvarte",
+    "alcaldia": "Benito Juárez",
+    "direccion": "Calle Petén 133",
+    "tags": [
+      "especialidad",
+      "tostador"
+    ],
+    "horario": "Lu-Vi 11:00 a 20:00",
+    "fuente": "osm:way/526137961",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "3-amores-barra-de-cafe",
+    "nombre": "3 Amores Barra de Café",
+    "lat": 19.398335,
+    "lng": -99.159316,
+    "colonia": "Narvarte Poniente",
+    "alcaldia": "Benito Juárez",
+    "direccion": "Calle La Morena",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/11635872469",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "distinto-cafe",
+    "nombre": "Distinto Café",
+    "lat": 19.366972,
+    "lng": -99.145722,
+    "colonia": "Portales Norte",
+    "alcaldia": "Benito Juárez",
+    "direccion": "Bélgica 506",
+    "tags": [],
+    "horario": "Mo-Th 09:00-21:00; Fr 09:00-22:00; Sa-Su 16:00-21:00",
+    "web": "https://twitter.com/distintoC",
+    "fuente": "osm:node/4400539790",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "tyulmal-barra-de-cafe",
+    "nombre": "Tyulmal Barra de Café",
+    "lat": 19.314506,
+    "lng": -99.164935,
+    "colonia": "Ajusco",
+    "alcaldia": "Coyoacán",
+    "direccion": "Calle Mixtecas",
+    "tags": [
+      "especialidad"
+    ],
+    "web": "https://www.tyulmal.com/",
+    "fuente": "osm:node/8593492319",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "cooperativa-las-400-voces",
+    "nombre": "Cooperativa Las 400 Voces",
+    "lat": 19.332667,
+    "lng": -99.176493,
+    "colonia": "Copilco El Alto",
+    "alcaldia": "Coyoacán",
+    "direccion": "Calle Alfonso Pruneda 24",
+    "tags": [
+      "cooperativa"
+    ],
+    "horario": "Mo-Sa 07:00-21:00",
+    "web": "https://www.facebook.com/las400voces/",
+    "fuente": "osm:way/418123322",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "joselo-cafe",
+    "nombre": "Joselo Café",
+    "lat": 19.429978,
+    "lng": -99.196633,
+    "colonia": "Polanco 4ª Sección",
+    "alcaldia": "Miguel Hidalgo",
+    "direccion": "Avenida Emilio Castelar",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/4640535032",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "baia-cafe",
+    "nombre": "Baia Café",
+    "lat": 19.42829,
+    "lng": -99.192563,
+    "colonia": "Polanco 4ª Sección",
+    "alcaldia": "Miguel Hidalgo",
+    "direccion": "Avenida Campos Elíseos 199",
+    "tags": [],
+    "horario": "Mo-Fr 08:00-20:00; Sa-Su 08:30-18:30",
+    "web": "https://baiacafe.com/",
+    "instagram": "baiacafe",
+    "fuente": "osm:node/11196610637",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "kumo-laboratorio-de-cafe",
+    "nombre": "Kumo Laboratorio de Café",
+    "lat": 19.363076,
+    "lng": -99.281424,
+    "colonia": "El Yaqui",
+    "alcaldia": "Cuajimalpa",
+    "direccion": "Calle Carlos Echánove",
+    "tags": [
+      "especialidad"
+    ],
+    "fuente": "osm:node/8239053617",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "the-basement-coffee",
+    "nombre": "The Basement Coffee",
+    "lat": 19.366753,
+    "lng": -99.263179,
+    "colonia": "Santa Fe Centro Ciudad",
+    "alcaldia": "Álvaro Obregón",
+    "direccion": "Guillermo González Camarena 999",
+    "tags": [],
+    "horario": "Mo-Th 08:00 19:00",
+    "web": "www.facebook.com/TheBasementCoffee/",
+    "fuente": "osm:node/5618552421",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  },
+  {
+    "id": "corazon-de-mexico-cafe",
+    "nombre": "Corazón de México Café",
+    "lat": 19.490598,
+    "lng": -99.174969,
+    "colonia": "Santa Catarina",
+    "alcaldia": "Azcapotzalco",
+    "direccion": "Calzada Azcapotzalco-La Villa 408",
+    "tags": [
+      "tostador"
+    ],
+    "horario": "Mo-Fr 08:00-21:00; Sa-Su 10:00-20:00",
+    "web": "https://cafecorazondemexico.com/",
+    "fuente": "osm:node/12094564201",
+    "nota": "",
+    "visitado": false,
+    "favorito": false
+  }
+]

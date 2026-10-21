@@ -1,0 +1,119 @@
+---
+// La habitación de Abnormality: las anomalías aparecen tras un apagón, como en el juego.
+// Posiciones en % a partir de las coordenadas originales (sobre 800 × 600).
+const sprites = [
+	{ n: 1, x: 114, y: 52, d: 0 },
+	{ n: 6, x: 694, y: 80, d: 3 },
+	{ n: 8, x: 444, y: 416, d: 6 },
+];
+---
+
+<div class="abn-viz" role="img" aria-label="Habitación dibujada a mano del juego Abnormality, con anomalías que aparecen tras un parpadeo">
+	<div class="abn-viz__scene">
+		<img src="/games/abnormality/habitacion.png" alt="" width="800" height="600" loading="lazy" decoding="async" />
+		{
+			sprites.map((s) => (
+				<img
+					class="abn-viz__spr"
+					src={`/games/abnormality/events/event${s.n}.png`}
+					alt=""
+					width="60"
+					height="60"
+					loading="lazy"
+					style={`left:${(s.x / 8).toFixed(3)}%;top:${(s.y / 6).toFixed(3)}%;animation-delay:${s.d}s`}
+				/>
+			))
+		}
+	</div>
+	<div class="abn-viz__flash" aria-hidden="true"></div>
+	<span class="abn-viz__clock mono" aria-hidden="true">Hora: 22:00</span>
+</div>
+
+<style>
+	.abn-viz {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		background: #fff;
+		container-type: inline-size;
+	}
+
+	.abn-viz__scene {
+		position: absolute;
+		inset: 0;
+	}
+
+	.abn-viz__scene > img:first-child {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.abn-viz__spr {
+		position: absolute;
+		width: 7.5%;
+		height: 10%;
+		opacity: 0;
+		animation: abn-spr 9s steps(1) infinite;
+	}
+
+	.abn-viz__flash {
+		position: absolute;
+		inset: 0;
+		background: #000;
+		opacity: 0;
+		animation: abn-flash 3s steps(1) infinite;
+	}
+
+	.abn-viz__clock {
+		position: absolute;
+		right: 3%;
+		top: 3%;
+		font-weight: 700;
+		font-size: 3.2cqw;
+		color: #000;
+	}
+
+	/* en el tema oscuro la habitación se invierte: líneas blancas sobre negro, con el rojo intacto */
+	:root:not([data-theme='light']) .abn-viz__scene,
+	:root:not([data-theme='light']) .abn-viz__clock {
+		filter: invert(1) hue-rotate(180deg);
+	}
+
+	:root:not([data-theme='light']) .abn-viz {
+		background: #000;
+	}
+
+	/* aparece justo cuando termina el apagón (4 % de 3 s = 1.33 % de 9 s) */
+	@keyframes abn-spr {
+		0% {
+			opacity: 0;
+		}
+		1.4% {
+			opacity: 1;
+		}
+		68% {
+			opacity: 0;
+		}
+	}
+
+	@keyframes abn-flash {
+		0% {
+			opacity: 1;
+		}
+		4% {
+			opacity: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.abn-viz__spr {
+			animation: none;
+			opacity: 1;
+		}
+		.abn-viz__flash {
+			display: none;
+		}
+	}
+</style>

@@ -1,0 +1,44 @@
+---
+title: Monarca
+kicker: Plataforma de gestión de viajes corporativos
+summary: Sistema integral para solicitar, aprobar, reservar y comprobar viajes de negocio. Backend modular en NestJS y PostgreSQL, frontend en React, pruebas end-to-end y CI. Lo construimos entre unas quince personas.
+year: 2026
+period: feb — jun 2026
+context: Proyecto Monarca · equipo 02 Solutions
+role: Desarrollo full-stack. Bitácora de acciones sobre solicitudes, catálogos contables, validaciones y seguridad en la carga de comprobantes XML.
+team: Equipo de ~15 personas
+stack: [NestJS, TypeScript, PostgreSQL, TypeORM, React, Vite, TanStack Query, Tailwind CSS, Zod, Docker, Cypress, Vitest]
+tags: [web, sistemas]
+featured: true
+order: 1
+visual: monarca
+links:
+  - label: Backend en GitHub
+    href: https://github.com/SolutionsT2/Monarca_Backend
+  - label: Frontend en GitHub
+    href: https://github.com/SolutionsT2/Monarca_Frontend
+---
+
+## El problema
+
+Cuando una empresa manda a alguien de viaje intervienen varias personas: quien **solicita**, quien **aprueba**, quien **controla el gasto** y la **agencia** que reserva. Al final hay que **comprobar** cada peso con facturas. Monarca junta todo ese flujo en una sola plataforma: solicitudes, reglas y rondas de aprobación, reservaciones de hotel y vuelo, comprobantes (incluidas facturas CFDI en XML), centros de costo y bitácoras de auditoría.
+
+## Arquitectura
+
+- **Backend:** NestJS con un módulo por dominio (usuarios, roles, departamentos, solicitudes, revisiones, reservaciones, comprobantes, centros de costo, motor de políticas…), PostgreSQL con TypeORM, autenticación con JWT y endpoints documentados con OpenAPI.
+- **Frontend:** React + Vite con TypeScript, TanStack Query para datos remotos, formularios validados con Zod y rutas protegidas por rol: Solicitante, Aprobador, Control de costos y Agente de viajes.
+- **Calidad:** pruebas end-to-end con Cypress, unitarias con Vitest, integración continua en GitHub Actions y servicios locales en Docker (PostgreSQL y MailHog para probar correos).
+
+## Lo que hice
+
+- **Bitácora de solicitudes.** Diseñé e implementé el módulo `request-logs`, que guarda el historial de acciones sobre cada solicitud de viaje, y reestructuré el módulo de solicitudes para integrarlo.
+- **Catálogos contables.** Agregué a la base de datos las entidades del catálogo contable de un cliente.
+- **Validaciones de negocio.** Destino obligatorio al crear una solicitud, validado en `POST /requests` y también en el formulario.
+- **Seguridad en comprobantes.** Validé las subidas de XML contra ataques **XXE** (*XML External Entity*), que pueden leer archivos del servidor a través de un XML malicioso, y cambié la vista previa para mostrar el contenido como texto plano.
+- **Corrección de UX.** Arreglé el botón de actualizar para que vuelva a pedir los datos en todas las páginas con listas.
+
+## Trabajar en un equipo grande
+
+Con más de 900 commits entre ambos repositorios, gran parte del trabajo fue de coordinación: ramas por funcionalidad, revisiones de código, `CODEOWNERS` y una CI que corre las pruebas en cada cambio.
+
+{/* TODO (Diego): agrega una captura de la app en /public/img/monarca.png y una o dos líneas sobre lo que aprendiste. */}

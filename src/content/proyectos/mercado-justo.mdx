@@ -1,0 +1,42 @@
+---
+title: Mercado Justo
+kicker: Precios de mercados y tianguis de la CDMX
+summary: Construimos desde cero un conjunto de datos con 279 precios de 7 lugares y 72 puestos, y entrenamos K-means y una regresión lineal para responder dónde conviene comprar una lista. El modelo está en vivo en el laboratorio.
+year: 2026
+period: ene — sep 2026
+context: IA avanzada para la ciencia de datos · proyecto final
+role: Levanté 146 de los 279 precios (Mercado San Juan Arcos de Belén, La Lagunilla y Santa María Nonoalco) y participé en la limpieza, la estandarización y el modelado.
+team: Con Héctor Lugo Gabino y Santino Matías Im
+stack: [Python, pandas, scikit-learn, Plotly, Jupyter]
+tags: [datos, ia]
+featured: true
+order: 3
+visual: mercado
+links:
+  - label: Probar el modelo
+    href: /lab/mercado-justo/
+---
+
+## La pregunta
+
+Los precios de productos básicos se anuncian en presentaciones distintas: por kilo, por pieza o en promociones como "2 kg por $35". No todos los mercados venden lo mismo y la información está dispersa puesto por puesto. Así es imposible comparar directamente qué tan caro es un mercado frente a otro.
+
+> ¿Cómo agrupar los lugares según el perfil de precios de una canasta común, y cómo estimar el precio de productos no observados para comparar el costo de una lista de compras?
+
+## El conjunto de datos
+
+Fuimos a los mercados con una hoja de captura. Cada registro trae el lugar, el puesto, el producto, su presentación, el precio total y la cantidad equivalente. Un script (`construir_dataset.py`) aplica las correcciones de calidad, **estandariza todo a una unidad comparable** (kg, litro, pieza o docena) y calcula la distancia de cada lugar a la Central de Abasto.
+
+## Los modelos
+
+- **K-means** para agrupar lugares por su índice de precios relativo y puestos por su nivel y dispersión de precios.
+- **Regresión lineal multivariable** sobre el logaritmo del precio, con variables indicadoras de producto y lugar: `ln(precio) = β₀ + β_producto + β_lugar`. Si existe un precio observado se usa ese; si no, se estima.
+
+## Lo que encontramos
+
+- La canasta común de 7 kg cuesta alrededor de **$232** en el lugar más barato y **$277.50** en el más caro: **19.8 %** de diferencia.
+- El modelo explica el **91.3 %** de la variación del logaritmo del precio, con un error medio de **$4.67** por producto (contra $5.08 de un modelo base).
+- **Pesa más qué compras que dónde compras:** un modelo que solo conoce el producto ya llega a R² = 0.900; agregar el lugar lo sube a 0.913.
+- La variación fuerte está **entre puestos del mismo mercado**. El agrupamiento de puestos separa un grupo que cobra alrededor de 45 % por encima del precio típico.
+
+Todas las semillas están fijas (`SEMILLA = 42`), así que el notebook reproduce exactamente estas cifras.

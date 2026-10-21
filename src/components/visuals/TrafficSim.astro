@@ -1,0 +1,298 @@
+---
+// Mini simulación de una intersección semaforizada (versión web, inspirada en el proyecto de Mesa + Unity).
+// Cada auto sigue el Intelligent Driver Model; un semáforo en rojo actúa como un "auto detenido" en la línea de alto.
+interface Props {
+	controls?: boolean;
+}
+const { controls = false } = Astro.props;
+---
+
+<div class="tsim" data-tsim>
+	<canvas aria-label="Simulación de tráfico en una intersección con semáforos" role="img"></canvas>
+	<div class="tsim-hud" data-hud aria-live="off"></div>
+	{
+		controls && (
+			<div class="tsim-controls">
+				<label>
+					<span>Verde norte–sur</span>
+					<input type="range" min="3" max="14" step="1" value="7" data-ctl="greenNS" />
+				</label>
+				<label>
+					<span>Verde oriente–poniente</span>
+					<input type="range" min="3" max="14" step="1" value="7" data-ctl="greenEW" />
+				</label>
+				<label>
+					<span>Tráfico</span>
+					<input type="range" min="0.2" max="1.6" step="0.1" value="0.8" data-ctl="rate" />
+				</label>
+				<button class="pill pill--sm pill--ghost" type="button" data-ctl="pause">Pausa</button>
+			</div>
+		)
+	}
+</div>
+
+<style>
+	.tsim {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	canvas {
+		width: 100%;
+		height: 100%;
+	}
+	.tsim-hud {
+		position: absolute;
+		left: 14px;
+		top: 12px;
+		font: 500 clamp(10px, 1.8cqw, 13px) / 1.5 var(--font-mono);
+		color: var(--ink-mute);
+		pointer-events: none;
+		white-space: pre;
+	}
+	.tsim-controls {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: end;
+		gap: 10px 18px;
+		padding: 12px 14px;
+		background: linear-gradient(transparent, color-mix(in srgb, var(--bg-raise) 92%, transparent) 35%);
+		font-size: var(--step--2);
+	}
+	.tsim-controls label {
+		display: grid;
+		gap: 4px;
+		color: var(--ink-soft);
+	}
+	.tsim-controls input[type='range'] {
+		accent-color: var(--red);
+		width: min(160px, 38vw);
+	}
+</style>
+
+<script>
+	type Dir = 'E' | 'W' | 'S' | 'N';
+	interface Car {
+		dir: Dir;
+		s: number;
+		v: number;
+		red: boolean;
+		counted: boolean;
+	}
+
+	const LEN = 4.6; // largo del auto (m)
+	const V0 = 13; // velocidad deseada (m/s)
+	const A = 1.6; // aceleración máxima
+	const B = 2.4; // frenado cómodo
+	const T = 1.2; // separación temporal
+	const S0 = 2; // distancia mínima
+	const YELLOW = 2.5;
+	const ALLRED = 1;
+
+	function initSim(root: HTMLElement) {
+		const canvas = root.querySelector('canvas')!;
+		const ctx = canvas.getContext('2d')!;
+		const hud = root.querySelector<HTMLElement>('[data-hud]')!;
+		const params = { greenNS: 7, greenEW: 7, rate: 0.8 };
+		let paused = false;
+		let cars: Car[] = [];
+		let clock = 0;
+		let crossed = 0;
+		let W = 0;
+		let H = 0;
+		let scale = 1; // px por metro
+		let half = 0; // media longitud de cada brazo en metros
+
+		root.querySelectorAll<HTMLInputElement>('input[data-ctl]').forEach((inp) => {
+			inp.addEventListener('input', () => ((params as Record<string, number>)[inp.dataset.ctl!] = Number(inp.value)));
+		});
+		const pauseBtn = root.querySelector<HTMLButtonElement>('button[data-ctl="pause"]');
+		pauseBtn?.addEventListener('click', () => {
+			paused = !paused;
+			pauseBtn.textContent = paused ? 'Seguir' : 'Pausa';
+		});
+
+		function resize() {
+			const r = canvas.getBoundingClientRect();
+			const dpr = Math.min(window.devicePixelRatio || 1, 2);
+			W = r.width;
+			H = r.height;
+			canvas.width = Math.round(W * dpr);
+			canvas.height = Math.round(H * dpr);
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+			scale = Math.min(W, H) / 70;
+			half = Math.max(W, H) / scale / 2 + 8;
+		}
+
+		// fases: 0 NS verde, 1 NS amarillo, 2 todo rojo, 3 EW verde, 4 EW amarillo, 5 todo rojo
+		function phase() {
+			const cyc = [params.greenNS, YELLOW, ALLRED, params.greenEW, YELLOW, ALLRED];
+			const total = cyc.reduce((a, b) => a + b, 0);
+			let t = clock % total;
+			for (let i = 0; i < cyc.length; i++) {
+				if (t < cyc[i]) return i;
+				t -= cyc[i];
+			}
+			return 0;
+		}
+		const lightFor = (dir: Dir) => {
+			const p = phase();
+			const ns = dir === 'N' || dir === 'S';
+			if (ns) return p === 0 ? 'g' : p === 1 ? 'y' : 'r';
+			return p === 3 ? 'g' : p === 4 ? 'y' : 'r';
+		};
+
+		const STOP = -9; // línea de alto, en metros antes del centro
+		const spawnS = () => -half;
+
+		function spawn(dt: number) {
+			for (const dir of ['E', 'W', 'S', 'N'] as Dir[]) {
+				const rate = params.rate * (dir === 'E' || dir === 'W' ? 0.32 : 0.26);
+				if (Math.random() < rate * dt) {
+					const last = cars.filter((c) => c.dir === dir).reduce<Car | null>((m, c) => (!m || c.s < m.s ? c : m), null);
+					if (!last || last.s - spawnS() > LEN + S0 + 4) {
+						cars.push({ dir, s: spawnS(), v: V0 * 0.8, red: Math.random() < 0.18, counted: false });
+					}
+				}
+			}
+		}
+
+		function step(dt: number) {
+			clock += dt;
+			spawn(dt);
+			for (const dir of ['E', 'W', 'S', 'N'] as Dir[]) {
+				const lane = cars.filter((c) => c.dir === dir).sort((a, b) => b.s - a.s);
+				const light = lightFor(dir);
+				lane.forEach((car, i) => {
+					let gap = Number.POSITIVE_INFINITY;
+					let dv = 0;
+					if (i > 0) {
+						gap = lane[i - 1].s - car.s - LEN;
+						dv = car.v - lane[i - 1].v;
+					}
+					const toStop = STOP - car.s;
+					if (toStop > -0.5) {
+						const mustStop = light === 'r' || (light === 'y' && toStop > (car.v * car.v) / (2 * B) * 0.9);
+						if (mustStop && toStop < gap) {
+							gap = Math.max(toStop, 0.01);
+							dv = car.v;
+						}
+					}
+					const sStar = S0 + Math.max(0, car.v * T + (car.v * dv) / (2 * Math.sqrt(A * B)));
+					const acc = A * (1 - (car.v / V0) ** 4 - (sStar / Math.max(gap, 0.01)) ** 2);
+					car.v = Math.max(0, car.v + acc * dt);
+					car.s += car.v * dt;
+					if (!car.counted && car.s > 0) {
+						car.counted = true;
+						crossed++;
+					}
+				});
+			}
+			cars = cars.filter((c) => c.s < half + 6);
+		}
+
+		// posición en pantalla: se circula por la derecha
+		function pos(car: Car): [number, number, number] {
+			const cx = W / 2;
+			const cy = H / 2;
+			const off = 3.4 * scale;
+			const d = car.s * scale;
+			switch (car.dir) {
+				case 'E':
+					return [cx + d, cy + off, 0];
+				case 'W':
+					return [cx - d, cy - off, Math.PI];
+				case 'S':
+					return [cx - off, cy + d, Math.PI / 2];
+				default:
+					return [cx + off, cy - d, -Math.PI / 2];
+			}
+		}
+
+		function draw() {
+			const css = getComputedStyle(root);
+			const c = (v: string) => css.getPropertyValue(v).trim();
+			const road = 13.6 * scale;
+			ctx.clearRect(0, 0, W, H);
+			ctx.fillStyle = c('--bg-sunk');
+			ctx.fillRect(0, H / 2 - road / 2, W, road);
+			ctx.fillRect(W / 2 - road / 2, 0, road, H);
+			ctx.strokeStyle = c('--line-strong');
+			ctx.lineWidth = 1;
+			ctx.setLineDash([8, 10]);
+			ctx.beginPath();
+			ctx.moveTo(0, H / 2);
+			ctx.lineTo(W / 2 - road / 2, H / 2);
+			ctx.moveTo(W / 2 + road / 2, H / 2);
+			ctx.lineTo(W, H / 2);
+			ctx.moveTo(W / 2, 0);
+			ctx.lineTo(W / 2, H / 2 - road / 2);
+			ctx.moveTo(W / 2, H / 2 + road / 2);
+			ctx.lineTo(W / 2, H);
+			ctx.stroke();
+			ctx.setLineDash([]);
+
+			const lights: Record<string, string> = { g: '#6fbf73', y: '#e0b040', r: c('--red-ink') };
+			const st = -STOP * scale;
+			const lp: [Dir, number, number][] = [
+				['E', W / 2 - st, H / 2 + road / 2 + 8],
+				['W', W / 2 + st, H / 2 - road / 2 - 8],
+				['S', W / 2 - road / 2 - 8, H / 2 - st],
+				['N', W / 2 + road / 2 + 8, H / 2 + st],
+			];
+			for (const [dir, x, y] of lp) {
+				ctx.fillStyle = lights[lightFor(dir)];
+				ctx.beginPath();
+				ctx.arc(x, y, Math.max(3, scale * 0.9), 0, Math.PI * 2);
+				ctx.fill();
+			}
+
+			for (const car of cars) {
+				const [x, y, a] = pos(car);
+				ctx.save();
+				ctx.translate(x, y);
+				ctx.rotate(a);
+				ctx.fillStyle = car.red ? c('--red') : c('--ink');
+				const l = LEN * scale;
+				const w = 2 * scale;
+				ctx.beginPath();
+				ctx.roundRect(-l, -w / 2, l, w, Math.min(3, w / 3));
+				ctx.fill();
+				ctx.restore();
+			}
+			const p = phase();
+			const label = p === 0 ? 'N–S verde' : p === 3 ? 'O–P verde' : p === 1 || p === 4 ? 'amarillo' : 'todo rojo';
+			hud.textContent = `fase: ${label}\nautos en escena: ${cars.length}\ncruzaron: ${crossed}`;
+		}
+
+		resize();
+		new ResizeObserver(resize).observe(canvas);
+
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		for (let i = 0; i < 600; i++) step(1 / 30); // arranca con tráfico
+		draw();
+		if (reduce) return;
+
+		let visible = false;
+		new IntersectionObserver((e) => (visible = e[0].isIntersecting)).observe(root);
+		let last = performance.now();
+		const loop = (now: number) => {
+			const dt = Math.min((now - last) / 1000, 0.05);
+			last = now;
+			if (visible && !paused && !document.hidden) {
+				step(dt);
+				draw();
+			}
+			requestAnimationFrame(loop);
+		};
+		requestAnimationFrame(loop);
+		window.addEventListener('themechange', draw);
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-tsim]').forEach(initSim);
+</script>

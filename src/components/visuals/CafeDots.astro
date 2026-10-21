@@ -1,0 +1,61 @@
+---
+// Las cafeterías del mapa como puntos, con proyección equirectangular corregida por latitud.
+import cafes from '../../data/cafes.json';
+
+const W = 640;
+const H = 480;
+const pad = 56;
+const lats = cafes.map((c) => c.lat);
+const lngs = cafes.map((c) => c.lng);
+const [minLat, maxLat] = [Math.min(...lats), Math.max(...lats)];
+const [minLng, maxLng] = [Math.min(...lngs), Math.max(...lngs)];
+const kx = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
+const spanX = (maxLng - minLng) * kx;
+const spanY = maxLat - minLat;
+const scale = Math.min((W - pad * 2) / spanX, (H - pad * 2 - 40) / spanY);
+const offX = (W - spanX * scale) / 2;
+const offY = 40 + (H - 40 - spanY * scale) / 2;
+const px = (lng: number) => offX + (lng - minLng) * kx * scale;
+const py = (lat: number) => offY + (maxLat - lat) * scale;
+const alcaldias = new Set(cafes.map((c) => c.alcaldia)).size;
+---
+
+<svg class="viz-cafe" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${cafes.length} cafeterías de ${alcaldias} alcaldías de la Ciudad de México`}>
+	<text x="28" y="40" class="c-cap">{cafes.length} cafeterías · {alcaldias} alcaldías</text>
+	<text x="28" y="60" class="c-cap c-cap--soft">19.4° N · 99.1° O</text>
+	{
+		Array.from({ length: 9 }, (_, i) => (
+			<line x1={(W / 8) * i} y1="0" x2={(W / 8) * i} y2={H} class="c-grid" />
+		))
+	}
+	{
+		Array.from({ length: 7 }, (_, i) => (
+			<line x1="0" y1={(H / 6) * i} x2={W} y2={(H / 6) * i} class="c-grid" />
+		))
+	}
+	{cafes.map((c) => <circle cx={px(c.lng).toFixed(1)} cy={py(c.lat).toFixed(1)} r="6" class="c-dot" />)}
+</svg>
+
+<style>
+	.viz-cafe {
+		width: 100%;
+		height: 100%;
+		background: var(--bg-raise);
+	}
+	.c-cap {
+		font: 500 13px var(--font-mono);
+		fill: var(--ink-mute);
+	}
+	.c-cap--soft {
+		opacity: 0.7;
+	}
+	.c-grid {
+		stroke: var(--line);
+		stroke-width: 1;
+	}
+	.c-dot {
+		fill: var(--red);
+		stroke: var(--bg-raise);
+		stroke-width: 2;
+	}
+</style>
