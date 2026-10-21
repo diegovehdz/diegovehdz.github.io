@@ -440,7 +440,9 @@ hr {
 	object-fit: cover;
 }
 
-.frame > .dither {
+/* [data-dither] sube la especificidad: en producción el estilo propio del componente (position: relative)
+   se inserta después de esta hoja y, con el mismo peso, ganaba; la imagen quedaba de 0 px de alto */
+.frame > .dither[data-dither] {
 	position: absolute;
 	inset: 0;
 }
