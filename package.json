@@ -11,6 +11,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "compartir": "astro build && astro preview --port 4400",
     "check": "astro check",
     "astro": "astro",
     "cafes:import": "node scripts/import-mymaps-kml.mjs",

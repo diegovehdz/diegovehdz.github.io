@@ -12,6 +12,7 @@ Hecho con [Astro](https://astro.build) 7, salida 100 % estática. El JavaScript 
 | `npm run dev` | Servidor local en `http://localhost:4321` |
 | `npm run build` | Genera el sitio en `dist/` |
 | `npm run preview` | Sirve `dist/` para revisarlo antes de publicar |
+| `npm run compartir` | Genera el sitio y lo sirve en `http://localhost:4400` para compartirlo con un enlace temporal (ver "Publicar") |
 | `npm run check` | Revisa tipos de TypeScript y errores en `.astro` |
 | `npm run cafes:osm -- "Nombre"` | Busca una cafetería en OpenStreetMap y genera su entrada (`--add` la agrega) |
 | `npm run cafes:import -- mapa.kml` | Importa cafeterías desde Google My Maps (`--write` guarda) |
@@ -209,6 +210,10 @@ npm run palabras -- node_modules/an-array-of-spanish-words/index.json
 El script quita acentos (la ñ se queda) y groserías; las listas `COMUNES` e `INICIOS` se editan a mano.
 
 ## Publicar
+
+### Enlace temporal (reenvío de puertos de VS Code)
+
+Para enseñarlo sin publicarlo: corre `npm run compartir` en la terminal de VS Code, abre el panel **Puertos** (junto a la terminal), usa **Reenviar un puerto** con `4400`, inicia sesión con GitHub si te lo pide y cambia la visibilidad del puerto a **Pública** (clic derecho → Visibilidad del puerto). La dirección de la columna "Dirección reenviada" es el enlace. Funciona mientras la computadora, VS Code y el servidor sigan prendidos; la primera vez, los visitantes ven un aviso de Microsoft sobre túneles de desarrollo y le dan "Continuar". `astro.config.mjs` ya acepta los dominios `*.devtunnels.ms`.
 
 ### GitHub Pages (gratis)
 
